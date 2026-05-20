@@ -42,6 +42,8 @@ add_custom_command(
   TARGET ${PROJECT_NAME} POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:OpenAL> $<TARGET_FILE_DIR:${PROJECT_NAME}>)
 
+add_subdirectory(third_party/assimp)
+
 target_compile_options(${PROJECT_NAME} PUBLIC /W4 /external:anglebrackets /external:W0 /wd5045)
 target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_17) # C++17
 
@@ -62,4 +64,5 @@ target_link_libraries(${PROJECT_NAME} PUBLIC
   SDL3::SDL3
   OpenAL
   glew32s
+  assimp
 )
