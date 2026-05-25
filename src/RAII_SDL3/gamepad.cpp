@@ -1,13 +1,29 @@
 #include "RAII_SDL3/gamepad.h"
 
+#include <iostream>
+
 namespace sdl
 {
 
 Gamepad::Gamepad() //SDL_OpenGamepad
+	: gamepad_(nullptr)
 {
-	if((gamepad_ = SDL_OpenGamepad(0)) == nullptr)
+	int count = 0;
+	SDL_JoystickID* joysticks = nullptr;
+	if((joysticks = SDL_GetGamepads(&count)) == nullptr)
 	{
-		SDL_Log("(SDL_OpenGamepad) %s\n", SDL_GetError());
+		SDL_Log("(SDL_GetGamepads) %s\n", SDL_GetError());
+	}
+
+	std::cout << count << " controller(s) connected!\n";
+
+	if(joysticks != nullptr)
+	{
+		if((gamepad_ = SDL_OpenGamepad(joysticks[0])) == nullptr) 
+		{
+			SDL_Log("(SDL_OpenGamepad) %s\n", SDL_GetError());
+		}
+		SDL_free(joysticks);
 	}
 }
 

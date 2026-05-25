@@ -2,11 +2,10 @@
 
 #include "RAII_SDL3/sdl.h"
 #include "RAII_SDL3/window.h"
+#include "RAII_SDL3/gamepad.h"
 #include "shader_program.h"
 
 #include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-#include <string>
 #include <unordered_map>
 
 class Game
@@ -20,7 +19,7 @@ class Game
 		void update();
 
 	private:
-		enum class ArrowKeys
+		enum class Direction
 		{
 			UP,
 			DOWN,
@@ -29,7 +28,6 @@ class Game
 		};
 
 		glm::mat4 look_at(glm::vec3 camera_position, glm::vec3 camera_target_position, glm::vec3 up_vector) const;
-		void update_arrow_keys_state();
 
 		sdl::SDL sdl_;
 		sdl::Window window_;
@@ -39,5 +37,6 @@ class Game
 		glm::mat4 model_;
 		glm::mat4 view_;
 		bool running_;
-		std::unordered_map<ArrowKeys, bool> arrow_keys_state_; 
+		sdl::Gamepad gamepad_;
+		std::unordered_map<Direction, bool> direction_state_;
 };

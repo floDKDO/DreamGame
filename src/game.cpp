@@ -2,15 +2,22 @@
 #include "gl/glew.h"
 #include "stb/stb_image.h"
 
+#include <glm/gtc/type_ptr.hpp>
 #include <iostream>
+
 
 Game::Game()
 	: sdl_(), window_(), glew_(glewInit()), shader_program_(), 
-	camera_position_(glm::vec3(0.0f)), model_(glm::mat4(1.0f)), view_(glm::mat4(1.0f)), running_(true)
+	camera_position_(glm::vec3(0.0f)), model_(glm::mat4(1.0f)), view_(glm::mat4(1.0f)), running_(true), gamepad_()
 {
 	glViewport(0, 0, 2560, 1440);
 	glEnable(GL_DEPTH_TEST);
 	stbi_set_flip_vertically_on_load(true);
+
+	direction_state_.insert({Direction::UP, false});
+	direction_state_.insert({Direction::DOWN, false});
+	direction_state_.insert({Direction::LEFT, false});
+	direction_state_.insert({Direction::RIGHT, false});
 }
 
 void Game::run()
@@ -148,15 +155,6 @@ void Game::run()
 	glDeleteTextures(1, &texture_yuri);
 }
 
-void Game::update_arrow_keys_state()
-{
-	const bool* keyboard_state = SDL_GetKeyboardState(nullptr);
-	arrow_keys_state_.insert_or_assign(ArrowKeys::UP, keyboard_state[SDL_SCANCODE_UP]);
-	arrow_keys_state_.insert_or_assign(ArrowKeys::DOWN, keyboard_state[SDL_SCANCODE_DOWN]);
-	arrow_keys_state_.insert_or_assign(ArrowKeys::LEFT, keyboard_state[SDL_SCANCODE_LEFT]);
-	arrow_keys_state_.insert_or_assign(ArrowKeys::RIGHT, keyboard_state[SDL_SCANCODE_RIGHT]);
-}
-
 void Game::handle_events()
 {
 	SDL_Event e;
@@ -165,14 +163,57 @@ void Game::handle_events()
 		switch(e.type)
 		{
 			case SDL_EVENT_KEY_DOWN:
-				switch(e.key.key)
+			case SDL_EVENT_GAMEPAD_BUTTON_DOWN:
+				if(e.key.key == SDLK_ESCAPE)
 				{
-					case SDLK_ESCAPE: //TODO : gérer avec SDL_GetKeyboardState ??
-						running_ = false;
-						break;
+					running_ = false;
+				}
+				else
+				{
+					if((e.type == SDL_EVENT_KEY_DOWN && e.key.key == SDLK_UP)
+					|| (e.type == SDL_EVENT_GAMEPAD_BUTTON_DOWN && e.gbutton.button == SDL_GAMEPAD_BUTTON_DPAD_UP))
+					{
+						direction_state_.insert_or_assign(Direction::UP, true);
+					}
+					if((e.type == SDL_EVENT_KEY_DOWN && e.key.key == SDLK_DOWN)
+					|| (e.type == SDL_EVENT_GAMEPAD_BUTTON_DOWN && e.gbutton.button == SDL_GAMEPAD_BUTTON_DPAD_DOWN))
+					{
+						direction_state_.insert_or_assign(Direction::DOWN, true);
+					}
+					if((e.type == SDL_EVENT_KEY_DOWN && e.key.key == SDLK_LEFT)
+					|| (e.type == SDL_EVENT_GAMEPAD_BUTTON_DOWN && e.gbutton.button == SDL_GAMEPAD_BUTTON_DPAD_LEFT))
+					{
+						direction_state_.insert_or_assign(Direction::LEFT, true);
+					}
+					if((e.type == SDL_EVENT_KEY_DOWN && e.key.key == SDLK_RIGHT)
+					|| (e.type == SDL_EVENT_GAMEPAD_BUTTON_DOWN && e.gbutton.button == SDL_GAMEPAD_BUTTON_DPAD_RIGHT))
+					{
+						direction_state_.insert_or_assign(Direction::RIGHT, true);
+					}
+				}
+				break;
 
-					default: 
-						break;
+			case SDL_EVENT_KEY_UP:
+			case SDL_EVENT_GAMEPAD_BUTTON_UP:
+				if((e.type == SDL_EVENT_KEY_UP && e.key.key == SDLK_UP)
+				|| (e.type == SDL_EVENT_GAMEPAD_BUTTON_UP && e.gbutton.button == SDL_GAMEPAD_BUTTON_DPAD_UP))
+				{
+					direction_state_.insert_or_assign(Direction::UP, false);
+				}
+				if((e.type == SDL_EVENT_KEY_UP && e.key.key == SDLK_DOWN)
+				|| (e.type == SDL_EVENT_GAMEPAD_BUTTON_UP && e.gbutton.button == SDL_GAMEPAD_BUTTON_DPAD_DOWN))
+				{
+					direction_state_.insert_or_assign(Direction::DOWN, false);
+				}
+				if((e.type == SDL_EVENT_KEY_UP && e.key.key == SDLK_LEFT)
+				|| (e.type == SDL_EVENT_GAMEPAD_BUTTON_UP && e.gbutton.button == SDL_GAMEPAD_BUTTON_DPAD_LEFT))
+				{
+					direction_state_.insert_or_assign(Direction::LEFT, false);
+				}
+				if((e.type == SDL_EVENT_KEY_UP && e.key.key == SDLK_RIGHT)
+				|| (e.type == SDL_EVENT_GAMEPAD_BUTTON_UP && e.gbutton.button == SDL_GAMEPAD_BUTTON_DPAD_RIGHT))
+				{
+					direction_state_.insert_or_assign(Direction::RIGHT, false);
 				}
 				break;
 
@@ -184,7 +225,6 @@ void Game::handle_events()
 				break;
 		}
 	}
-	update_arrow_keys_state();
 }
 
 void Game::draw()
@@ -203,16 +243,16 @@ void Game::draw()
 
 void Game::update()
 {
-	//if(arrow_keys_state_.at(ArrowKeys::UP) || arrow_keys_state_.at(ArrowKeys::DOWN) || arrow_keys_state_.at(ArrowKeys::LEFT) || arrow_keys_state_.at(ArrowKeys::RIGHT))
-	{
-		if(arrow_keys_state_.at(ArrowKeys::UP) || arrow_keys_state_.at(ArrowKeys::DOWN))
+	//if(direction_state_.at(Direction::UP) || direction_state_.at(Direction::DOWN) || direction_state_.at(Direction::LEFT) || direction_state_.at(Direction::RIGHT))
+	//{
+		if(direction_state_.at(Direction::UP) || direction_state_.at(Direction::DOWN))
 		{
 			glm::vec3 camera_forward = glm::vec3(-view_[0][2], -view_[1][2], -view_[2][2]);
-			if(arrow_keys_state_.at(ArrowKeys::UP))
+			if(direction_state_.at(Direction::UP))
 			{
 				camera_position_ += 0.05f * camera_forward;
 			}
-			if(arrow_keys_state_.at(ArrowKeys::DOWN))
+			if(direction_state_.at(Direction::DOWN))
 			{
 				camera_position_ -= 0.05f * camera_forward;
 			}
@@ -220,20 +260,20 @@ void Game::update()
 			view_ = look_at(camera_position_, camera_position_ + glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		}
 
-		if(arrow_keys_state_.at(ArrowKeys::LEFT) || arrow_keys_state_.at(ArrowKeys::RIGHT))
+		if(direction_state_.at(Direction::LEFT) || direction_state_.at(Direction::RIGHT))
 		{
 			glm::vec3 camera_left = glm::vec3(-view_[0][0], -view_[1][0], -view_[2][0]);
-			if(arrow_keys_state_.at(ArrowKeys::LEFT))
+			if(direction_state_.at(Direction::LEFT))
 			{
 				camera_position_ += 0.05f * camera_left;
 			}
-			if(arrow_keys_state_.at(ArrowKeys::RIGHT))
+			if(direction_state_.at(Direction::RIGHT))
 			{
 				camera_position_ -= 0.05f * camera_left;
 			}
 			view_ = look_at(camera_position_, camera_position_ + glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		}
-	}
+	//}
 }
 
 glm::mat4 Game::look_at(glm::vec3 camera_position, glm::vec3 camera_target_position, glm::vec3 up_vector) const
