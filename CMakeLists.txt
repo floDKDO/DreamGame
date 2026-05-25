@@ -19,8 +19,8 @@ endif()
 set(STB_DIR "${CMAKE_SOURCE_DIR}/third_party/stb") 
 set(IMGUI_DIR "${CMAKE_SOURCE_DIR}/third_party/imgui") 
 
-file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS src/*.cpp include/*.h ${STB_DIR}/*.cpp ${STB_DIR}/*.h ${IMGUI_DIR}/*.cpp ${IMGUI_DIR}/*.h)
-add_executable(${PROJECT_NAME} ${SOURCES})
+file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS src/*.cpp include/*.h src/RAII_SDL3/*.cpp src/game.cpp include/game.h include/RAII_SDL3/*.h ${STB_DIR}/*.cpp ${STB_DIR}/*.h ${IMGUI_DIR}/*.cpp ${IMGUI_DIR}/*.h)
+add_executable(${PROJECT_NAME} ${SOURCES} "src/shader_program.cpp" "include/shader_program.h" "include/RAII_SDL3/gamepad.h" "src/RAII_SDL3/gamepad.cpp")
 
 add_custom_command(
   TARGET ${PROJECT_NAME} POST_BUILD
