@@ -27,6 +27,14 @@ class Game
 			RIGHT
 		};
 
+		struct DirectionInfo
+		{
+			bool is_direction_;
+			bool is_from_joystick_;
+			float x_intensity_; //joystick value
+			float y_intensity_; //joystick value
+		};
+
 		glm::mat4 look_at(glm::vec3 camera_position, glm::vec3 camera_target_position, glm::vec3 up_vector) const;
 
 		sdl::SDL sdl_;
@@ -38,5 +46,5 @@ class Game
 		glm::mat4 view_;
 		bool running_;
 		sdl::Gamepad gamepad_;
-		std::unordered_map<Direction, bool> direction_state_;
+		std::unordered_map<Direction, DirectionInfo> direction_state_;
 };

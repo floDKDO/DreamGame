@@ -5,6 +5,8 @@
 namespace sdl
 {
 
+const float Gamepad::joystick_deadzone_ = SDL_JOYSTICK_AXIS_MAX * 0.1f; //10% of the max value
+
 Gamepad::Gamepad() //SDL_OpenGamepad
 	: gamepad_(nullptr)
 {
@@ -38,6 +40,11 @@ Gamepad::~Gamepad() //SDL_CloseGamepad
 SDL_Gamepad* Gamepad::fetch() const
 {
 	return gamepad_;
+}
+
+Sint16 Gamepad::get_axis(SDL_GamepadAxis axis) const
+{
+	return SDL_GetGamepadAxis(gamepad_, axis);
 }
 
 }

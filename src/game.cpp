@@ -5,6 +5,8 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <iostream>
 
+//TODO : voir https://wikis.khronos.org/opengl/Common_Mistakes
+
 
 Game::Game()
 	: sdl_(), window_(), glew_(glewInit()), shader_program_(), 
@@ -14,10 +16,10 @@ Game::Game()
 	glEnable(GL_DEPTH_TEST);
 	stbi_set_flip_vertically_on_load(true);
 
-	direction_state_.insert({Direction::UP, false});
-	direction_state_.insert({Direction::DOWN, false});
-	direction_state_.insert({Direction::LEFT, false});
-	direction_state_.insert({Direction::RIGHT, false});
+	direction_state_.insert({Direction::UP,    {false, false, 0.0f, 0.0f}});
+	direction_state_.insert({Direction::DOWN,  {false, false, 0.0f, 0.0f}});
+	direction_state_.insert({Direction::LEFT,  {false, false, 0.0f, 0.0f}});
+	direction_state_.insert({Direction::RIGHT, {false, false, 0.0f, 0.0f}});
 }
 
 void Game::run()
@@ -173,22 +175,26 @@ void Game::handle_events()
 					if((e.type == SDL_EVENT_KEY_DOWN && e.key.key == SDLK_UP)
 					|| (e.type == SDL_EVENT_GAMEPAD_BUTTON_DOWN && e.gbutton.button == SDL_GAMEPAD_BUTTON_DPAD_UP))
 					{
-						direction_state_.insert_or_assign(Direction::UP, true);
+						direction_state_.insert_or_assign(Direction::UP, DirectionInfo{true, false});
+						direction_state_.at(Direction::UP).y_intensity_ = 1.0f;
 					}
 					if((e.type == SDL_EVENT_KEY_DOWN && e.key.key == SDLK_DOWN)
 					|| (e.type == SDL_EVENT_GAMEPAD_BUTTON_DOWN && e.gbutton.button == SDL_GAMEPAD_BUTTON_DPAD_DOWN))
 					{
-						direction_state_.insert_or_assign(Direction::DOWN, true);
+						direction_state_.insert_or_assign(Direction::DOWN, DirectionInfo{true, false});
+						direction_state_.at(Direction::DOWN).y_intensity_ = 1.0f;
 					}
 					if((e.type == SDL_EVENT_KEY_DOWN && e.key.key == SDLK_LEFT)
 					|| (e.type == SDL_EVENT_GAMEPAD_BUTTON_DOWN && e.gbutton.button == SDL_GAMEPAD_BUTTON_DPAD_LEFT))
 					{
-						direction_state_.insert_or_assign(Direction::LEFT, true);
+						direction_state_.insert_or_assign(Direction::LEFT, DirectionInfo{true, false});
+						direction_state_.at(Direction::LEFT).x_intensity_ = 1.0f;
 					}
 					if((e.type == SDL_EVENT_KEY_DOWN && e.key.key == SDLK_RIGHT)
 					|| (e.type == SDL_EVENT_GAMEPAD_BUTTON_DOWN && e.gbutton.button == SDL_GAMEPAD_BUTTON_DPAD_RIGHT))
 					{
-						direction_state_.insert_or_assign(Direction::RIGHT, true);
+						direction_state_.insert_or_assign(Direction::RIGHT, DirectionInfo{true, false});
+						direction_state_.at(Direction::RIGHT).x_intensity_ = 1.0f;
 					}
 				}
 				break;
@@ -198,22 +204,76 @@ void Game::handle_events()
 				if((e.type == SDL_EVENT_KEY_UP && e.key.key == SDLK_UP)
 				|| (e.type == SDL_EVENT_GAMEPAD_BUTTON_UP && e.gbutton.button == SDL_GAMEPAD_BUTTON_DPAD_UP))
 				{
-					direction_state_.insert_or_assign(Direction::UP, false);
+					direction_state_.insert_or_assign(Direction::UP, DirectionInfo{false, false});
+					direction_state_.at(Direction::UP).y_intensity_ = 0.0f;
 				}
 				if((e.type == SDL_EVENT_KEY_UP && e.key.key == SDLK_DOWN)
 				|| (e.type == SDL_EVENT_GAMEPAD_BUTTON_UP && e.gbutton.button == SDL_GAMEPAD_BUTTON_DPAD_DOWN))
 				{
-					direction_state_.insert_or_assign(Direction::DOWN, false);
+					direction_state_.insert_or_assign(Direction::DOWN, DirectionInfo{false, false});
+					direction_state_.at(Direction::DOWN).y_intensity_ = 0.0f;
 				}
 				if((e.type == SDL_EVENT_KEY_UP && e.key.key == SDLK_LEFT)
 				|| (e.type == SDL_EVENT_GAMEPAD_BUTTON_UP && e.gbutton.button == SDL_GAMEPAD_BUTTON_DPAD_LEFT))
 				{
-					direction_state_.insert_or_assign(Direction::LEFT, false);
+					direction_state_.insert_or_assign(Direction::LEFT, DirectionInfo{false, false});
+					direction_state_.at(Direction::LEFT).x_intensity_ = 0.0f;
 				}
 				if((e.type == SDL_EVENT_KEY_UP && e.key.key == SDLK_RIGHT)
 				|| (e.type == SDL_EVENT_GAMEPAD_BUTTON_UP && e.gbutton.button == SDL_GAMEPAD_BUTTON_DPAD_RIGHT))
 				{
-					direction_state_.insert_or_assign(Direction::RIGHT, false);
+					direction_state_.insert_or_assign(Direction::RIGHT, DirectionInfo{false, false});
+					direction_state_.at(Direction::RIGHT).x_intensity_ = 0.0f;
+				}
+				break;
+
+			case SDL_EVENT_GAMEPAD_AXIS_MOTION:
+				if(e.gaxis.axis == SDL_GAMEPAD_AXIS_LEFTX)
+				{
+					if(e.gaxis.value > sdl::Gamepad::joystick_deadzone_) //to the right
+					{
+						direction_state_.insert_or_assign(Direction::RIGHT, DirectionInfo{true, true});
+						direction_state_.at(Direction::RIGHT).x_intensity_ = abs(float(e.gaxis.value) / SDL_JOYSTICK_AXIS_MAX);
+
+						//sécurité si on bascule très rapidement le joystick de droite à gauche (ne pas avoir droite et gauche à true en même temps)
+						if(direction_state_.at(Direction::LEFT).is_direction_ && direction_state_.at(Direction::LEFT).is_from_joystick_)
+						{
+							direction_state_.insert_or_assign(Direction::LEFT, DirectionInfo{false, false});
+						}
+					}
+					else if(e.gaxis.value < -(sdl::Gamepad::joystick_deadzone_)) //to the left
+					{
+						direction_state_.insert_or_assign(Direction::LEFT, DirectionInfo{true, true});
+						direction_state_.at(Direction::LEFT).x_intensity_ = abs(float(e.gaxis.value) / SDL_JOYSTICK_AXIS_MAX);
+
+						if(direction_state_.at(Direction::RIGHT).is_direction_ && direction_state_.at(Direction::RIGHT).is_from_joystick_)
+						{
+							direction_state_.insert_or_assign(Direction::RIGHT, DirectionInfo{false, false});
+						}
+					}
+				}
+				if(e.gaxis.axis == SDL_GAMEPAD_AXIS_LEFTY)
+				{
+					if(e.gaxis.value > sdl::Gamepad::joystick_deadzone_) //to down
+					{
+						direction_state_.insert_or_assign(Direction::DOWN, DirectionInfo{true, true});
+						direction_state_.at(Direction::DOWN).y_intensity_ = abs(float(e.gaxis.value) / SDL_JOYSTICK_AXIS_MAX);
+
+						if(direction_state_.at(Direction::UP).is_direction_ && direction_state_.at(Direction::UP).is_from_joystick_)
+						{
+							direction_state_.insert_or_assign(Direction::UP, DirectionInfo{false, false});
+						}
+					}
+					else if(e.gaxis.value < -(sdl::Gamepad::joystick_deadzone_)) //to up
+					{
+						direction_state_.insert_or_assign(Direction::UP, DirectionInfo{true, true});
+						direction_state_.at(Direction::UP).y_intensity_ = abs(float(e.gaxis.value) / SDL_JOYSTICK_AXIS_MAX);
+
+						if(direction_state_.at(Direction::DOWN).is_direction_ && direction_state_.at(Direction::DOWN).is_from_joystick_)
+						{
+							direction_state_.insert_or_assign(Direction::DOWN, DirectionInfo{false, false});
+						}
+					}
 				}
 				break;
 
@@ -243,37 +303,67 @@ void Game::draw()
 
 void Game::update()
 {
-	//if(direction_state_.at(Direction::UP) || direction_state_.at(Direction::DOWN) || direction_state_.at(Direction::LEFT) || direction_state_.at(Direction::RIGHT))
-	//{
-		if(direction_state_.at(Direction::UP) || direction_state_.at(Direction::DOWN))
+	if(direction_state_.at(Direction::UP).is_direction_ || direction_state_.at(Direction::DOWN).is_direction_)
+	{
+		if((direction_state_.at(Direction::UP).is_from_joystick_ || direction_state_.at(Direction::DOWN).is_from_joystick_) //Stick relâché (haut, bas)
+		&& abs(gamepad_.get_axis(SDL_GAMEPAD_AXIS_LEFTY)) < gamepad_.joystick_deadzone_)
+		{
+			if(direction_state_.at(Direction::UP).is_direction_)
+			{
+				direction_state_.insert_or_assign(Direction::UP, DirectionInfo{false, false}); 
+				direction_state_.at(Direction::UP).y_intensity_ = 0.0f;
+			}
+			if(direction_state_.at(Direction::DOWN).is_direction_)
+			{
+				direction_state_.insert_or_assign(Direction::DOWN, DirectionInfo{false, false});
+				direction_state_.at(Direction::DOWN).y_intensity_ = 0.0f;
+			}
+		}
+		else
 		{
 			glm::vec3 camera_forward = glm::vec3(-view_[0][2], -view_[1][2], -view_[2][2]);
-			if(direction_state_.at(Direction::UP))
+			if(direction_state_.at(Direction::UP).is_direction_)
 			{
-				camera_position_ += 0.05f * camera_forward;
+				camera_position_ += (direction_state_.at(Direction::UP).y_intensity_ * 0.05f) * camera_forward;
 			}
-			if(direction_state_.at(Direction::DOWN))
+			if(direction_state_.at(Direction::DOWN).is_direction_)
 			{
-				camera_position_ -= 0.05f * camera_forward;
+				camera_position_ -= (direction_state_.at(Direction::DOWN).y_intensity_ * 0.05f) * camera_forward;
 			}
-			//TODO : mettre cette ligne qu'une seule fois pour les deux if ??
 			view_ = look_at(camera_position_, camera_position_ + glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		}
+	}
 
-		if(direction_state_.at(Direction::LEFT) || direction_state_.at(Direction::RIGHT))
+	if(direction_state_.at(Direction::LEFT).is_direction_ || direction_state_.at(Direction::RIGHT).is_direction_)
+	{
+		if((direction_state_.at(Direction::LEFT).is_from_joystick_ || direction_state_.at(Direction::RIGHT).is_from_joystick_) //Stick relâché (gauche, droite)
+		&& abs(gamepad_.get_axis(SDL_GAMEPAD_AXIS_LEFTX)) < gamepad_.joystick_deadzone_)
+		{
+			if(direction_state_.at(Direction::LEFT).is_direction_)
+			{
+				direction_state_.insert_or_assign(Direction::LEFT, DirectionInfo{false, false});
+				direction_state_.at(Direction::LEFT).x_intensity_ = 0.0f;
+			}
+			if(direction_state_.at(Direction::RIGHT).is_direction_)
+			{
+				direction_state_.insert_or_assign(Direction::RIGHT, DirectionInfo{false, false});
+				direction_state_.at(Direction::RIGHT).x_intensity_ = 0.0f;
+			}
+		}
+		else
 		{
 			glm::vec3 camera_left = glm::vec3(-view_[0][0], -view_[1][0], -view_[2][0]);
-			if(direction_state_.at(Direction::LEFT))
+			if(direction_state_.at(Direction::LEFT).is_direction_)
 			{
-				camera_position_ += 0.05f * camera_left;
+				camera_position_ += (direction_state_.at(Direction::LEFT).x_intensity_ * 0.05f) * camera_left;
 			}
-			if(direction_state_.at(Direction::RIGHT))
+			if(direction_state_.at(Direction::RIGHT).is_direction_)
 			{
-				camera_position_ -= 0.05f * camera_left;
+				camera_position_ -= (direction_state_.at(Direction::RIGHT).x_intensity_ * 0.05f) * camera_left;
 			}
 			view_ = look_at(camera_position_, camera_position_ + glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		}
-	//}
+	}
 }
 
 glm::mat4 Game::look_at(glm::vec3 camera_position, glm::vec3 camera_target_position, glm::vec3 up_vector) const

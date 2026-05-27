@@ -21,7 +21,7 @@ Window::Window()
 		SDL_Log("(SDL_GL_SetAttribute) %s\n", SDL_GetError());
 	}
 
-	if((window_ = SDL_CreateWindow("DreamGame", 1280, 720, SDL_WINDOW_RESIZABLE | SDL_WINDOW_MAXIMIZED | SDL_WINDOW_OPENGL)) == nullptr)
+	if((window_ = SDL_CreateWindow("DreamGame", 1280, 720, /*SDL_WINDOW_RESIZABLE | SDL_WINDOW_MAXIMIZED |*/ SDL_WINDOW_OPENGL)) == nullptr)
 	{
 		SDL_Log("(SDL_CreateWindow) %s\n", SDL_GetError());
 	}
