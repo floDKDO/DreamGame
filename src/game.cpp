@@ -1,6 +1,7 @@
 #include "game.h"
 #include "gl/glew.h"
 #include "stb/stb_image.h"
+#include "tinygltf/tiny_gltf_v3.h"
 
 #include <glm/gtc/type_ptr.hpp>
 #include <iostream>
@@ -20,6 +21,141 @@ Game::Game()
 	direction_state_.insert({Direction::DOWN,  {false, false, 0.0f, 0.0f}});
 	direction_state_.insert({Direction::LEFT,  {false, false, 0.0f, 0.0f}});
 	direction_state_.insert({Direction::RIGHT, {false, false, 0.0f, 0.0f}});
+
+	get_info_on_gltf_file("resources/3d_models/triangle.gltf");
+}
+
+void Game::get_info_on_gltf_file(std::string_view path)
+{
+	std::string path_str = std::string(path);
+
+	tg3_parse_options opts;
+	tg3_error_stack errors;
+	tg3_model model;
+
+	tg3_parse_options_init(&opts);
+	tg3_error_stack_init(&errors);
+
+	tg3_error_code err = tg3_parse_file(&model, &errors, path_str.c_str(), 30, &opts);
+	if(err != TG3_OK)
+	{
+		for(uint32_t i = 0; i < errors.count; i++)
+		{
+			fprintf(stderr, "[%d] %s\n", (int)errors.entries[i].severity,
+					errors.entries[i].message ? errors.entries[i].message : "(null)");
+		}
+	}
+
+	for(size_t i = 0; i < model.nodes_count; ++i)
+	{
+		for(size_t j = 0; j < model.meshes_count; ++j)
+		{
+			for(size_t k = 0; k < model.meshes[j].primitives_count; ++k)
+			{
+				int32_t accessor_index_indices = model.meshes[j].primitives[k].indices;
+				int32_t buffer_view_index_indices = model.accessors[accessor_index_indices].buffer_view;
+				uint64_t byte_length_indices = model.buffer_views[buffer_view_index_indices].byte_length;
+				uint64_t byte_offset_indices = model.buffer_views[buffer_view_index_indices].byte_offset;
+				int32_t buffer_index_indices = model.buffer_views[buffer_view_index_indices].buffer;
+				int32_t target_indices = model.buffer_views[buffer_view_index_indices].target;
+
+				//std::cout << model.accessors[accessor_index_indices].component_type << std::endl; //5123 => GL_UNSIGNED_SHORT => GLushort
+				std::cout << "Target: " << target_indices << std::endl; //34963 => GL_ELEMENT_ARRAY_BUFFER
+				
+				std::vector<GLushort> ebo_value;
+				ebo_value.reserve(model.accessors[accessor_index_indices].count);
+
+				//affiche tous les indices => devront être stockés dans un EBO 
+				for(uint64_t k1 = byte_offset_indices; k1 < byte_offset_indices + byte_length_indices; k1 += sizeof(GLushort))
+				{
+					GLushort indice_value = (model.buffers[buffer_index_indices].data.data[k1 + 1] << 8) | model.buffers[buffer_index_indices].data.data[k1]; //=> little-endian
+					std::cout << +indice_value << std::endl; //"+" pour que l'élément ne soit pas considéré comme un char mais comme un int
+					ebo_value.push_back(indice_value);
+				}
+				/*GLuint ebo;
+				glCreateBuffers(1, &ebo);
+				glNamedBufferStorage(ebo, ebo_value.size() * sizeof(ebo_value[0]), ebo_value.data(), GL_DYNAMIC_STORAGE_BIT);*/
+
+				//////////
+
+				int32_t attributes_count = model.meshes[j].primitives[k].attributes_count;
+				for(uint32_t k1 = 0; k1 < attributes_count; k1++)
+				{
+					std::string accessor_type_attributes = model.meshes[j].primitives[k].attributes[k1].key.data;
+					int32_t accessor_index_attributes = model.meshes[j].primitives[k].attributes[k1].value;
+					int32_t buffer_view_index_attributes = model.accessors[accessor_index_attributes].buffer_view;
+					uint64_t byte_length_attributes = model.buffer_views[buffer_view_index_attributes].byte_length;
+					uint64_t byte_offset_attributes = model.buffer_views[buffer_view_index_attributes].byte_offset;
+					int32_t buffer_index_attributes = model.buffer_views[buffer_view_index_attributes].buffer;
+					int32_t target_attributes = model.buffer_views[buffer_view_index_attributes].target;
+					std::cout << "Target: " << target_attributes << std::endl; //34962 => GL_ARRAY_BUFFER
+					std::cout << "Attribut: " << accessor_type_attributes << std::endl;
+
+					auto lamda_type_str = [](int32_t type) -> std::string
+					{
+						switch(type)
+						{
+							case TG3_TYPE_SCALAR: return "SCALAR";
+							case TG3_TYPE_VEC2:   return "VEC2";
+							case TG3_TYPE_VEC3:   return "VEC3";
+							case TG3_TYPE_VEC4:   return "VEC4";
+							case TG3_TYPE_MAT2:   return "MAT2";
+							case TG3_TYPE_MAT3:   return "MAT3";
+							case TG3_TYPE_MAT4:   return "MAT4";
+							default: return "";
+						}
+					};
+					//std::cout << lamda_type_str(model.accessors[accessor_index_attributes].type) << ", " << model.accessors[accessor_index_attributes].component_type << std::endl; //VEC3 ; 5126 => GL_FLOAT => GLfloat --> glm::vec3
+
+					std::vector<glm::vec3> position_vector;
+					glm::vec3 position_vec3;
+
+					//afficher l'attribut position (floats qui sont des composants d'un vec3)
+					for(uint64_t k2 = byte_offset_attributes; k2 < byte_offset_attributes + byte_length_attributes; k2 += sizeof(GLfloat))
+					{
+						static int vector_counter = 0;
+
+						uint64_t position = (model.buffers[buffer_index_attributes].data.data[k2 + 3] << 24) | (model.buffers[buffer_index_attributes].data.data[k2 + 2] << 16) | (model.buffers[buffer_index_attributes].data.data[k2 + 1] << 8) | model.buffers[buffer_index_attributes].data.data[k2];
+						GLfloat position_float;
+						std::memcpy(&position_float, &position, sizeof(position_float)); //obligé de faire cela pour convertir un nombre IEEE-754 en float (voir https://stackoverflow.com/questions/56710780/how-is-1-encoded-in-c-c-as-a-float-assuming-ieee-754-single-precision-represe)
+						std::cout << position_float << std::endl;
+
+						if(vector_counter == 0) //x
+						{
+							position_vec3.x = position_float;
+						}
+						else if(vector_counter == 1) //y
+						{
+							position_vec3.y = position_float;
+						}
+						else if(vector_counter == 2) //z
+						{
+							position_vec3.z = position_float;
+						}
+						vector_counter += 1;
+
+						if(vector_counter == 3)
+						{
+							position_vector.push_back(position_vec3);
+							position_vec3 = glm::vec3(0.0f, 0.0f, 0.0f);
+							vector_counter = 0;
+						}
+					}
+
+					/*GLuint vbo;
+					glCreateBuffers(1, &vbo);
+					glNamedBufferStorage(vbo, position_vector.size() * sizeof(position_vector[0]), position_vector.data(), GL_DYNAMIC_STORAGE_BIT);*/
+
+					/*for(glm::vec3& v : position_vector)
+					{
+						std::cout << "x: " << v.x << ", y: " << v.y << ", z: " << v.z << std::endl;
+					}*/
+				}	
+			}
+		}
+	}
+	tg3_model_free(&model);
+	tg3_error_stack_free(&errors);
 }
 
 void Game::run()

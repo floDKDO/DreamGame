@@ -36,6 +36,7 @@ class Game
 		};
 
 		glm::mat4 look_at(glm::vec3 camera_position, glm::vec3 camera_target_position, glm::vec3 up_vector) const;
+		void get_info_on_gltf_file(std::string_view path);
 
 		sdl::SDL sdl_;
 		sdl::Window window_;
