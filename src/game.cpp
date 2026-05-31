@@ -22,7 +22,7 @@ Game::Game()
 	direction_state_.insert({Direction::LEFT,  {false, false, 0.0f, 0.0f}});
 	direction_state_.insert({Direction::RIGHT, {false, false, 0.0f, 0.0f}});
 
-	get_info_on_gltf_file("resources/3d_models/triangle.gltf");
+	get_info_on_gltf_file("resources/models/triangle.gltf");
 }
 
 void Game::get_info_on_gltf_file(std::string_view path)
@@ -78,7 +78,7 @@ void Game::get_info_on_gltf_file(std::string_view path)
 
 				//////////
 
-				int32_t attributes_count = model.meshes[j].primitives[k].attributes_count;
+				uint32_t attributes_count = model.meshes[j].primitives[k].attributes_count;
 				for(uint32_t k1 = 0; k1 < attributes_count; k1++)
 				{
 					std::string accessor_type_attributes = model.meshes[j].primitives[k].attributes[k1].key.data;
@@ -158,66 +158,79 @@ void Game::get_info_on_gltf_file(std::string_view path)
 	tg3_error_stack_free(&errors);
 }
 
+
+struct Vertex
+{
+	Vertex(glm::vec3 position, glm::vec3 color, glm::vec2 texture_coordinates)
+		: position_(position), color_(color), texture_coordinates_(texture_coordinates)
+	{}
+
+	glm::vec3 position_;
+	glm::vec3 color_;
+	glm::vec2 texture_coordinates_;
+};
+
 void Game::run()
 {
-	float vertices_cube[] = 
-	{
-		-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-		 0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
-		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-		-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+	std::vector<Vertex> vertices_cube;
+	vertices_cube.push_back(Vertex(glm::vec3(-0.5f, -0.5f, -0.5f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(0.0f, 0.0f)));
+	vertices_cube.push_back(Vertex(glm::vec3( 0.5f, -0.5f, -0.5f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(1.0f, 0.0f)));
+	vertices_cube.push_back(Vertex(glm::vec3( 0.5f,  0.5f, -0.5f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(1.0f, 1.0f)));
+	vertices_cube.push_back(Vertex(glm::vec3( 0.5f,  0.5f, -0.5f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(1.0f, 1.0f)));
+	vertices_cube.push_back(Vertex(glm::vec3(-0.5f,  0.5f, -0.5f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(0.0f, 1.0f)));
+	vertices_cube.push_back(Vertex(glm::vec3(-0.5f, -0.5f, -0.5f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(0.0f, 0.0f)));
 
-		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-		 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-		 0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-		 0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-		-0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
-		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+	vertices_cube.push_back(Vertex(glm::vec3(-0.5f, -0.5f, 0.5f),  glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(0.0f, 0.0f)));
+	vertices_cube.push_back(Vertex(glm::vec3( 0.5f, -0.5f, 0.5f),  glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(1.0f, 0.0f)));
+	vertices_cube.push_back(Vertex(glm::vec3( 0.5f,  0.5f, 0.5f),  glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(1.0f, 1.0f)));
+	vertices_cube.push_back(Vertex(glm::vec3( 0.5f,  0.5f, 0.5f),  glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(1.0f, 1.0f)));
+	vertices_cube.push_back(Vertex(glm::vec3(-0.5f,  0.5f, 0.5f),  glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(0.0f, 1.0f)));
+	vertices_cube.push_back(Vertex(glm::vec3(-0.5f, -0.5f, 0.5f),  glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(0.0f, 0.0f)));
 
-		-0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-		-0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-		-0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+	vertices_cube.push_back(Vertex(glm::vec3(-0.5f,  0.5f,  0.5f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(1.0f, 0.0f)));
+	vertices_cube.push_back(Vertex(glm::vec3(-0.5f,  0.5f, -0.5f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(1.0f, 1.0f)));
+	vertices_cube.push_back(Vertex(glm::vec3(-0.5f, -0.5f, -0.5f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(0.0f, 1.0f)));
+	vertices_cube.push_back(Vertex(glm::vec3(-0.5f, -0.5f, -0.5f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(0.0f, 1.0f)));
+	vertices_cube.push_back(Vertex(glm::vec3(-0.5f, -0.5f,  0.5f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(0.0f, 0.0f)));
+	vertices_cube.push_back(Vertex(glm::vec3(-0.5f,  0.5f,  0.5f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(1.0f, 0.0f)));
 
-		 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-		 0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-		 0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-		 0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-		 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+	vertices_cube.push_back(Vertex(glm::vec3(0.5f,  0.5f,  0.5f),  glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(1.0f, 0.0f)));
+	vertices_cube.push_back(Vertex(glm::vec3(0.5f,  0.5f, -0.5f),  glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(1.0f, 1.0f)));
+	vertices_cube.push_back(Vertex(glm::vec3(0.5f, -0.5f, -0.5f),  glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(0.0f, 1.0f)));
+	vertices_cube.push_back(Vertex(glm::vec3(0.5f, -0.5f, -0.5f),  glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(0.0f, 1.0f)));
+	vertices_cube.push_back(Vertex(glm::vec3(0.5f, -0.5f,  0.5f),  glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(0.0f, 0.0f)));
+	vertices_cube.push_back(Vertex(glm::vec3(0.5f,  0.5f,  0.5f),  glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(1.0f, 0.0f)));
 
-		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-		 0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
-		 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-		 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+	vertices_cube.push_back(Vertex(glm::vec3(-0.5f, -0.5f, -0.5f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(0.0f, 1.0f)));
+	vertices_cube.push_back(Vertex(glm::vec3( 0.5f, -0.5f, -0.5f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(1.0f, 1.0f)));
+	vertices_cube.push_back(Vertex(glm::vec3( 0.5f, -0.5f,  0.5f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(1.0f, 0.0f)));
+	vertices_cube.push_back(Vertex(glm::vec3( 0.5f, -0.5f,  0.5f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(1.0f, 0.0f)));
+	vertices_cube.push_back(Vertex(glm::vec3(-0.5f, -0.5f,  0.5f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(0.0f, 0.0f)));
+	vertices_cube.push_back(Vertex(glm::vec3(-0.5f, -0.5f, -0.5f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(0.0f, 1.0f)));
 
-		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-		 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-		 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-		-0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
-		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f
-	};
+	vertices_cube.push_back(Vertex(glm::vec3(-0.5f, 0.5f, -0.5f),  glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(0.0f, 1.0f)));
+	vertices_cube.push_back(Vertex(glm::vec3( 0.5f, 0.5f, -0.5f),  glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(1.0f, 1.0f)));
+	vertices_cube.push_back(Vertex(glm::vec3( 0.5f, 0.5f,  0.5f),  glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(1.0f, 0.0f)));
+	vertices_cube.push_back(Vertex(glm::vec3( 0.5f, 0.5f,  0.5f),  glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(1.0f, 0.0f)));
+	vertices_cube.push_back(Vertex(glm::vec3(-0.5f, 0.5f,  0.5f),  glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(0.0f, 0.0f)));
+	vertices_cube.push_back(Vertex(glm::vec3(-0.5f, 0.5f, -0.5f),  glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(0.0f, 1.0f)));
 
 	GLuint vbo_cube;
 	glCreateBuffers(1, &vbo_cube);
-	glNamedBufferStorage(vbo_cube, sizeof(vertices_cube), vertices_cube, GL_DYNAMIC_STORAGE_BIT);
+	glNamedBufferStorage(vbo_cube, vertices_cube.size() * sizeof(vertices_cube[0]), vertices_cube.data(), GL_DYNAMIC_STORAGE_BIT);
 
 	GLuint vao_cube;
 	glCreateVertexArrays(1, &vao_cube);
 	glBindVertexArray(vao_cube);
-	glVertexArrayVertexBuffer(vao_cube, 0, vbo_cube, 0, 5 * sizeof(float));
+	glVertexArrayVertexBuffer(vao_cube, 0, vbo_cube, 0, sizeof(Vertex));
 	glEnableVertexArrayAttrib(vao_cube, 0);
-	glVertexArrayAttribFormat(vao_cube, 0, 3, GL_FLOAT, GL_FALSE, 0);
+	glVertexArrayAttribFormat(vao_cube, 0, 3, GL_FLOAT, GL_FALSE, offsetof(Vertex, position_));
 	glVertexArrayAttribBinding(vao_cube, 0, 0);
+	glEnableVertexArrayAttrib(vao_cube, 1);
+	glVertexArrayAttribFormat(vao_cube, 1, 3, GL_FLOAT, GL_FALSE, offsetof(Vertex, color_));
+	glVertexArrayAttribBinding(vao_cube, 1, 0);
 	glEnableVertexArrayAttrib(vao_cube, 2);
-	glVertexArrayAttribFormat(vao_cube, 2, 2, GL_FLOAT, GL_FALSE, 3 * sizeof(float));
+	glVertexArrayAttribFormat(vao_cube, 2, 2, GL_FLOAT, GL_FALSE, offsetof(Vertex, texture_coordinates_));
 	glVertexArrayAttribBinding(vao_cube, 2, 0);
 
 
