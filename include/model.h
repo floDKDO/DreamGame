@@ -1,11 +1,5 @@
 #include "mesh.h"
 #include "tinygltf/tiny_gltf_v3.h"
-#include "gl/glew.h"
-
-#include <glm/gtc/type_ptr.hpp>
-#include <string_view>
-#include <string>
-#include <vector>
 
 class Model
 {
@@ -16,6 +10,8 @@ class Model
 		Model& operator=(const Model& model) = delete;
 		Model& operator=(Model&& model) = delete;
 		~Model();
+
+		void draw(ShaderProgram& shader_program);
 
 	private:
 		void open_gltf_file(std::string_view path);

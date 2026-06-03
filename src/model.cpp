@@ -246,7 +246,7 @@ void Model::load_meshes()
 				{
 					std::vector<GLushort> ebo_values = get_ebo_values(primitive);
 					std::vector<glm::vec3> position_attribute_values = get_position_attribute_values(primitive.attributes[kk]);
-					meshes_.push_back(Mesh(ebo_values, position_attribute_values));
+					meshes_.push_back(Mesh(ebo_values, position_attribute_values, primitive.mode));
 
 					/*for(GLushort ebo : ebo_values)
 					{
@@ -260,5 +260,13 @@ void Model::load_meshes()
 				}
 			}
 		}
+	}
+}
+
+void Model::draw(ShaderProgram& shader_program)
+{
+	for(Mesh& mesh : meshes_)
+	{
+		mesh.draw(shader_program);
 	}
 }

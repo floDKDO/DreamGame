@@ -3,9 +3,10 @@
 #include "RAII_SDL3/sdl.h"
 #include "RAII_SDL3/window.h"
 #include "RAII_SDL3/gamepad.h"
-#include "shader_program.h"
+#include "model.h"
 
-#include <glm/gtc/matrix_transform.hpp>
+#include <glm/vec3.hpp>
+#include <glm/mat4x4.hpp>
 #include <unordered_map>
 
 class Game
@@ -47,4 +48,6 @@ class Game
 		bool running_;
 		sdl::Gamepad gamepad_;
 		std::unordered_map<Direction, DirectionInfo> direction_state_;
+
+		Model temp_model_;
 };

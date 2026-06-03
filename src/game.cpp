@@ -1,17 +1,13 @@
 #include "game.h"
-#include "model.h"
 #include "gl/glew.h"
 #include "stb/stb_image.h"
 
 #include <glm/gtc/type_ptr.hpp>
 #include <iostream>
 
-//TODO : créer une classe Mesh (ne contient pas direct EBO/VBO mais leur contenu (ex : vertices_cube)
-
-
 Game::Game()
 	: sdl_(), window_(), glew_(glewInit()), shader_program_(), 
-	camera_position_(glm::vec3(0.0f)), model_(glm::mat4(1.0f)), view_(glm::mat4(1.0f)), running_(true), gamepad_()
+	camera_position_(glm::vec3(0.0f)), model_(glm::mat4(1.0f)), view_(glm::mat4(1.0f)), running_(true), gamepad_(), temp_model_("resources/models/triangle.gltf")
 {
 	glViewport(0, 0, 2560, 1440);
 	glEnable(GL_DEPTH_TEST);
@@ -21,10 +17,9 @@ Game::Game()
 	direction_state_.insert({Direction::DOWN,  {false, false, 0.0f, 0.0f}});
 	direction_state_.insert({Direction::LEFT,  {false, false, 0.0f, 0.0f}});
 	direction_state_.insert({Direction::RIGHT, {false, false, 0.0f, 0.0f}});
-
-	Model temp_model("resources/models/triangle.gltf");
 }
 
+//TODO : placer autre part
 struct Vertex
 {
 	Vertex(glm::vec3 position, glm::vec3 color, glm::vec2 texture_coordinates)
@@ -141,7 +136,7 @@ void Game::run()
 
 	model_ = glm::rotate(model_, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 
-	camera_position_ = glm::vec3(0.0f, 0.0f, 10.0f);
+	camera_position_ = glm::vec3(0.0f, 1.0f, 10.0f);
 	view_ = look_at(camera_position_, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 
 	glm::mat4 projection = glm::mat4(1.0f);
@@ -308,10 +303,12 @@ void Game::draw()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	shader_program_.use();
-	model_ = glm::rotate(model_, glm::radians(float(glm::sin(SDL_GetTicks() / 1000))), glm::vec3(1.0f, 0.0f, 0.0f));
+	//model_ = glm::rotate(model_, glm::radians(float(glm::sin(SDL_GetTicks() / 1000))), glm::vec3(1.0f, 0.0f, 0.0f));
 	shader_program_.set_uniform_matrix_4fv("model", glm::value_ptr(model_));
 	shader_program_.set_uniform_matrix_4fv("view", glm::value_ptr(view_));
 	glDrawArrays(GL_TRIANGLES, 0, 36);
+
+	temp_model_.draw(shader_program_);
 
 	window_.swap_buffers();
 }
