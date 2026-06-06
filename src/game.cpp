@@ -7,7 +7,7 @@
 
 Game::Game()
 	: sdl_(), window_(), glew_(glewInit()), shader_program_(), 
-	camera_position_(glm::vec3(0.0f)), model_(glm::mat4(1.0f)), view_(glm::mat4(1.0f)), running_(true), gamepad_(), temp_model_("resources/models/triangle.gltf")
+	camera_position_(glm::vec3(0.0f)), model_(glm::mat4(1.0f)), view_(glm::mat4(1.0f)), running_(true), gamepad_(), temp_model_("resources/models/cube.gltf") //TODO : cube.gltf n'est pas encore complètement géré
 {
 	glViewport(0, 0, 2560, 1440);
 	glEnable(GL_DEPTH_TEST);

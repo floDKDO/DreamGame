@@ -1,7 +1,7 @@
 #include "mesh.h"
 
-Mesh::Mesh(std::vector<GLushort> ebo_values, std::vector<glm::vec3> position_attribute_values, GLenum draw_mode)
-	: ebo_values_(ebo_values), position_attribute_values_(position_attribute_values), draw_mode_(draw_mode == -1 ? GL_TRIANGLES : draw_mode)
+Mesh::Mesh(std::vector<GLushort> ebo_values, std::vector<Vertex> attribute_values, GLenum draw_mode)
+	: ebo_values_(ebo_values), attribute_values_(attribute_values), draw_mode_(draw_mode == -1 ? GL_TRIANGLES : draw_mode)
 {
 	load_mesh();
 }
@@ -15,14 +15,14 @@ void Mesh::create_ebo()
 void Mesh::create_vbo()
 {
 	glCreateBuffers(1, &vbo_);
-	glNamedBufferStorage(vbo_, position_attribute_values_.size() * sizeof(position_attribute_values_[0]), position_attribute_values_.data(), GL_DYNAMIC_STORAGE_BIT);
+	glNamedBufferStorage(vbo_, attribute_values_.size() * sizeof(Vertex), attribute_values_.data(), GL_DYNAMIC_STORAGE_BIT);
 }
 
 void Mesh::create_vao()
 {
 	glCreateVertexArrays(1, &vao_);
 	glBindVertexArray(vao_);
-	glVertexArrayVertexBuffer(vao_, 0, vbo_, 0, sizeof(glm::vec3));
+	glVertexArrayVertexBuffer(vao_, 0, vbo_, 0, sizeof(Vertex));
 	glVertexArrayElementBuffer(vao_, ebo_);
 	glEnableVertexArrayAttrib(vao_, 0);
 	glVertexArrayAttribFormat(vao_, 0, 3, GL_FLOAT, GL_FALSE, 0);
