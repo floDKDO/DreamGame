@@ -138,6 +138,66 @@ namespace gltf
 		return component_type_size;
 	}
 
+	std::string get_filter_str(int32_t filter)
+	{
+		std::string filter_str;
+		switch(filter)
+		{
+			case GL_NEAREST:
+				filter_str = "GL_NEAREST";
+				break;
+
+			case GL_LINEAR:
+				filter_str = "GL_LINEAR";
+				break;
+
+			case GL_NEAREST_MIPMAP_NEAREST:
+				filter_str = "GL_NEAREST_MIPMAP_NEAREST";
+				break;
+
+			case GL_LINEAR_MIPMAP_NEAREST:
+				filter_str = "GL_LINEAR_MIPMAP_NEAREST";
+				break;
+
+			case GL_NEAREST_MIPMAP_LINEAR:
+				filter_str = "GL_NEAREST_MIPMAP_LINEAR";
+				break;
+
+			case GL_LINEAR_MIPMAP_LINEAR:
+				filter_str = "GL_LINEAR_MIPMAP_LINEAR";
+				break;
+
+			default:
+				filter_str = "****ERROR****";
+				break;
+		}
+		return filter_str;
+	}
+
+	std::string get_wrap_str(int32_t wrap)
+	{
+		std::string wrap_str;
+		switch(wrap)
+		{
+			case GL_CLAMP_TO_EDGE:
+				wrap_str = "GL_CLAMP_TO_EDGE";
+				break;
+
+			case GL_MIRRORED_REPEAT:
+				wrap_str = "GL_MIRRORED_REPEAT";
+				break;
+
+			case GL_REPEAT:
+				wrap_str = "GL_REPEAT";
+				break;
+
+			default:
+				wrap_str = "****ERROR****";
+				break;
+		}
+		return wrap_str;
+	}
+
 	GLfloat ieee754_to_float(uint64_t ieee754_number)
 	{
 		GLfloat float_number;
@@ -182,7 +242,7 @@ void Model::print_info_gltf() const
 {
 	std::cout << "\n**** Info on the GLTF file/model ****\n";
 	std::cout << "- File name: " << path_ << std::endl;
-	std::cout << "- The model has " << model_.nodes_count << " node(s), " << model_.meshes_count << " meshe(s), " << model_.buffer_views_count << " buffer view(s) and " << model_.accessors_count << " accessor(s).\n";
+	std::cout << "- The model has " << model_.nodes_count << " node(s), " << model_.meshes_count << " meshe(s), " << model_.buffer_views_count << " buffer view(s), " << model_.accessors_count << " accessor(s), " << model_.textures_count << " texture(s), " << model_.samplers_count << " sampler(s) and " << model_.images_count << " image(s).\n";
 
 	for(uint32_t i = 0; i < model_.nodes_count; ++i)
 	{
@@ -225,7 +285,41 @@ void Model::print_info_gltf() const
 		std::cout << "   .Length = " << buffer.data.count << std::endl;
 	}
 
+	for(uint32_t i = 0; i < model_.textures_count; ++i)
+	{
+		tg3_texture texture = model_.textures[i];
+		std::cout << "- Texture " << i << ": " << std::endl;
+		std::cout << "   .Source = " << texture.source << ", sampler = " << texture.sampler << std::endl;
+	}
+
+	for(uint32_t i = 0; i < model_.samplers_count; ++i)
+	{
+		tg3_sampler sampler = model_.samplers[i];
+		std::cout << "- Sampler " << i << ": " << std::endl;
+		std::cout << "   .MagFilter = " << gltf::get_filter_str(sampler.mag_filter) << ", minFilter = " << gltf::get_filter_str(sampler.min_filter) << ", wrapS = " << gltf::get_wrap_str(sampler.wrap_s) << ", wrapT = " << gltf::get_wrap_str(sampler.wrap_t) << std::endl;
+	}
+
+	for(uint32_t i = 0; i < model_.images_count; ++i)
+	{
+		tg3_image image = model_.images[i];
+		std::cout << "- Image " << i << ": " << std::endl;
+		std::cout << "   .URI = " << image.uri.data << std::endl;
+	}
+
 	std::cout << "*********************************************************************************************\n\n";
+}
+
+//count devrait être égal pour tous les attributs donc on peut prendre le count de l'attribut [0]
+uint64_t Model::get_attributes_count(const tg3_primitive& primitive) const
+{
+	if(primitive.attributes_count > 0)
+	{
+		return model_.accessors[primitive.attributes[0].value].count;
+	}
+	else
+	{
+		return 0;
+	}
 }
 
 std::vector<GLushort> Model::get_ebo_values(const tg3_primitive& primitive) const
@@ -349,6 +443,47 @@ std::vector<glm::vec3> Model::get_vec3_attribute(const tg3_str_int_pair& attribu
 	return vec3_vector;
 }
 
+Mesh::Vertices Model::get_vertices(const tg3_primitive& primitive)
+{
+	Mesh::Vertices vertices(get_attributes_count(primitive));
+
+	for(uint32_t i = 0; i < primitive.attributes_count; i++)
+	{
+		tg3_str_int_pair attribute = primitive.attributes[i];
+		std::string attribute_name_str = std::string(attribute.key.data);
+		tg3_accessor accessor = model_.accessors[attribute.value];
+
+		if(attribute_name_str == "POSITION") //vec3 de float
+		{
+			vertices.add_position_attributes(get_vec3_attribute(attribute));
+		}
+		else if(attribute_name_str == "NORMAL") //vec3 de float
+		{
+			vertices.add_normal_attributes(get_vec3_attribute(attribute));
+		}
+		else if(attribute_name_str.find("TEXCOORD_") != std::string::npos) //vec2
+		{
+			vertices.add_texture_coordinates_attributes(get_vec2_attribute(attribute));
+		}
+		else if(attribute_name_str.find("COLOR_") != std::string::npos) //vec3 ou vec4
+		{
+			if(gltf::get_type_str(accessor.type) == "VEC3")
+			{
+				vertices.add_color_attributes(get_vec3_attribute(attribute));
+			}
+			else if(gltf::get_type_str(accessor.type) == "VEC4")
+			{
+				std::cout << "****ERROR****\n";
+			}
+		}
+		else
+		{
+			std::cout << "****ERROR****\n";
+		}
+	}
+	return vertices;
+}
+
 void Model::load_meshes()
 {
 	if(model_.nodes_count > 1)
@@ -365,86 +500,8 @@ void Model::load_meshes()
 			{
 				tg3_primitive primitive = mesh.primitives[k];
 				std::vector<GLushort> ebo_values = get_ebo_values(primitive);
-				Mesh::Vertices vertices;
-
-				std::vector<glm::vec3> position_vector;
-				std::vector<glm::vec3> normal_vector;
-				std::vector<glm::vec2> texcoord_vector;
-				std::vector<glm::vec3> color_vector;
-
-				for(uint32_t kk = 0; kk < primitive.attributes_count; kk++)
-				{
-					tg3_str_int_pair attribute = primitive.attributes[kk];
-					std::string attribute_name_str = std::string(attribute.key.data);
-					tg3_accessor accessor = model_.accessors[attribute.value];
-
-					if(attribute_name_str == "POSITION") //vec3 de float
-					{
-						position_vector = get_vec3_attribute(attribute);
-					}
-					else if(attribute_name_str == "NORMAL") //vec3 de float
-					{
-						normal_vector = get_vec3_attribute(attribute);
-					}
-					else if(attribute_name_str.find("TEXCOORD_") != std::string::npos) //vec2
-					{
-						texcoord_vector = get_vec2_attribute(attribute);
-					}
-					else if(attribute_name_str.find("COLOR_") != std::string::npos) //vec3 ou vec4
-					{
-						if(gltf::get_type_str(accessor.type) == "VEC3")
-						{
-							color_vector = get_vec3_attribute(attribute);
-						}
-						else if(gltf::get_type_str(accessor.type) == "VEC4")
-						{
-							std::cout << "****ERROR****\n";
-						}
-					}
-					else
-					{
-						std::cout << "****ERROR****\n";
-					}
-				}
-
-				vertices.vertices_.reserve(position_vector.size()); //position_vector est toujours rempli
-				vertices.has_positions_ = true;
-
-				if(normal_vector.size() == 0)
-				{
-					normal_vector.resize(position_vector.size(), glm::vec3(0.0f, 0.0f, 0.0f));
-					vertices.has_normals_ = false;
-				}
-				else
-				{
-					vertices.has_normals_ = true;
-				}
-
-				if(texcoord_vector.size() == 0)
-				{
-					texcoord_vector.resize(position_vector.size(), glm::vec2(0.0f, 0.0f));
-					vertices.has_texture_coordinates_ = false;
-				}
-				else
-				{
-					vertices.has_texture_coordinates_ = true;
-				}
-
-				if(color_vector.size() == 0)
-				{
-					color_vector.resize(position_vector.size(), glm::vec3(0.0f, 0.0f, 0.0f));
-					vertices.has_colors_ = false;
-				}
-				else
-				{
-					vertices.has_colors_ = true;
-				}
-
-				for(size_t i = 0; i < position_vector.size(); ++i)
-				{
-					Mesh::Vertex vertex(position_vector[i], normal_vector[i], texcoord_vector[i], color_vector[i]);
-					vertices.vertices_.push_back(vertex);
-				}
+				Mesh::Vertices vertices = get_vertices(primitive);
+				meshes_.push_back(Mesh(ebo_values, vertices, primitive.mode)); 
 
 				/*for(GLushort ebo : ebo_values)
 				{
@@ -459,10 +516,23 @@ void Model::load_meshes()
 					std::cout << "Texture coordinates : (.x: " << v.texture_coordinates_.x << ", .y: " << v.texture_coordinates_.y << ")\n";
 					std::cout << "Color : (.x: " << v.color_.x << ", .y: " << v.color_.y << ", .z: " << v.color_.z << ")\n";
 				}*/
-
-				meshes_.push_back(Mesh(ebo_values, vertices, primitive.mode)); 
 			}
 		}
+	}
+
+	for(uint32_t i = 0; i < model_.textures_count; ++i)
+	{
+		//TODO
+	}
+
+	for(uint32_t i = 0; i < model_.samplers_count; ++i)
+	{
+		//TODO
+	}
+
+	for(uint32_t i = 0; i < model_.images_count; ++i)
+	{
+		//TODO
 	}
 }
 

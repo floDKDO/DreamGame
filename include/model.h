@@ -22,9 +22,11 @@ class Model
 	private:
 		void open_gltf_file();
 		void load_meshes();
+		uint64_t get_attributes_count(const tg3_primitive& primitive) const;
 		std::vector<GLushort> get_ebo_values(const tg3_primitive& primitive) const;
 		std::vector<glm::vec2> get_vec2_attribute(const tg3_str_int_pair& attribute) const;
 		std::vector<glm::vec3> get_vec3_attribute(const tg3_str_int_pair& attribute) const;
+		Mesh::Vertices get_vertices(const tg3_primitive& primitive);
 
 		std::string path_;
 		tg3_model model_;
