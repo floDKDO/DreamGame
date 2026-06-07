@@ -7,7 +7,7 @@
 
 Game::Game()
 	: sdl_(), window_(), glew_(glewInit()), shader_program_(), 
-	camera_position_(glm::vec3(0.0f)), model_(glm::mat4(1.0f)), view_(glm::mat4(1.0f)), running_(true), gamepad_(), temp_model_("resources/models/cube.gltf") //TODO : cube.gltf n'est pas encore complètement géré
+	camera_position_(glm::vec3(0.0f)), model_(glm::mat4(1.0f)), view_(glm::mat4(1.0f)), running_(true), gamepad_(), temp_model_("resources/models/cube.gltf")
 {
 	glViewport(0, 0, 2560, 1440);
 	glEnable(GL_DEPTH_TEST);
@@ -19,21 +19,9 @@ Game::Game()
 	direction_state_.insert({Direction::RIGHT, {false, false, 0.0f, 0.0f}});
 }
 
-//TODO : placer autre part
-struct Vertex
-{
-	Vertex(glm::vec3 position, glm::vec3 color, glm::vec2 texture_coordinates)
-		: position_(position), color_(color), texture_coordinates_(texture_coordinates)
-	{}
-
-	glm::vec3 position_;
-	glm::vec3 color_;
-	glm::vec2 texture_coordinates_;
-};
-
 void Game::run()
 {
-	std::vector<Vertex> vertices_cube;
+	/*std::vector<Vertex> vertices_cube;
 	vertices_cube.push_back(Vertex(glm::vec3(-0.5f, -0.5f, -0.5f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(0.0f, 0.0f)));
 	vertices_cube.push_back(Vertex(glm::vec3( 0.5f, -0.5f, -0.5f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(1.0f, 0.0f)));
 	vertices_cube.push_back(Vertex(glm::vec3( 0.5f,  0.5f, -0.5f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(1.0f, 1.0f)));
@@ -132,7 +120,7 @@ void Game::run()
 	glGenerateTextureMipmap(texture_yuri);
 	glTextureStorage2D(texture_yuri, 1, GL_RGBA8, width, height);
 	glTextureSubImage2D(texture_yuri, 0, 0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
-	stbi_image_free(pixels);
+	stbi_image_free(pixels);*/
 
 	model_ = glm::rotate(model_, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 
@@ -161,10 +149,10 @@ void Game::run()
 		draw();
 	}
 
-	glDeleteVertexArrays(1, &vao_cube);
+	/*glDeleteVertexArrays(1, &vao_cube);
 	glDeleteBuffers(1, &vbo_cube);
 	glDeleteTextures(1, &texture_wall);
-	glDeleteTextures(1, &texture_yuri);
+	glDeleteTextures(1, &texture_yuri);*/
 }
 
 void Game::handle_events()
