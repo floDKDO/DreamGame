@@ -1,10 +1,17 @@
 #include "mesh.h"
+#include "stb/stb_image.h"
 
 #include <iostream>
 
-Mesh::Mesh(std::vector<GLushort> ebo_values, Vertices vertices, GLenum draw_mode)
+//TODO : créer un destructeur qui libère le VAO/VBO/EBO et les textures
+
+Mesh::Mesh(std::vector<GLushort> ebo_values, Vertices vertices, std::vector<TextureInfo> textures_info, GLenum draw_mode)
 	: ebo_values_(ebo_values), vertices_(vertices), draw_mode_(draw_mode == -1 ? GL_TRIANGLES : draw_mode)
 {
+	for(const TextureInfo& t_info : textures_info)
+	{
+		textures_.push_back({0, t_info}); //texture id = 0 initialement
+	}
 	load_mesh();
 }
 
@@ -80,11 +87,38 @@ void Mesh::create_vao()
 	}
 }
 
+void Mesh::create_textures()
+{
+	for(Texture& t : textures_)
+	{
+		glCreateTextures(GL_TEXTURE_2D, 1, &t.texture_id_);
+		glBindTextureUnit(t.texture_info_.texture_index_, t.texture_id_);
+		glTextureParameteri(t.texture_id_, GL_TEXTURE_WRAP_S, t.texture_info_.wrap_s_);
+		glTextureParameteri(t.texture_id_, GL_TEXTURE_WRAP_T, t.texture_info_.wrap_t_);
+		glTextureParameteri(t.texture_id_, GL_TEXTURE_MAG_FILTER, t.texture_info_.mag_filter_);
+		glTextureParameteri(t.texture_id_, GL_TEXTURE_MIN_FILTER, t.texture_info_.min_filter_);
+
+		int width, height, channels;
+		unsigned char* pixels;
+		if((pixels = stbi_load(t.texture_info_.image_path_.c_str(), &width, &height, &channels, 4)) == nullptr) //4 pour que ça crashe pas pour une image RGB uniquement (ex : .jpg)
+		{
+			std::cerr << "Error (stbi_load)\n";
+			exit(EXIT_FAILURE);
+		}
+
+		glGenerateTextureMipmap(t.texture_id_);
+		glTextureStorage2D(t.texture_id_, 1, GL_RGBA8, width, height); //TODO : 1 = number of texture levels => utiliser une autre valeur ?
+		glTextureSubImage2D(t.texture_id_, 0, 0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, pixels); 
+		stbi_image_free(pixels);
+	}
+}
+
 void Mesh::load_mesh()
 {
 	create_ebo();
 	create_vbo();
 	create_vao();
+	create_textures();
 }
 
 void Mesh::draw(ShaderProgram& shader_progam)

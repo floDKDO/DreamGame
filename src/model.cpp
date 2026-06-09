@@ -2,6 +2,7 @@
 
 #include <iostream>
 
+//TODO : mettre ce namespace dans un fichier à part ?
 namespace gltf
 {
 
@@ -267,7 +268,7 @@ void Model::print_info_gltf() const
 		tg3_accessor accessor = model_.accessors[i];
 		std::cout << "- Accessor " << i << ": " << std::endl;
 		std::cout << "   .Buffer view (index = " << accessor.buffer_view << ", offset = " << accessor.byte_offset << ")\n";
-		std::cout << "   .Type = " << accessor.type << ", count = " << accessor.count << ", component type = " << gltf::get_component_type_str(accessor.component_type) << std::endl;
+		std::cout << "   .Type = " << gltf::get_type_str(accessor.type) << ", count = " << accessor.count << ", component type = " << gltf::get_component_type_str(accessor.component_type) << std::endl;
 	}
 
 	for(uint32_t i = 0; i < model_.buffer_views_count; ++i)
@@ -355,10 +356,12 @@ std::vector<glm::vec2> Model::get_vec2_attribute(const tg3_str_int_pair& attribu
 		std::cout << "****ERROR****\n";
 	}
 
+	uint64_t stride = buffer_view.byte_stride != 0 ? buffer_view.byte_stride : sizeof(glm::vec2);
+
 	std::vector<glm::vec2> vec2_vector;
 	if(type_str == "VEC2")
 	{
-		for(uint64_t i = buffer_view.byte_offset; i < buffer_view.byte_offset + buffer_view.byte_length; i += sizeof(glm::vec2))
+		for(uint64_t i = buffer_view.byte_offset + accessor.byte_offset; i < buffer_view.byte_offset + buffer_view.byte_length; i += stride)
 		{
 			glm::vec2 vec2 = glm::vec2(0.0f, 0.0f);
 			for(uint64_t j = 0; j < component_type_size * 2; j += component_type_size) //2 car vec2
@@ -404,10 +407,12 @@ std::vector<glm::vec3> Model::get_vec3_attribute(const tg3_str_int_pair& attribu
 		std::cout << "****ERROR****\n";
 	}
 
+	uint64_t stride = buffer_view.byte_stride != 0 ? buffer_view.byte_stride : sizeof(glm::vec3);
+
 	std::vector<glm::vec3> vec3_vector;
 	if(type_str == "VEC3")
 	{
-		for(uint64_t i = buffer_view.byte_offset; i < buffer_view.byte_offset + buffer_view.byte_length; i += sizeof(glm::vec3))
+		for(uint64_t i = buffer_view.byte_offset + accessor.byte_offset; i < buffer_view.byte_offset + buffer_view.byte_length; i += stride)
 		{
 			glm::vec3 vec3 = glm::vec3(0.0f, 0.0f, 0.0f);
 			for(uint64_t j = 0; j < component_type_size * 3; j += component_type_size) //3 car vec3
@@ -491,6 +496,24 @@ void Model::load_meshes()
 		std::cout << "WARNING: multiple nodes are not handled for now!\n";
 	}
 
+	std::vector<Mesh::TextureInfo> textures;
+	for(uint32_t i = 0; i < model_.textures_count; ++i)
+	{
+		Mesh::TextureInfo mesh_texture;
+		tg3_texture texture = model_.textures[i];
+		tg3_image image = model_.images[texture.source];
+		tg3_sampler sampler = model_.samplers[texture.sampler];
+
+		mesh_texture.texture_index_ = i;
+		mesh_texture.image_path_ = "resources/models/" + std::string(image.uri.data); 
+		mesh_texture.min_filter_ = sampler.min_filter;
+		mesh_texture.mag_filter_ = sampler.mag_filter;
+		mesh_texture.wrap_s_ = sampler.wrap_s;
+		mesh_texture.wrap_t_ = sampler.wrap_t;
+
+		textures.push_back(mesh_texture);
+	}
+
 	//for(uint32_t i = 0; i < model_.nodes_count; ++i)
 	{
 		for(uint32_t j = 0; j < model_.meshes_count; ++j)
@@ -501,7 +524,7 @@ void Model::load_meshes()
 				tg3_primitive primitive = mesh.primitives[k];
 				std::vector<GLushort> ebo_values = get_ebo_values(primitive);
 				Mesh::Vertices vertices = get_vertices(primitive);
-				meshes_.push_back(Mesh(ebo_values, vertices, primitive.mode)); 
+				meshes_.push_back(Mesh(ebo_values, vertices, textures, primitive.mode)); 
 
 				/*for(GLushort ebo : ebo_values)
 				{
@@ -518,21 +541,6 @@ void Model::load_meshes()
 				}*/
 			}
 		}
-	}
-
-	for(uint32_t i = 0; i < model_.textures_count; ++i)
-	{
-		//TODO
-	}
-
-	for(uint32_t i = 0; i < model_.samplers_count; ++i)
-	{
-		//TODO
-	}
-
-	for(uint32_t i = 0; i < model_.images_count; ++i)
-	{
-		//TODO
 	}
 }
 

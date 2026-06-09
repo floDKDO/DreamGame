@@ -6,8 +6,25 @@
 class Mesh
 {
 	public:
+		//TODO : public/private et mettre dans un fichier à part ??
+		struct TextureInfo
+		{
+			GLuint texture_index_;
+			std::string image_path_;
+			GLint mag_filter_;
+			GLint min_filter_;
+			GLint wrap_s_;
+			GLint wrap_t_;
+		};
 
-		//TODO : public/private
+		struct Texture
+		{
+			GLuint texture_id_;
+			TextureInfo texture_info_;
+		};
+
+
+		//TODO : public/private et mettre dans un fichier à part ??
 		struct Vertex
 		{
 			Vertex()
@@ -24,7 +41,7 @@ class Mesh
 			glm::vec3 color_;				//3
 		};
 
-		//TODO : public/private
+		//TODO : public/private et mettre dans un fichier à part ??
 		struct Vertices
 		{
 			Vertices(uint64_t number)
@@ -79,7 +96,7 @@ class Mesh
 			bool has_colors_;
 		};
 
-		Mesh(std::vector<GLushort> ebo_values, Vertices vertices, GLenum draw_mode);
+		Mesh(std::vector<GLushort> ebo_values, Vertices vertices, std::vector<TextureInfo> textures_info, GLenum draw_mode);
 		void draw(ShaderProgram& shader_progam);
 
 	private:
@@ -95,10 +112,12 @@ class Mesh
 		void create_ebo();
 		void create_vbo();
 		void create_vao();
+		void create_textures();
 		void load_mesh();
 
 		std::vector<GLushort> ebo_values_;
 		Vertices vertices_;
+		std::vector<Texture> textures_;
 		GLuint ebo_, vbo_, vao_;
 		GLenum draw_mode_;
 };
