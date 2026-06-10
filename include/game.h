@@ -9,6 +9,8 @@
 #include <glm/mat4x4.hpp>
 #include <unordered_map>
 
+void message_callback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* user_param);
+
 class Game
 {
 	public:

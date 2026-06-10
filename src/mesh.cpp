@@ -125,5 +125,5 @@ void Mesh::draw(ShaderProgram& shader_progam)
 {
 	glBindVertexArray(vao_);
 	glDrawElements(draw_mode_, GLsizei(ebo_values_.size()), GL_UNSIGNED_SHORT, 0);
-	glBindVertexArray(0); //= unbind 
+	//glBindVertexArray(0); //= unbind 
 }

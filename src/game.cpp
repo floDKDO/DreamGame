@@ -5,6 +5,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <iostream>
 
+
 Game::Game()
 	: sdl_(), window_(), glew_(glewInit()), shader_program_(), 
 	camera_position_(glm::vec3(0.0f)), model_(glm::mat4(1.0f)), view_(glm::mat4(1.0f)), running_(true), gamepad_(), temp_model_("resources/models/texture.gltf")
@@ -13,10 +14,103 @@ Game::Game()
 	glEnable(GL_DEPTH_TEST);
 	stbi_set_flip_vertically_on_load(true);
 
+	glEnable(GL_DEBUG_OUTPUT);
+	glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+	glDebugMessageCallback(message_callback, nullptr);
+
 	direction_state_.insert({Direction::UP,    {false, false, 0.0f, 0.0f}});
 	direction_state_.insert({Direction::DOWN,  {false, false, 0.0f, 0.0f}});
 	direction_state_.insert({Direction::LEFT,  {false, false, 0.0f, 0.0f}});
 	direction_state_.insert({Direction::RIGHT, {false, false, 0.0f, 0.0f}});
+}
+
+void GLAPIENTRY message_callback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* user_param)
+{
+	auto lambda_source = [&source]() -> std::string
+	{
+		switch(source)
+		{
+			case GL_DEBUG_SOURCE_API:
+				return "SOURCE: API, ";
+
+			case GL_DEBUG_SOURCE_APPLICATION:
+				return "SOURCE: Application, ";
+
+			case GL_DEBUG_SOURCE_OTHER:
+				return "SOURCE: Other, ";
+
+			case GL_DEBUG_SOURCE_SHADER_COMPILER:
+				return "SOURCE: Shader compiler, ";
+
+			case GL_DEBUG_SOURCE_THIRD_PARTY:
+				return "SOURCE: Third party, ";
+
+			case GL_DEBUG_SOURCE_WINDOW_SYSTEM:
+				return "SOURCE: Window system, ";
+
+			default:
+				return "SOURCE: Unknown, ";
+		}
+	};
+
+	auto lamda_type = [&type]() -> std::string
+	{
+		switch(type)
+		{
+			case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR:
+				return "Deprecated behavior";
+
+			case GL_DEBUG_TYPE_ERROR:
+				return "Error";
+
+			case GL_DEBUG_TYPE_MARKER:
+				return "Marker";
+
+			case GL_DEBUG_TYPE_OTHER:
+				return "Other";
+
+			case GL_DEBUG_TYPE_PERFORMANCE:
+				return "Performance";
+
+			case GL_DEBUG_TYPE_POP_GROUP:
+				return "Pop group";
+
+			case GL_DEBUG_TYPE_PORTABILITY:
+				return "Portability";
+
+			case GL_DEBUG_TYPE_PUSH_GROUP:
+				return "Push group";
+
+			case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:
+				return "Undefined behavior";
+
+			default:
+				return "Unknown";
+		}
+	};
+
+	auto lambda_severity = [&severity]() -> std::string
+	{
+		switch(severity)
+		{
+			case GL_DEBUG_SEVERITY_HIGH:
+				return "SEVERITY: High, ";
+
+			case GL_DEBUG_SEVERITY_LOW:
+				return "SEVERITY: Low, ";
+
+			case GL_DEBUG_SEVERITY_MEDIUM:
+				return "SEVERITY: Medium, ";
+
+			case GL_DEBUG_SEVERITY_NOTIFICATION:
+				return "SEVERITY: Notification, ";
+
+			default:
+				return "SEVERITY: Unknown, ";
+		}
+	};
+
+	std::cout << "[OpenGL " << lamda_type() << "] - " << lambda_severity() << lambda_source() << "ID: " << id << ", MESSAGE (length=" << length << "): <" << message << ">\n";
 }
 
 void Game::run()
