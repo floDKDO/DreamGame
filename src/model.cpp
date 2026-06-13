@@ -1,10 +1,99 @@
 #include "model.h"
 
+#include <glm/gtc/matrix_transform.hpp>
 #include <iostream>
 
 //TODO : mettre ce namespace dans un fichier à part ?
 namespace gltf
 {
+
+	glm::mat4 get_mat4_from_1d_matrix(double m[16])
+	{
+		glm::mat4 matrix_mat4 = glm::mat4(1.0f);
+		for(glm::length_t i = 0; i < 4 * 4; i += 4)
+		{
+			for(glm::length_t j = 0; j < 4; ++j)
+			{
+				matrix_mat4[i / 4][j] = float(m[i + j]);
+			}
+		}
+		return matrix_mat4;
+	}
+
+	glm::mat4 get_transformation_matrix(double rotation[4], double scale[3], double translation[3])
+	{
+		glm::mat4 matrix_mat4 = glm::mat4(1.0f);
+		glm::vec4 rotation_vec4 = glm::vec4(float(rotation[0]), float(rotation[1]), float(rotation[2]), float(rotation[3]));
+		glm::vec3 scale_vec3 = glm::vec3(float(scale[0]), float(scale[1]), float(scale[2]));
+		glm::vec3 translation_vec3 = glm::vec3(float(translation[0]), float(translation[1]), float(translation[2]));
+
+		matrix_mat4 = glm::translate(matrix_mat4, translation_vec3);
+		if(rotation_vec4.x != 0.0f || rotation_vec4.y != 0.0f || rotation_vec4.z != 0.0f)
+		{
+			matrix_mat4 = glm::rotate(matrix_mat4, glm::acos(rotation_vec4.w) * 2.0f, glm::vec3(rotation_vec4.x, rotation_vec4.y, rotation_vec4.z)); //glm::acos donne l'angle en radian donc pas besoin d'utiliser glm::radians
+		}
+		matrix_mat4 = glm::scale(matrix_mat4, scale_vec3);
+		
+		return matrix_mat4;
+	}
+
+	void print_mat4(glm::mat4 m)
+	{
+		for(glm::length_t i = 0; i < 4; ++i)
+		{
+			for(glm::length_t j = 0; j < 4; ++j)
+			{
+				std::cout << m[i][j] << ", \t";
+			}
+			std::cout << std::endl;
+		}
+		std::cout << std::endl;
+	}
+
+	void print_1d_matrix(double m[16])
+	{
+		for(glm::length_t i = 0; i < 4 * 4; i += 4)
+		{
+			for(glm::length_t j = 0; j < 4; ++j)
+			{
+				std::cout << m[i + j] << ", \t";
+			}
+			std::cout << std::endl;
+		}
+		std::cout << std::endl;
+	}
+
+	bool is_mat4_identity(glm::mat4 m)
+	{
+		glm::mat4 identity = glm::mat4(1.0f);
+		for(glm::length_t i = 0; i < 4; ++i)
+		{
+			for(glm::length_t j = 0; j < 4; ++j)
+			{
+				if(m[i][j] != identity[i][j])
+				{
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+
+	bool is_1d_matrix_identity(double m[16])
+	{
+		glm::mat4 identity = glm::mat4(1.0f); 
+		for(glm::length_t i = 0; i < 4 * 4; i += 4)
+		{
+			for(glm::length_t j = 0; j < 4; ++j)
+			{
+				if(float(m[i + j]) != identity[i / 4][j])
+				{
+					return false;
+				}
+			}
+		}
+		return true;
+	}
 
 	std::string get_target_str(int32_t target)
 	{
@@ -515,7 +604,14 @@ void Model::load_meshes()
 	for(uint32_t i = 0; i < model_.nodes_count; ++i)
 	{
 		tg3_node node = model_.nodes[i];
-		nodes_.push_back(Node(node.mesh, node.rotation, node.scale, node.translation));
+		if(gltf::is_1d_matrix_identity(node.matrix))
+		{
+			nodes_.push_back(Node(node.mesh, node.rotation, node.scale, node.translation));
+		}
+		else
+		{
+			nodes_.push_back(Node(node.mesh, node.matrix));
+		}
 
 		tg3_mesh mesh = model_.meshes[node.mesh];
 		for(uint32_t k = 0; k < mesh.primitives_count; ++k)
@@ -523,7 +619,7 @@ void Model::load_meshes()
 			tg3_primitive primitive = mesh.primitives[k];
 			std::vector<GLushort> ebo_values = get_ebo_values(primitive);
 			Mesh::Vertices vertices = get_vertices(primitive);
-			meshes_.push_back(Mesh(ebo_values, vertices, textures, nodes_.back().get_transformation_matrix(), primitive.mode)); 
+			meshes_.push_back(Mesh(ebo_values, vertices, textures, nodes_.back().transformation_matrix_, primitive.mode)); 
 
 			/*for(GLushort ebo : ebo_values)
 			{

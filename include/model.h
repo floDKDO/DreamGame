@@ -4,11 +4,25 @@
 
 #include "tinygltf/tiny_gltf_v3.h"
 
-#include <glm/vec2.hpp>
-#include <glm/vec3.hpp>
-#include <glm/vec4.hpp>
-#include <glm/mat4x4.hpp>
-#include <glm/gtc/matrix_transform.hpp>
+//TODO : mettre ce namespace dans un fichier à part ?
+namespace gltf
+{
+
+glm::mat4 get_mat4_from_1d_matrix(double m[16]);
+glm::mat4 get_transformation_matrix(double rotation[4], double scale[3], double translation[3]);
+void print_mat4(glm::mat4 m);
+void print_1d_matrix(double m[16]);
+bool is_mat4_identity(glm::mat4 m);
+bool is_1d_matrix_identity(double m[16]);
+std::string get_target_str(int32_t target);
+std::string get_type_str(int32_t type);
+std::string get_component_type_str(int32_t component_type);
+std::size_t get_component_type_size(int32_t component_type);
+std::string get_filter_str(int32_t filter);
+std::string get_wrap_str(int32_t wrap);
+GLfloat ieee754_to_float(uint64_t ieee754_number);
+
+}
 
 
 class Model
@@ -28,30 +42,19 @@ class Model
 		struct Node
 		{
 			Node()
-				: mesh_index_(-1), rotation_(glm::vec4(0.0f, 0.0f, 0.0f, 1.0f)), scale_(glm::vec3(1.0f, 1.0f, 1.0f)), translation_(glm::vec3(0.0f, 0.0f, 0.0f))
+				: mesh_index_(-1), transformation_matrix_(glm::mat4(1.0f))
 			{}
 
 			Node(int32_t mesh_index, double rotation[4], double scale[3], double translation[3])
-				: mesh_index_(mesh_index), rotation_(glm::vec4(rotation[0], rotation[1], rotation[2], rotation[3])), 
-				  scale_(glm::vec3(scale[0], scale[1], scale[2])), translation_(glm::vec3(translation[0], translation[1], translation[2]))
+				: mesh_index_(mesh_index), transformation_matrix_(gltf::get_transformation_matrix(rotation, scale, translation))
 			{}
 
-			glm::mat4 get_transformation_matrix() const
-			{
-				glm::mat4 matrix = glm::mat4(1.0f);
-				matrix = glm::scale(matrix, scale_);
-				if(rotation_.x != 0.0f || rotation_.y != 0.0f || rotation_.z != 0.0f)
-				{
-					matrix = glm::rotate(matrix, glm::radians(0.0f), glm::vec3(0.0f, 1.0f, 0.0f)); //glm::acos donne l'angle en radian donc pas besoin de glm::radians
-				}
-				matrix = glm::translate(matrix, translation_); 
-				return matrix;
-			}
+			Node(int32_t mesh_index, double matrix[16])
+				: mesh_index_(mesh_index), transformation_matrix_(gltf::get_mat4_from_1d_matrix(matrix))
+			{}
 
 			int32_t mesh_index_;
-			glm::vec4 rotation_;
-			glm::vec3 scale_;
-			glm::vec3 translation_;
+			glm::mat4 transformation_matrix_;
 		};
 
 		void open_gltf_file();

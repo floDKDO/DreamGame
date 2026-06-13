@@ -7,7 +7,7 @@ namespace sdl
 
 SDL::SDL()
 {
-	if(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMEPAD) < 0)
+	if(!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMEPAD))
 	{
 		SDL_Log("(SDL_Init) %s\n", SDL_GetError());
 	}
