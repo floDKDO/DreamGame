@@ -1,12 +1,13 @@
 #include "mesh.h"
 #include "stb/stb_image.h"
 
+#include <glm/gtc/type_ptr.hpp>
 #include <iostream>
 
 //TODO : créer un destructeur qui libère le VAO/VBO/EBO et les textures
 
-Mesh::Mesh(std::vector<GLushort> ebo_values, Vertices vertices, std::vector<TextureInfo> textures_info, GLenum draw_mode)
-	: ebo_values_(ebo_values), vertices_(vertices), draw_mode_(draw_mode == -1 ? GL_TRIANGLES : draw_mode)
+Mesh::Mesh(std::vector<GLushort> ebo_values, Vertices vertices, std::vector<TextureInfo> textures_info, glm::mat4 transformation_matrix, GLenum draw_mode)
+	: ebo_values_(ebo_values), vertices_(vertices), transformation_matrix_(transformation_matrix), draw_mode_(draw_mode == -1 ? GL_TRIANGLES : draw_mode)
 {
 	for(const TextureInfo& t_info : textures_info)
 	{
@@ -123,7 +124,8 @@ void Mesh::load_mesh()
 
 void Mesh::draw(ShaderProgram& shader_progam)
 {
+	shader_progam.set_uniform_matrix_4fv("transformation_matrix", glm::value_ptr(transformation_matrix_));
 	glBindVertexArray(vao_);
 	glDrawElements(draw_mode_, GLsizei(ebo_values_.size()), GL_UNSIGNED_SHORT, 0);
-	//glBindVertexArray(0); //= unbind 
+	//glBindVertexArray(0); //= unbind, provoque des erreurs
 }

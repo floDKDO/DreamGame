@@ -24,7 +24,7 @@ Game::Game()
 	direction_state_.insert({Direction::RIGHT, {false, false, 0.0f, 0.0f}});
 }
 
-void GLAPIENTRY message_callback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* user_param)
+void GLAPIENTRY message_callback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, [[maybe_unused]] const void* user_param)
 {
 	auto lambda_source = [&source]() -> std::string
 	{

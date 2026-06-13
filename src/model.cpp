@@ -247,19 +247,22 @@ void Model::print_info_gltf() const
 
 	for(uint32_t i = 0; i < model_.nodes_count; ++i)
 	{
-		for(uint32_t j = 0; j < model_.meshes_count; ++j)
+		tg3_node node = model_.nodes[i];
+		std::cout << "- Node " << i << ": " << std::endl;
+		std::cout << "   .Mesh index: " << node.mesh << ", rotation: (" << node.rotation[0] << ", " << node.rotation[1] << ", " << node.rotation[2] << ", " << node.rotation[3] <<
+			"), scale: (" << node.scale[0] << ", " << node.scale[1] << ", " << node.scale[2] <<
+			"), translation: (" << node.translation[0] << ", " << node.translation[1] << ", " << node.translation[2] << ")\n";
+
+		tg3_mesh mesh = model_.meshes[node.mesh];
+		std::cout << "- Mesh " << model_.nodes->mesh << ": " << std::endl;
+		for(uint32_t k = 0; k < mesh.primitives_count; ++k)
 		{
-			tg3_mesh mesh = model_.meshes[j];
-			std::cout << "- Mesh " << model_.nodes->mesh << ": " << std::endl;
-			for(uint32_t k = 0; k < mesh.primitives_count; ++k)
+			tg3_primitive primitive = mesh.primitives[k];
+			for(uint32_t kk = 0; kk < primitive.attributes_count; kk++)
 			{
-				tg3_primitive primitive = mesh.primitives[k];
-				for(uint32_t kk = 0; kk < primitive.attributes_count; kk++)
-				{
-					std::cout << "   .Primitive: " << primitive.attributes[kk].key.data << " = " << primitive.attributes[kk].value << std::endl;
-				}
-				std::cout << "   .Indices: " << primitive.indices << std::endl;
+				std::cout << "   .Primitive: " << primitive.attributes[kk].key.data << " = " << primitive.attributes[kk].value << std::endl;
 			}
+			std::cout << "   .Indices: " << primitive.indices << std::endl;
 		}
 	}
 
@@ -491,11 +494,6 @@ Mesh::Vertices Model::get_vertices(const tg3_primitive& primitive)
 
 void Model::load_meshes()
 {
-	if(model_.nodes_count > 1)
-	{
-		std::cout << "WARNING: multiple nodes are not handled for now!\n";
-	}
-
 	std::vector<Mesh::TextureInfo> textures;
 	for(uint32_t i = 0; i < model_.textures_count; ++i)
 	{
@@ -514,32 +512,32 @@ void Model::load_meshes()
 		textures.push_back(mesh_texture);
 	}
 
-	//for(uint32_t i = 0; i < model_.nodes_count; ++i)
+	for(uint32_t i = 0; i < model_.nodes_count; ++i)
 	{
-		for(uint32_t j = 0; j < model_.meshes_count; ++j)
+		tg3_node node = model_.nodes[i];
+		nodes_.push_back(Node(node.mesh, node.rotation, node.scale, node.translation));
+
+		tg3_mesh mesh = model_.meshes[node.mesh];
+		for(uint32_t k = 0; k < mesh.primitives_count; ++k)
 		{
-			tg3_mesh mesh = model_.meshes[j];
-			for(uint32_t k = 0; k < mesh.primitives_count; ++k)
+			tg3_primitive primitive = mesh.primitives[k];
+			std::vector<GLushort> ebo_values = get_ebo_values(primitive);
+			Mesh::Vertices vertices = get_vertices(primitive);
+			meshes_.push_back(Mesh(ebo_values, vertices, textures, nodes_.back().get_transformation_matrix(), primitive.mode)); 
+
+			/*for(GLushort ebo : ebo_values)
 			{
-				tg3_primitive primitive = mesh.primitives[k];
-				std::vector<GLushort> ebo_values = get_ebo_values(primitive);
-				Mesh::Vertices vertices = get_vertices(primitive);
-				meshes_.push_back(Mesh(ebo_values, vertices, textures, primitive.mode)); 
-
-				/*for(GLushort ebo : ebo_values)
-				{
-					std::cout << ebo << ", ";
-				}
-				std::cout << std::endl;*/
-
-				/*for(const Mesh::Vertex& v : vertices.vertices_)
-				{
-					std::cout << "Position : (.x: " << v.position_.x << ", .y: " << v.position_.y << ", .z: " << v.position_.z << ")\n";
-					std::cout << "Normal : (.x: " << v.normal_.x << ", .y: " << v.normal_.y << ", .z: " << v.normal_.z << ")\n";
-					std::cout << "Texture coordinates : (.x: " << v.texture_coordinates_.x << ", .y: " << v.texture_coordinates_.y << ")\n";
-					std::cout << "Color : (.x: " << v.color_.x << ", .y: " << v.color_.y << ", .z: " << v.color_.z << ")\n";
-				}*/
+				std::cout << ebo << ", ";
 			}
+			std::cout << std::endl;*/
+
+			/*for(const Mesh::Vertex& v : vertices.vertices_)
+			{
+				std::cout << "Position : (.x: " << v.position_.x << ", .y: " << v.position_.y << ", .z: " << v.position_.z << ")\n";
+				std::cout << "Normal : (.x: " << v.normal_.x << ", .y: " << v.normal_.y << ", .z: " << v.normal_.z << ")\n";
+				std::cout << "Texture coordinates : (.x: " << v.texture_coordinates_.x << ", .y: " << v.texture_coordinates_.y << ")\n";
+				std::cout << "Color : (.x: " << v.color_.x << ", .y: " << v.color_.y << ", .z: " << v.color_.z << ")\n";
+			}*/
 		}
 	}
 }

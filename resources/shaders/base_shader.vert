@@ -12,9 +12,11 @@ uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
 
+uniform mat4 transformation_matrix;
+
 void main()
 {
-	gl_Position = projection * view * model * vec4(position_, 1.0f);
+	gl_Position = projection * view * model * transformation_matrix * vec4(position_, 1.0f);
 	output_color_ = color_;
 	output_text_coord_ = texture_coordinates_;
 }
