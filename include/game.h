@@ -5,8 +5,6 @@
 #include "RAII_SDL3/gamepad.h"
 #include "model.h"
 
-#include <glm/vec3.hpp>
-#include <glm/mat4x4.hpp>
 #include <unordered_map>
 
 void message_callback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, [[maybe_unused]] const void* user_param);

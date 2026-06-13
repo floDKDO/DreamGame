@@ -1,5 +1,4 @@
 #include "game.h"
-#include "gl/glew.h"
 #include "stb/stb_image.h"
 
 #include <glm/gtc/type_ptr.hpp>
@@ -8,7 +7,7 @@
 
 Game::Game()
 	: sdl_(), window_(), glew_(glewInit()), shader_program_(), 
-	camera_position_(glm::vec3(0.0f)), model_(glm::mat4(1.0f)), view_(glm::mat4(1.0f)), running_(true), gamepad_(), temp_model_("resources/models/test.gltf")
+	camera_position_(glm::vec3(0.0f)), model_(glm::mat4(1.0f)), view_(glm::mat4(1.0f)), running_(true), gamepad_(), temp_model_("resources/models/stairs.gltf")
 {
 	glViewport(0, 0, 2560, 1440);
 	glEnable(GL_DEPTH_TEST);

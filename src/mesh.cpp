@@ -6,41 +6,19 @@
 
 //TODO : créer un destructeur qui libère le VAO/VBO/EBO et les textures
 
-Mesh::Mesh(std::vector<GLushort> ebo_values, Vertices vertices, std::vector<TextureInfo> textures_info, glm::mat4 transformation_matrix, GLenum draw_mode)
+Mesh::Mesh(std::vector<GLushort> ebo_values, Vertices vertices, std::vector<Texture::TextureInfo> textures_info, glm::mat4 transformation_matrix, GLenum draw_mode)
 	: ebo_values_(ebo_values), vertices_(vertices), transformation_matrix_(transformation_matrix), draw_mode_(draw_mode == -1 ? GL_TRIANGLES : draw_mode)
 {
-	for(const TextureInfo& t_info : textures_info)
+	for(const Texture::TextureInfo& t_info : textures_info)
 	{
 		textures_.push_back({0, t_info}); //texture id = 0 initialement
 	}
 	load_mesh();
 }
 
-void Mesh::load_vertex_attribute(GLuint vbo_binding_index, AttributeIndex attribute_index, GLint size)
+void Mesh::load_vertex_attribute(GLuint vbo_binding_index, Vertices::AttributeIndex attribute_index, GLint size)
 {
-	std::size_t offset = 0;
-	switch(attribute_index)
-	{
-		case AttributeIndex::Position:
-			offset = offsetof(Vertex, position_);
-			break;
-
-		case AttributeIndex::Normal:
-			offset = offsetof(Vertex, normal_);
-			break;
-
-		case AttributeIndex::TextureCoord:
-			offset = offsetof(Vertex, texture_coordinates_);
-			break;
-
-		case AttributeIndex::Color:
-			offset = offsetof(Vertex, color_);
-			break;
-
-		default:
-			std::cout << "****ERROR****\n";
-			break;
-	}
+	std::size_t offset = vertices_.get_attribute_offset(attribute_index);
 	glEnableVertexArrayAttrib(vao_, attribute_index);
 	glVertexArrayAttribFormat(vao_, attribute_index, size, GL_FLOAT, GL_FALSE, GLuint(offset));
 	glVertexArrayAttribBinding(vao_, attribute_index, vbo_binding_index);
@@ -55,7 +33,7 @@ void Mesh::create_ebo()
 void Mesh::create_vbo()
 {
 	glCreateBuffers(1, &vbo_);
-	glNamedBufferStorage(vbo_, vertices_.vertices_.size() * sizeof(Vertex), vertices_.vertices_.data(), GL_DYNAMIC_STORAGE_BIT);
+	glNamedBufferStorage(vbo_, vertices_.vertices_.size() * sizeof(Vertices::Vertex), vertices_.vertices_.data(), GL_DYNAMIC_STORAGE_BIT);
 }
 
 void Mesh::create_vao()
@@ -64,27 +42,27 @@ void Mesh::create_vao()
 
 	glCreateVertexArrays(1, &vao_);
 	glBindVertexArray(vao_);
-	glVertexArrayVertexBuffer(vao_, vbo_binding_index, vbo_, 0, sizeof(Vertex));
+	glVertexArrayVertexBuffer(vao_, vbo_binding_index, vbo_, 0, sizeof(Vertices::Vertex));
 	glVertexArrayElementBuffer(vao_, ebo_);
 
 	if(vertices_.has_positions_)
 	{
-		load_vertex_attribute(vbo_binding_index, AttributeIndex::Position, 3);
+		load_vertex_attribute(vbo_binding_index, Vertices::AttributeIndex::Position, 3);
 	}
 
 	if(vertices_.has_normals_)
 	{
-		load_vertex_attribute(vbo_binding_index, AttributeIndex::Normal, 3);
+		load_vertex_attribute(vbo_binding_index, Vertices::AttributeIndex::Normal, 3);
 	}
 
 	if(vertices_.has_texture_coordinates_)
 	{
-		load_vertex_attribute(vbo_binding_index, AttributeIndex::TextureCoord, 2);
+		load_vertex_attribute(vbo_binding_index, Vertices::AttributeIndex::TextureCoord, 2);
 	}
 
 	if(vertices_.has_colors_)
 	{
-		load_vertex_attribute(vbo_binding_index, AttributeIndex::Color, 3);
+		load_vertex_attribute(vbo_binding_index, Vertices::AttributeIndex::Color, 3);
 	}
 }
 
