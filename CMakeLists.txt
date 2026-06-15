@@ -20,12 +20,13 @@ set(STB_DIR "${CMAKE_SOURCE_DIR}/third_party/stb")
 set(IMGUI_DIR "${CMAKE_SOURCE_DIR}/third_party/imgui") 
 set(TINYGLTF_DIR "${CMAKE_SOURCE_DIR}/third_party/tinygltf") 
 
-file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS src/*.cpp include/*.h src/RAII_SDL3/*.cpp src/game.cpp include/game.h include/RAII_SDL3/*.h ${STB_DIR}/*.cpp ${STB_DIR}/*.h ${IMGUI_DIR}/*.cpp ${IMGUI_DIR}/*.h ${TINYGLTF_DIR}/*.c ${TINYGLTF_DIR}/*.h)
-add_executable(${PROJECT_NAME} ${SOURCES} "include/gltf.h" "src/gltf.cpp" "include/vertices.h" "src/vertices.cpp" "include/texture.h" )
+file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS src/*.cpp src/*.h src/RAII_SDL3/*.cpp src/RAII_SDL3/*.h ${STB_DIR}/*.cpp ${STB_DIR}/*.h ${IMGUI_DIR}/*.cpp ${IMGUI_DIR}/*.h ${TINYGLTF_DIR}/*.c ${TINYGLTF_DIR}/*.h)
+add_executable(${PROJECT_NAME} ${SOURCES})
 
 add_custom_command(
-  TARGET ${PROJECT_NAME} POST_BUILD
-  COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/resources ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/resources)
+ TARGET  ${PROJECT_NAME} POST_BUILD
+ COMMAND ${CMAKE_COMMAND} -E create_symlink ${CMAKE_SOURCE_DIR}/resources $<TARGET_FILE_DIR:${PROJECT_NAME}>/resources
+ DEPENDS $<TARGET_FILE_DIR:${PROJECT_NAME}>/resources)
 
 add_subdirectory("${CMAKE_SOURCE_DIR}/third_party/SDL3" EXCLUDE_FROM_ALL)
 add_custom_command(
@@ -50,7 +51,7 @@ add_definitions(-DGLEW_STATIC)
 target_link_directories(${PROJECT_NAME} PUBLIC "lib/glew/lib/Release/x64")
 
 target_include_directories(${PROJECT_NAME} PUBLIC 
-  "include"
+  "src"
   "lib/glew/include"
   "lib/glm"
   "third_party"

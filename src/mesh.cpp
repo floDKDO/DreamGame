@@ -1,6 +1,6 @@
 #include "mesh.h"
-#include "stb/stb_image.h"
 
+#include <stb/stb_image.h>
 #include <glm/gtc/type_ptr.hpp>
 #include <iostream>
 

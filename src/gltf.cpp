@@ -1,6 +1,6 @@
 #include "gltf.h"
-#include "tinygltf/tiny_gltf_v3.h" //TODO : inclure les third party avec "..." ou <...> ??
 
+#include <tinygltf/tiny_gltf_v3.h>
 #include <glm/gtc/matrix_transform.hpp>
 #include <iostream>
 

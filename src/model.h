@@ -1,6 +1,7 @@
 #include "mesh.h"
 #include "gltf.h"
-#include "tinygltf/tiny_gltf_v3.h"
+
+#include <tinygltf/tiny_gltf_v3.h>
 
 class Model
 {

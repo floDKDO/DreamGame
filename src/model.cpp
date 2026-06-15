@@ -3,7 +3,7 @@
 #include <iostream>
 
 
-Model::Model(std::string_view path)
+Model::Model(std::string_view path) //si le modèle vient de Blender, il doit avoir été exporté en ayant coché "Transform: + Y Up"
 	: path_(path)
 {
 	open_gltf_file();

@@ -1,14 +1,21 @@
 #include "game.h"
-#include "stb/stb_image.h"
 
+#include <stb/stb_image.h>
 #include <glm/gtc/type_ptr.hpp>
 #include <iostream>
+#include <filesystem>
 
+//TODO : voir pour les variables d'environnement des librairies
+/*
+#define GLM_FORCE_SILENT_WARNINGS => OK
+*/
 
 Game::Game()
 	: sdl_(), window_(), glew_(glewInit()), shader_program_(), 
-	camera_position_(glm::vec3(0.0f)), model_(glm::mat4(1.0f)), view_(glm::mat4(1.0f)), running_(true), gamepad_(), temp_model_("resources/models/stairs.gltf")
+	camera_position_(glm::vec3(0.0f)), model_(glm::mat4(1.0f)), view_(glm::mat4(1.0f)), running_(true), gamepad_(), temp_model_("resources/models/stairs_y_up.gltf")
 {
+	std::cout << std::filesystem::current_path() << std::endl;
+
 	glViewport(0, 0, 2560, 1440);
 	glEnable(GL_DEPTH_TEST);
 	stbi_set_flip_vertically_on_load(true);
@@ -215,7 +222,7 @@ void Game::run()
 	glTextureSubImage2D(texture_yuri, 0, 0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
 	stbi_image_free(pixels);*/
 
-	model_ = glm::rotate(model_, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+	model_ = glm::rotate(model_, glm::radians(0.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 
 	camera_position_ = glm::vec3(0.0f, 1.0f, 10.0f);
 	view_ = look_at(camera_position_, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
