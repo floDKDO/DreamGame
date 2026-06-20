@@ -15,18 +15,18 @@
 	"nodes":[
 		{
 			"mesh":0,
-			"name":"Cube.007"
+			"name":"Cube.021"
 		}
 	],
 	"meshes":[
 		{
-			"name":"Cube.032",
+			"name":"Cube.015",
 			"primitives":[
 				{
 					"attributes":{
 						"POSITION":0,
 						"NORMAL":1,
-						"TEXCOORD_0":2
+						"COLOR_0":2
 					},
 					"indices":3
 				}
@@ -58,9 +58,10 @@
 		},
 		{
 			"bufferView":2,
-			"componentType":5126,
+			"componentType":5123,
 			"count":480,
-			"type":"VEC2"
+			"normalized":true,
+			"type":"VEC4"
 		},
 		{
 			"bufferView":3,

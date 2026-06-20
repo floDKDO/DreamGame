@@ -1,5 +1,6 @@
 #include "model.h"
 
+#include <limits>
 #include <iostream>
 
 
@@ -140,110 +141,77 @@ std::vector<GLushort> Model::get_ebo_values(const tg3_primitive& primitive) cons
 	return ebo_value;
 }
 
-std::vector<glm::vec2> Model::get_vec2_attribute(const tg3_str_int_pair& attribute) const
+std::vector<glm::vec4> Model::get_vec4_color_attribute(const tg3_str_int_pair& attribute) const
 {
 	tg3_accessor accessor = model_.accessors[attribute.value];
-	tg3_buffer_view buffer_view = model_.buffer_views[accessor.buffer_view];
-	tg3_buffer buffer = model_.buffers[buffer_view.buffer];
 	std::string component_type_str = gltf::get_component_type_str(accessor.component_type);
-	std::size_t component_type_size = gltf::get_component_type_size(accessor.component_type);
-	std::string type_str = gltf::get_type_str(accessor.type);
+	std::vector<glm::vec4> vec4_vector;
 
-	if(gltf::get_component_type_str(accessor.component_type) != "GL_FLOAT")
+	if(component_type_str == "GL_FLOAT")
 	{
-		std::cout << "****ERROR****: only GL_FLOAT is handled fopr now!\n";
-	}
-
-	uint64_t stride = buffer_view.byte_stride != 0 ? buffer_view.byte_stride : sizeof(glm::vec2);
-
-	std::vector<glm::vec2> vec2_vector;
-	if(type_str == "VEC2")
-	{
-		for(uint64_t i = buffer_view.byte_offset + accessor.byte_offset; i < buffer_view.byte_offset + buffer_view.byte_length; i += stride)
-		{
-			glm::vec2 vec2 = glm::vec2(0.0f, 0.0f);
-			for(uint64_t j = 0; j < component_type_size * 2; j += component_type_size) //2 car vec2
-			{
-				uint32_t attribute_ieee754 = 0; //uint32_t car un float fait 32 octets
-				for(uint64_t k = 0; k < component_type_size; k += sizeof(uint8_t))
-				{
-					attribute_ieee754 |= uint32_t(buffer.data.data[i + j + k] << k * 8); //8 pour convertir octets en bits
-				}
-				GLfloat attribute_float = gltf::ieee754_to_float(attribute_ieee754);
-
-				//TODO : créer une fonction qui prend 0 ou 1 en paramètre et positionne x ou y d'un vec2 ??
-				if(j == component_type_size * 0) //x
-				{
-					vec2.x = attribute_float;
-				}
-				else if(j == component_type_size * 1) //y
-				{
-					vec2.y = attribute_float;
-				}
-			}
-			vec2_vector.push_back(vec2);
-		}
+		return get_float_vec_attribute<4>(attribute);
 	}
 	else
 	{
-		std::cout << "****ERROR****: Only VEC2 is handled for now!\n";
+		tg3_buffer_view buffer_view = model_.buffer_views[accessor.buffer_view];
+		tg3_buffer buffer = model_.buffers[buffer_view.buffer];
+		std::size_t component_type_size = gltf::get_component_type_size(accessor.component_type);
+
+		if(component_type_str == "GL_UNSIGNED_BYTE")
+		{
+			for(uint64_t i = buffer_view.byte_offset + accessor.byte_offset; i < buffer_view.byte_offset + buffer_view.byte_length; i += 4 * sizeof(GLubyte)) //car sizeof(glm::vec4) != 4 * sizeof(sizeof(GLubyte))
+			{
+				glm::vec4 vec4 = glm::vec4(0.0f, 0.0f, 0.0f, 0.0f);
+				for(uint64_t j = 0; j < component_type_size * glm::vec4::length(); j += component_type_size)
+				{
+					uint8_t attribute_u8 = 0; //uint8_t car un unsigned short fait 8 bits
+					for(uint64_t k = 0; k < component_type_size; k += sizeof(uint8_t))
+					{
+						attribute_u8 |= uint8_t(buffer.data.data[i + j + k] << k * 8); //8 pour convertir octets en bits
+					}
+					GLfloat attribute_float = GLfloat(attribute_u8) / std::numeric_limits<GLubyte>::max(); //normaliser la valeur de l'attribut
+					uint64_t component = j / component_type_size;
+					vec4[component % 4] = attribute_float;
+				}
+				vec4_vector.push_back(vec4);
+			}
+		}
+		else if(component_type_str == "GL_UNSIGNED_SHORT")
+		{
+			for(uint64_t i = buffer_view.byte_offset + accessor.byte_offset; i < buffer_view.byte_offset + buffer_view.byte_length; i += 4 * sizeof(GLushort)) //car sizeof(glm::vec4) != 4 * sizeof(sizeof(GLushort))
+			{
+				glm::vec4 vec4 = glm::vec4(0.0f, 0.0f, 0.0f, 0.0f);
+				for(uint64_t j = 0; j < component_type_size * glm::vec4::length(); j += component_type_size)
+				{
+					uint16_t attribute_u16 = 0; //uint16_t car un unsigned short fait 16 bits
+					for(uint64_t k = 0; k < component_type_size; k += sizeof(uint8_t))
+					{
+						attribute_u16 |= uint16_t(buffer.data.data[i + j + k] << k * 8); //8 pour convertir octets en bits
+					}
+					GLfloat attribute_float = GLfloat(attribute_u16) / std::numeric_limits<GLushort>::max(); //normaliser la valeur de l'attribut
+					uint64_t component = j / component_type_size;
+					vec4[component % 4] = attribute_float;
+				}
+				vec4_vector.push_back(vec4);
+			}
+		}
+		else
+		{
+			std::cout << "****ERROR****: Unhandled type!\n";
+		}
 	}
-	return vec2_vector;
+	return vec4_vector;
 }
 
-std::vector<glm::vec3> Model::get_vec3_attribute(const tg3_str_int_pair& attribute) const
+std::vector<glm::vec4> Model::vec3_to_vec4_colors(std::vector<glm::vec3> vector) const
 {
-	tg3_accessor accessor = model_.accessors[attribute.value];
-	tg3_buffer_view buffer_view = model_.buffer_views[accessor.buffer_view];
-	tg3_buffer buffer = model_.buffers[buffer_view.buffer];
-	std::string component_type_str = gltf::get_component_type_str(accessor.component_type);
-	std::size_t component_type_size = gltf::get_component_type_size(accessor.component_type);
-	std::string type_str = gltf::get_type_str(accessor.type);
-
-	if(gltf::get_component_type_str(accessor.component_type) != "GL_FLOAT")
+	std::vector<glm::vec4> vector_vec4;
+	vector_vec4.reserve(vector.size());
+	for(const glm::vec3& v : vector)
 	{
-		std::cout << "****ERROR****: Only GL_FLOAT is handled for now!\n";
+		vector_vec4.push_back(glm::vec4(v, 1.0f));
 	}
-
-	uint64_t stride = buffer_view.byte_stride != 0 ? buffer_view.byte_stride : sizeof(glm::vec3);
-
-	std::vector<glm::vec3> vec3_vector;
-	if(type_str == "VEC3")
-	{
-		for(uint64_t i = buffer_view.byte_offset + accessor.byte_offset; i < buffer_view.byte_offset + buffer_view.byte_length; i += stride)
-		{
-			glm::vec3 vec3 = glm::vec3(0.0f, 0.0f, 0.0f);
-			for(uint64_t j = 0; j < component_type_size * 3; j += component_type_size) //3 car vec3
-			{
-				uint32_t attribute_ieee754 = 0; //uint32_t car un float fait 32 octets
-				for(uint64_t k = 0; k < component_type_size; k += sizeof(uint8_t))
-				{
-					attribute_ieee754 |= uint32_t(buffer.data.data[i + j + k] << k * 8); //8 pour convertir octets en bits
-				}
-				GLfloat attribute_float = gltf::ieee754_to_float(attribute_ieee754);
-
-				//TODO : créer une fonction qui prend 0, 1 ou 2 en paramètre et positionne x, y ou z d'un vec3 ??
-				if(j == component_type_size * 0) //x
-				{
-					vec3.x = attribute_float;
-				}
-				else if(j == component_type_size * 1) //y
-				{
-					vec3.y = attribute_float;
-				}
-				else if(j == component_type_size * 2) //z
-				{
-					vec3.z = attribute_float;
-				}
-			}
-			vec3_vector.push_back(vec3);
-		}
-	}
-	else
-	{
-		std::cout << "****ERROR****: Only VEC3 is handled for now!\n";
-	}
-	return vec3_vector;
+	return vector_vec4;
 }
 
 Vertices Model::get_vertices(const tg3_primitive& primitive)
@@ -258,25 +226,25 @@ Vertices Model::get_vertices(const tg3_primitive& primitive)
 
 		if(attribute_name_str == "POSITION") //vec3 de float
 		{
-			vertices.add_position_attributes(get_vec3_attribute(attribute));
+			vertices.add_position_attributes(get_float_vec_attribute<3>(attribute));
 		}
 		else if(attribute_name_str == "NORMAL") //vec3 de float
 		{
-			vertices.add_normal_attributes(get_vec3_attribute(attribute));
+			vertices.add_normal_attributes(get_float_vec_attribute<3>(attribute));
 		}
 		else if(attribute_name_str.find("TEXCOORD_") != std::string::npos) //vec2
 		{
-			vertices.add_texture_coordinates_attributes(get_vec2_attribute(attribute));
+			vertices.add_texture_coordinates_attributes(get_float_vec_attribute<2>(attribute));
 		}
 		else if(attribute_name_str.find("COLOR_") != std::string::npos) //vec3 ou vec4
 		{
 			if(gltf::get_type_str(accessor.type) == "VEC3")
 			{
-				vertices.add_color_attributes(get_vec3_attribute(attribute));
+				vertices.add_color_attributes(vec3_to_vec4_colors(get_float_vec_attribute<3>(attribute)));
 			}
 			else if(gltf::get_type_str(accessor.type) == "VEC4")
 			{
-				std::cout << "****ERROR****: Only VEC3 is handled for now!\n";
+				vertices.add_color_attributes(get_vec4_color_attribute(attribute));
 			}
 		}
 		else
@@ -333,7 +301,7 @@ void Model::load_meshes()
 			}
 			std::cout << std::endl;*/
 
-			/*for(const Mesh::Vertex& v : vertices.vertices_)
+			/*for(const Vertices::Vertex& v : vertices.vertices_)
 			{
 				std::cout << "Position : (.x: " << v.position_.x << ", .y: " << v.position_.y << ", .z: " << v.position_.z << ")\n";
 				std::cout << "Normal : (.x: " << v.normal_.x << ", .y: " << v.normal_.y << ", .z: " << v.normal_.z << ")\n";

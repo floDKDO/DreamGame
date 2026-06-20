@@ -33,7 +33,7 @@ void Vertices::add_texture_coordinates_attributes(std::vector<glm::vec2> texture
 	has_texture_coordinates_ = true;
 }
 
-void Vertices::add_color_attributes(std::vector<glm::vec3> color_vector)
+void Vertices::add_color_attributes(std::vector<glm::vec4> color_vector)
 {
 	for(std::size_t i = 0; i < vertices_.size(); ++i)
 	{

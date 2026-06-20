@@ -62,7 +62,7 @@ void Mesh::create_vao()
 
 	if(vertices_.has_colors_)
 	{
-		load_vertex_attribute(vbo_binding_index, Vertices::AttributeIndex::Color, 3);
+		load_vertex_attribute(vbo_binding_index, Vertices::AttributeIndex::Color, 4);
 	}
 }
 

@@ -3,19 +3,11 @@
 #include <stb/stb_image.h>
 #include <glm/gtc/type_ptr.hpp>
 #include <iostream>
-#include <filesystem>
-
-//TODO : voir pour les variables d'environnement des librairies
-/*
-#define GLM_FORCE_SILENT_WARNINGS => OK
-*/
 
 Game::Game()
 	: sdl_(), window_(), glew_(glewInit()), shader_program_(), 
 	camera_position_(glm::vec3(0.0f)), model_(glm::mat4(1.0f)), view_(glm::mat4(1.0f)), running_(true), gamepad_(), temp_model_("resources/models/stairs_y_up.gltf")
 {
-	std::cout << std::filesystem::current_path() << std::endl;
-
 	glViewport(0, 0, 2560, 1440);
 	glEnable(GL_DEPTH_TEST);
 	stbi_set_flip_vertically_on_load(true);

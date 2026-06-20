@@ -3,9 +3,9 @@
 layout (location = 0) in vec3 position_;
 layout (location = 1) in vec3 normal_;
 layout (location = 2) in vec2 texture_coordinates_;
-layout (location = 3) in vec3 color_;
+layout (location = 3) in vec4 color_;
 
-out vec3 output_color_;
+out vec4 output_color_;
 out vec2 output_text_coord_;
 
 uniform mat4 model;
