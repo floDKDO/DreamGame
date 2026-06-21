@@ -23,8 +23,8 @@ void Model::open_gltf_file()
 	tg3_parse_options opts;
 	tg3_parse_options_init(&opts);
 	tg3_error_stack_init(&errors_);
-
-	tg3_error_code err = tg3_parse_file(&model_, &errors_, path_.c_str(), 30, &opts);
+	
+	tg3_error_code err = tg3_parse_file(&model_, &errors_, path_.c_str(), 30, &opts); //TODO : hardcodé (30)
 	if(err != TG3_OK)
 	{
 		for(uint32_t i = 0; i < errors_.count; i++)
@@ -103,7 +103,15 @@ void Model::print_info_gltf() const
 	{
 		tg3_image image = model_.images[i];
 		std::cout << "- Image " << i << ": " << std::endl;
-		std::cout << "   .URI = " << image.uri.data << std::endl;
+		if(image.uri.len > 0)
+		{
+			std::cout << "   .URI = " << image.uri.data << std::endl;
+		}
+		if(image.buffer_view != -1)
+		{
+			std::cout << "   .Buffer view = " << image.buffer_view << std::endl;
+			std::cout << "   .Mime type = " << image.mime_type.data << std::endl;
+		}
 	}
 
 	std::cout << "*********************************************************************************************\n\n";
@@ -266,7 +274,32 @@ void Model::load_meshes()
 		tg3_sampler sampler = model_.samplers[texture.sampler];
 
 		mesh_texture.texture_index_ = i;
-		mesh_texture.image_path_ = "resources/models/" + std::string(image.uri.data); 
+		if(image.buffer_view == -1)
+		{
+			std::string image_str = std::string(image.uri.data);
+			if(image_str.find("data:") != std::string::npos)
+			{
+				std::string image_data_base64 = image_str.substr(image_str.find(',') + 1); //+1 pour ne pas prendre la virgule
+				std::cout << "****ERROR****: Embedded GLTF not handled for now!\n";
+			}
+			else
+			{
+				mesh_texture.image_path_ = "resources/models/" + image_str;
+			}
+		}
+		else
+		{
+			mesh_texture.image_path_ = "";
+			tg3_buffer_view buffer_view = model_.buffer_views[image.buffer_view];
+			tg3_buffer buffer = model_.buffers[buffer_view.buffer];
+			mesh_texture.image_data_.reserve(buffer_view.byte_length);
+
+			//std::copy(buffer.data.data, buffer.data.data + buffer_view.byte_length, std::back_inserter(mesh_texture.image_data_)); //TODO : "meilleure syntaxe"
+			for(uint64_t j = 0; j < buffer_view.byte_length; ++j)
+			{
+				mesh_texture.image_data_.push_back(buffer.data.data[buffer_view.byte_offset + j]);
+			}
+		}
 		mesh_texture.min_filter_ = sampler.min_filter;
 		mesh_texture.mag_filter_ = sampler.mag_filter;
 		mesh_texture.wrap_s_ = sampler.wrap_s;

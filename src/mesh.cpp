@@ -47,22 +47,22 @@ void Mesh::create_vao()
 
 	if(vertices_.has_positions_)
 	{
-		load_vertex_attribute(vbo_binding_index, Vertices::AttributeIndex::Position, 3);
+		load_vertex_attribute(vbo_binding_index, Vertices::AttributeIndex::POSITION, 3);
 	}
 
 	if(vertices_.has_normals_)
 	{
-		load_vertex_attribute(vbo_binding_index, Vertices::AttributeIndex::Normal, 3);
+		load_vertex_attribute(vbo_binding_index, Vertices::AttributeIndex::NORMAL, 3);
 	}
 
 	if(vertices_.has_texture_coordinates_)
 	{
-		load_vertex_attribute(vbo_binding_index, Vertices::AttributeIndex::TextureCoord, 2);
+		load_vertex_attribute(vbo_binding_index, Vertices::AttributeIndex::TEXTURE_COORD, 2);
 	}
 
 	if(vertices_.has_colors_)
 	{
-		load_vertex_attribute(vbo_binding_index, Vertices::AttributeIndex::Color, 4);
+		load_vertex_attribute(vbo_binding_index, Vertices::AttributeIndex::COLOR, 4);
 	}
 }
 
@@ -79,15 +79,25 @@ void Mesh::create_textures()
 
 		int width, height, channels;
 		unsigned char* pixels;
-		if((pixels = stbi_load(t.texture_info_.image_path_.c_str(), &width, &height, &channels, 4)) == nullptr) //4 pour que ça crashe pas pour une image RGB uniquement (ex : .jpg)
+		if(!t.texture_info_.image_path_.empty())
 		{
-			std::cerr << "Error (stbi_load)\n";
-			exit(EXIT_FAILURE);
+			if((pixels = stbi_load(t.texture_info_.image_path_.c_str(), &width, &height, &channels, 4)) == nullptr) //4 pour que ça crashe pas pour une image RGB uniquement (ex : .jpg)
+			{
+				std::cerr << "Error (stbi_load)\n";
+				exit(EXIT_FAILURE);
+			}
 		}
-
+		else
+		{
+			if((pixels = stbi_load_from_memory(t.texture_info_.image_data_.data(), t.texture_info_.image_data_.size(), &width, &height, &channels, 4)) == nullptr) //4 pour que ça crashe pas pour une image RGB uniquement (ex : .jpg)
+			{
+				std::cerr << "Error (stbi_load)\n";
+				exit(EXIT_FAILURE);
+			}
+		}
 		glGenerateTextureMipmap(t.texture_id_);
 		glTextureStorage2D(t.texture_id_, 1, GL_RGBA8, width, height); //TODO : 1 = number of texture levels => utiliser une autre valeur ?
-		glTextureSubImage2D(t.texture_id_, 0, 0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, pixels); 
+		glTextureSubImage2D(t.texture_id_, 0, 0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
 		stbi_image_free(pixels);
 	}
 }

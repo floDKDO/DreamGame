@@ -10,6 +10,7 @@ struct Texture
 	{
 		GLuint texture_index_;
 		std::string image_path_;
+		std::vector<unsigned char> image_data_;
 		GLint mag_filter_;
 		GLint min_filter_;
 		GLint wrap_s_;
