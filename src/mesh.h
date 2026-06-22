@@ -2,18 +2,16 @@
 #include "texture.h"
 #include "vertices.h"
 
-#include <glm/vec3.hpp>
-#include <glm/vec2.hpp>
 #include <glm/mat4x4.hpp>
 
 class Mesh
 {
 	public: 
-		Mesh(std::vector<GLushort> ebo_values, Vertices vertices, std::vector<Texture::TextureInfo> textures_info, glm::mat4 transformation_matrix, GLenum draw_mode);
+		Mesh(std::vector<GLushort> ebo_values, Vertices vertices, std::vector<Texture> textures, glm::mat4 transformation_matrix, GLenum draw_mode);
 		void draw(ShaderProgram& shader_progam);
 
 	private:
-		void load_vertex_attribute(GLuint vbo_binding_index, Vertices::AttributeIndex attribute_index, GLint size);
+		void load_vertex_attribute(GLuint vbo_binding_index, Vertices::AttributeIndex attribute_index);
 		void create_ebo();
 		void create_vbo();
 		void create_vao();

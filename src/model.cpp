@@ -24,7 +24,7 @@ void Model::open_gltf_file()
 	tg3_parse_options_init(&opts);
 	tg3_error_stack_init(&errors_);
 	
-	tg3_error_code err = tg3_parse_file(&model_, &errors_, path_.c_str(), 30, &opts); //TODO : hardcodé (30)
+	tg3_error_code err = tg3_parse_file(&model_, &errors_, path_.c_str(), uint32_t(path_.length()), &opts); 
 	if(err != TG3_OK)
 	{
 		for(uint32_t i = 0; i < errors_.count; i++)
@@ -105,9 +105,9 @@ void Model::print_info_gltf() const
 		std::cout << "- Image " << i << ": " << std::endl;
 		if(image.uri.len > 0)
 		{
-			std::cout << "   .URI = " << image.uri.data << std::endl;
+			std::cout << "   .URI " << "(Data URI: " << std::boolalpha << bool(tg3_is_data_uri(image.uri.data, image.uri.len)) << std::noboolalpha << ") = " << image.uri.data << std::endl;
 		}
-		if(image.buffer_view != -1)
+		else if(image.buffer_view != -1)
 		{
 			std::cout << "   .Buffer view = " << image.buffer_view << std::endl;
 			std::cout << "   .Mime type = " << image.mime_type.data << std::endl;
@@ -139,11 +139,9 @@ std::vector<GLushort> Model::get_ebo_values(const tg3_primitive& primitive) cons
 	std::vector<GLushort> ebo_value;
 	ebo_value.reserve(accessor.count);
 
-	//affiche tous les indices => devront être stockés dans un EBO 
 	for(uint64_t i = buffer_view.byte_offset; i < buffer_view.byte_offset + buffer_view.byte_length; i += sizeof(GLushort))
 	{
 		GLushort indice_value = (buffer.data.data[i + 1] << 8) | buffer.data.data[i]; //=> little-endian
-		//std::cout << +indice_value << std::endl; //"+" pour que l'élément ne soit pas considéré comme un char mais comme un int
 		ebo_value.push_back(indice_value);
 	}
 	return ebo_value;
@@ -217,7 +215,7 @@ std::vector<glm::vec4> Model::vec3_to_vec4_colors(std::vector<glm::vec3> vector)
 	vector_vec4.reserve(vector.size());
 	for(const glm::vec3& v : vector)
 	{
-		vector_vec4.push_back(glm::vec4(v, 1.0f));
+		vector_vec4.push_back(glm::vec4(v, 1.0f)); //1.0f = alpha
 	}
 	return vector_vec4;
 }
@@ -265,21 +263,22 @@ Vertices Model::get_vertices(const tg3_primitive& primitive)
 
 void Model::load_meshes()
 {
-	std::vector<Texture::TextureInfo> textures;
+	std::vector<Texture> textures;
 	for(uint32_t i = 0; i < model_.textures_count; ++i)
 	{
-		Texture::TextureInfo mesh_texture;
+		Texture mesh_texture;
 		tg3_texture texture = model_.textures[i];
 		tg3_image image = model_.images[texture.source];
 		tg3_sampler sampler = model_.samplers[texture.sampler];
 
-		mesh_texture.texture_index_ = i;
+		mesh_texture.texture_unit_ = i;
 		if(image.buffer_view == -1)
 		{
 			std::string image_str = std::string(image.uri.data);
-			if(image_str.find("data:") != std::string::npos)
+			if(bool(tg3_is_data_uri(image.uri.data, image.uri.len)))
 			{
-				std::string image_data_base64 = image_str.substr(image_str.find(',') + 1); //+1 pour ne pas prendre la virgule
+				mesh_texture.image_path_ = "";
+				//std::string image_data_base64 = image_str.substr(image_str.find(',') + 1); //+1 pour ne pas prendre la virgule
 				std::cout << "****ERROR****: Embedded GLTF not handled for now!\n";
 			}
 			else
@@ -294,7 +293,7 @@ void Model::load_meshes()
 			tg3_buffer buffer = model_.buffers[buffer_view.buffer];
 			mesh_texture.image_data_.reserve(buffer_view.byte_length);
 
-			//std::copy(buffer.data.data, buffer.data.data + buffer_view.byte_length, std::back_inserter(mesh_texture.image_data_)); //TODO : "meilleure syntaxe"
+			//std::copy(buffer.data.data, buffer.data.data + buffer_view.byte_length, std::back_inserter(mesh_texture.image_data_)); //TODO : mieux que la boucle for suivante ?
 			for(uint64_t j = 0; j < buffer_view.byte_length; ++j)
 			{
 				mesh_texture.image_data_.push_back(buffer.data.data[buffer_view.byte_offset + j]);
@@ -311,7 +310,7 @@ void Model::load_meshes()
 	for(uint32_t i = 0; i < model_.nodes_count; ++i)
 	{
 		tg3_node node = model_.nodes[i];
-		if(gltf::is_1d_matrix_identity(node.matrix))
+		if(gltf::is_1d_matrix_identity(node.matrix)) //=> ignorer la matrice si elle est la matrice identité
 		{
 			nodes_.push_back(Node(node.mesh, node.rotation, node.scale, node.translation));
 		}
@@ -334,13 +333,7 @@ void Model::load_meshes()
 			}
 			std::cout << std::endl;*/
 
-			/*for(const Vertices::Vertex& v : vertices.vertices_)
-			{
-				std::cout << "Position : (.x: " << v.position_.x << ", .y: " << v.position_.y << ", .z: " << v.position_.z << ")\n";
-				std::cout << "Normal : (.x: " << v.normal_.x << ", .y: " << v.normal_.y << ", .z: " << v.normal_.z << ")\n";
-				std::cout << "Texture coordinates : (.x: " << v.texture_coordinates_.x << ", .y: " << v.texture_coordinates_.y << ")\n";
-				std::cout << "Color : (.x: " << v.color_.x << ", .y: " << v.color_.y << ", .z: " << v.color_.z << ")\n";
-			}*/
+			//vertices.print();
 		}
 	}
 }

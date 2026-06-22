@@ -7,6 +7,8 @@ layout (location = 3) in vec4 color_;
 
 out vec4 output_color_;
 out vec2 output_text_coord_;
+out vec3 output_normal_;
+out vec3 world_position_;
 
 uniform mat4 model;
 uniform mat4 view;
@@ -19,4 +21,6 @@ void main()
 	gl_Position = projection * view * model * transformation_matrix * vec4(position_, 1.0f);
 	output_color_ = color_;
 	output_text_coord_ = texture_coordinates_;
+	output_normal_ = mat3(transpose(inverse(model))) * normal_;
+	world_position_ = vec3(model * vec4(position_, 1.0f));
 }

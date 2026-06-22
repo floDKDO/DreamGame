@@ -1,6 +1,7 @@
 #pragma once
 
 #include <GL/glew.h>
+#include <glm/vec3.hpp>
 #include <vector>
 #include <string>
 #include <string_view>
@@ -23,6 +24,7 @@ class ShaderProgram
 		void set_uniform_1f(const GLchar* name, GLfloat value);
 		void set_uniform_1i(const GLchar* name, GLint value);
 		void set_uniform_matrix_4fv(const GLchar* name, const GLfloat* value);
+		void set_uniform_3f(const GLchar* name, glm::vec3 v);
 
 	private:
 		void insert_uniform(const GLchar* name);

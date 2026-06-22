@@ -112,3 +112,9 @@ void ShaderProgram::set_uniform_matrix_4fv(const GLchar* name, const GLfloat* va
 	insert_uniform(name);
 	glUniformMatrix4fv(uniforms_.at(std::string(name)), 1, GL_FALSE, value);
 }
+
+void ShaderProgram::set_uniform_3f(const GLchar* name, glm::vec3 v)
+{
+	insert_uniform(name);
+	glUniform3f(uniforms_.at(std::string(name)), v.x, v.y, v.z);
+}
