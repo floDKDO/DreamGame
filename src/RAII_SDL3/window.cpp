@@ -25,7 +25,7 @@ Window::Window()
 		SDL_Log("(SDL_GL_SetAttribute) %s\n", SDL_GetError());
 	}
 
-	if((window_ = SDL_CreateWindow("DreamGame", 1280, 720, /*SDL_WINDOW_RESIZABLE | SDL_WINDOW_MAXIMIZED |*/ SDL_WINDOW_OPENGL)) == nullptr)
+	if((window_ = SDL_CreateWindow("DreamGame", 1280, 720, SDL_WINDOW_RESIZABLE | SDL_WINDOW_MAXIMIZED | SDL_WINDOW_OPENGL)) == nullptr)
 	{
 		SDL_Log("(SDL_CreateWindow) %s\n", SDL_GetError());
 	}
@@ -68,6 +68,14 @@ void Window::swap_buffers() const
 	if(!SDL_GL_SwapWindow(window_))
 	{
 		SDL_Log("(SDL_GL_SwapWindow) %s\n", SDL_GetError());
+	}
+}
+
+void Window::get_size(int* w, int* h) const
+{
+	if(!SDL_GetWindowSize(window_, w, h))
+	{
+		SDL_Log("(SDL_GetWindowSize) %s\n", SDL_GetError());
 	}
 }
 

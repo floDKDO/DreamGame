@@ -8,10 +8,13 @@ Game::Game()
 	: sdl_(), window_(), glew_(glewInit()), shader_program_(), 
 	camera_position_(glm::vec3(0.0f)), model_(glm::mat4(1.0f)), view_(glm::mat4(1.0f)), running_(true), gamepad_(), temp_model_("resources/models/texture.gltf")
 {
-	glViewport(0, 0, 2560, 1440);
-	glEnable(GL_DEPTH_TEST);
+	int w, h;
+	window_.get_size(&w, &h); 
+	glViewport(0, 0, w, h);
+
 	stbi_set_flip_vertically_on_load(true);
 
+	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_DEBUG_OUTPUT);
 	glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
 	glDebugMessageCallback(message_callback, nullptr);
@@ -253,6 +256,10 @@ void Game::handle_events()
 	{
 		switch(e.type)
 		{
+			case SDL_EVENT_WINDOW_RESIZED:
+				glViewport(0, 0, e.window.data1, e.window.data2);
+				break;
+
 			case SDL_EVENT_KEY_DOWN:
 			case SDL_EVENT_GAMEPAD_BUTTON_DOWN:
 				if(e.key.key == SDLK_ESCAPE)

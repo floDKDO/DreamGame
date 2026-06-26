@@ -1,7 +1,6 @@
 #pragma once
 
 #include "RAII_SDL3/surface.h"
-#include <string_view>
 
 namespace sdl
 {
@@ -18,6 +17,7 @@ class Window
 
 		SDL_Window* fetch() const;
 		void swap_buffers() const;
+		void get_size(int* w, int* h) const;
 
 	private:
 		SDL_Window* window_;
