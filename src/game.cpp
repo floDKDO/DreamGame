@@ -116,114 +116,15 @@ void GLAPIENTRY message_callback(GLenum source, GLenum type, GLuint id, GLenum s
 
 void Game::run()
 {
-	/*std::vector<Vertex> vertices_cube;
-	vertices_cube.push_back(Vertex(glm::vec3(-0.5f, -0.5f, -0.5f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(0.0f, 0.0f)));
-	vertices_cube.push_back(Vertex(glm::vec3( 0.5f, -0.5f, -0.5f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(1.0f, 0.0f)));
-	vertices_cube.push_back(Vertex(glm::vec3( 0.5f,  0.5f, -0.5f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(1.0f, 1.0f)));
-	vertices_cube.push_back(Vertex(glm::vec3( 0.5f,  0.5f, -0.5f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(1.0f, 1.0f)));
-	vertices_cube.push_back(Vertex(glm::vec3(-0.5f,  0.5f, -0.5f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(0.0f, 1.0f)));
-	vertices_cube.push_back(Vertex(glm::vec3(-0.5f, -0.5f, -0.5f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(0.0f, 0.0f)));
+	//model_ = glm::rotate(model_, glm::radians(0.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 
-	vertices_cube.push_back(Vertex(glm::vec3(-0.5f, -0.5f, 0.5f),  glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(0.0f, 0.0f)));
-	vertices_cube.push_back(Vertex(glm::vec3( 0.5f, -0.5f, 0.5f),  glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(1.0f, 0.0f)));
-	vertices_cube.push_back(Vertex(glm::vec3( 0.5f,  0.5f, 0.5f),  glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(1.0f, 1.0f)));
-	vertices_cube.push_back(Vertex(glm::vec3( 0.5f,  0.5f, 0.5f),  glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(1.0f, 1.0f)));
-	vertices_cube.push_back(Vertex(glm::vec3(-0.5f,  0.5f, 0.5f),  glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(0.0f, 1.0f)));
-	vertices_cube.push_back(Vertex(glm::vec3(-0.5f, -0.5f, 0.5f),  glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(0.0f, 0.0f)));
+	camera_position_ = glm::vec3(0.0f, 0.5f, 5.0f);
+	view_ = look_at(camera_position_, camera_position_ + glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 
-	vertices_cube.push_back(Vertex(glm::vec3(-0.5f,  0.5f,  0.5f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(1.0f, 0.0f)));
-	vertices_cube.push_back(Vertex(glm::vec3(-0.5f,  0.5f, -0.5f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(1.0f, 1.0f)));
-	vertices_cube.push_back(Vertex(glm::vec3(-0.5f, -0.5f, -0.5f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(0.0f, 1.0f)));
-	vertices_cube.push_back(Vertex(glm::vec3(-0.5f, -0.5f, -0.5f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(0.0f, 1.0f)));
-	vertices_cube.push_back(Vertex(glm::vec3(-0.5f, -0.5f,  0.5f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(0.0f, 0.0f)));
-	vertices_cube.push_back(Vertex(glm::vec3(-0.5f,  0.5f,  0.5f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(1.0f, 0.0f)));
-
-	vertices_cube.push_back(Vertex(glm::vec3(0.5f,  0.5f,  0.5f),  glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(1.0f, 0.0f)));
-	vertices_cube.push_back(Vertex(glm::vec3(0.5f,  0.5f, -0.5f),  glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(1.0f, 1.0f)));
-	vertices_cube.push_back(Vertex(glm::vec3(0.5f, -0.5f, -0.5f),  glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(0.0f, 1.0f)));
-	vertices_cube.push_back(Vertex(glm::vec3(0.5f, -0.5f, -0.5f),  glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(0.0f, 1.0f)));
-	vertices_cube.push_back(Vertex(glm::vec3(0.5f, -0.5f,  0.5f),  glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(0.0f, 0.0f)));
-	vertices_cube.push_back(Vertex(glm::vec3(0.5f,  0.5f,  0.5f),  glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(1.0f, 0.0f)));
-
-	vertices_cube.push_back(Vertex(glm::vec3(-0.5f, -0.5f, -0.5f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(0.0f, 1.0f)));
-	vertices_cube.push_back(Vertex(glm::vec3( 0.5f, -0.5f, -0.5f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(1.0f, 1.0f)));
-	vertices_cube.push_back(Vertex(glm::vec3( 0.5f, -0.5f,  0.5f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(1.0f, 0.0f)));
-	vertices_cube.push_back(Vertex(glm::vec3( 0.5f, -0.5f,  0.5f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(1.0f, 0.0f)));
-	vertices_cube.push_back(Vertex(glm::vec3(-0.5f, -0.5f,  0.5f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(0.0f, 0.0f)));
-	vertices_cube.push_back(Vertex(glm::vec3(-0.5f, -0.5f, -0.5f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(0.0f, 1.0f)));
-
-	vertices_cube.push_back(Vertex(glm::vec3(-0.5f, 0.5f, -0.5f),  glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(0.0f, 1.0f)));
-	vertices_cube.push_back(Vertex(glm::vec3( 0.5f, 0.5f, -0.5f),  glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(1.0f, 1.0f)));
-	vertices_cube.push_back(Vertex(glm::vec3( 0.5f, 0.5f,  0.5f),  glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(1.0f, 0.0f)));
-	vertices_cube.push_back(Vertex(glm::vec3( 0.5f, 0.5f,  0.5f),  glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(1.0f, 0.0f)));
-	vertices_cube.push_back(Vertex(glm::vec3(-0.5f, 0.5f,  0.5f),  glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(0.0f, 0.0f)));
-	vertices_cube.push_back(Vertex(glm::vec3(-0.5f, 0.5f, -0.5f),  glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(0.0f, 1.0f)));
-
-	GLuint vbo_cube;
-	glCreateBuffers(1, &vbo_cube);
-	glNamedBufferStorage(vbo_cube, vertices_cube.size() * sizeof(vertices_cube[0]), vertices_cube.data(), GL_DYNAMIC_STORAGE_BIT);
-
-	GLuint vao_cube;
-	glCreateVertexArrays(1, &vao_cube);
-	glBindVertexArray(vao_cube);
-	glVertexArrayVertexBuffer(vao_cube, 0, vbo_cube, 0, sizeof(Vertex));
-	glEnableVertexArrayAttrib(vao_cube, 0);
-	glVertexArrayAttribFormat(vao_cube, 0, 3, GL_FLOAT, GL_FALSE, offsetof(Vertex, position_));
-	glVertexArrayAttribBinding(vao_cube, 0, 0);
-	glEnableVertexArrayAttrib(vao_cube, 1);
-	glVertexArrayAttribFormat(vao_cube, 1, 3, GL_FLOAT, GL_FALSE, offsetof(Vertex, color_));
-	glVertexArrayAttribBinding(vao_cube, 1, 0);
-	glEnableVertexArrayAttrib(vao_cube, 2);
-	glVertexArrayAttribFormat(vao_cube, 2, 2, GL_FLOAT, GL_FALSE, offsetof(Vertex, texture_coordinates_));
-	glVertexArrayAttribBinding(vao_cube, 2, 0);
-
-
-	GLuint texture_wall;
-	glCreateTextures(GL_TEXTURE_2D, 1, &texture_wall);
-	glBindTextureUnit(0, texture_wall);
-	glTextureParameteri(texture_wall, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTextureParameteri(texture_wall, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	glTextureParameteri(texture_wall, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTextureParameteri(texture_wall, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-
-
-	int width, height, channels;
-	unsigned char* pixels;
-	if((pixels = stbi_load("resources/images/wall.jpg", &width, &height, &channels, 0)) == nullptr)
-	{
-		std::cerr << "Error (stbi_load)\n";
-		exit(EXIT_FAILURE);
-	}
-	glGenerateTextureMipmap(texture_wall);
-	glTextureStorage2D(texture_wall, 1, GL_RGBA8, width, height);
-	glTextureSubImage2D(texture_wall, 0, 0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, pixels);
-	stbi_image_free(pixels);
-
-	GLuint texture_yuri;
-	glCreateTextures(GL_TEXTURE_2D, 1, &texture_yuri);
-	glBindTextureUnit(1, texture_yuri);
-	glTextureParameteri(texture_yuri, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTextureParameteri(texture_yuri, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	glTextureParameteri(texture_yuri, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTextureParameteri(texture_yuri, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-
-	if((pixels = stbi_load("resources/images/yuri_tea.png", &width, &height, &channels, 0)) == nullptr)
-	{
-		std::cerr << "Error (stbi_load)\n";
-		exit(EXIT_FAILURE);
-	}
-	glGenerateTextureMipmap(texture_yuri);
-	glTextureStorage2D(texture_yuri, 1, GL_RGBA8, width, height);
-	glTextureSubImage2D(texture_yuri, 0, 0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
-	stbi_image_free(pixels);*/
-
-	model_ = glm::rotate(model_, glm::radians(0.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-
-	camera_position_ = glm::vec3(0.0f, 1.0f, 10.0f);
-	view_ = look_at(camera_position_, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-
+	int w, h;
+	window_.get_size(&w, &h);
 	glm::mat4 projection = glm::mat4(1.0f);
-	projection = glm::perspective(glm::radians(45.0f), 1280.0f / 720.0f, 0.1f, 1000.0f);
+	projection = glm::perspective(glm::radians(45.0f), float(w) / float(h), 0.1f, 100.0f);
 
 	shader_program_.create_shader(GL_VERTEX_SHADER, "resources/shaders/base_shader.vert");
 	shader_program_.create_shader(GL_FRAGMENT_SHADER, "resources/shaders/base_shader.frag");
@@ -242,11 +143,6 @@ void Game::run()
 		update();
 		draw();
 	}
-
-	/*glDeleteVertexArrays(1, &vao_cube);
-	glDeleteBuffers(1, &vbo_cube);
-	glDeleteTextures(1, &texture_wall);
-	glDeleteTextures(1, &texture_yuri);*/
 }
 
 void Game::handle_events()
