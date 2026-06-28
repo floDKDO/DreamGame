@@ -6,11 +6,14 @@
 
 Game::Game()
 	: sdl_(), window_(), glew_(glewInit()), shader_program_(), 
-	camera_position_(glm::vec3(0.0f)), model_(glm::mat4(1.0f)), view_(glm::mat4(1.0f)), running_(true), gamepad_(), temp_model_("resources/models/texture.gltf")
+	camera_position_(glm::vec3(0.0f)), camera_front_(glm::vec3(0.0f, 0.0f, -1.0f)), euler_angles_(), mouse_info_(), right_joystick_info_(),
+	model_(glm::mat4(1.0f)), view_(glm::mat4(1.0f)), running_(true), gamepad_(), temp_model_("resources/models/texture.gltf")
 {
 	int w, h;
 	window_.get_size(&w, &h); 
 	glViewport(0, 0, w, h);
+
+	SDL_SetWindowRelativeMouseMode(window_.fetch(), true);
 
 	stbi_set_flip_vertically_on_load(true);
 
@@ -119,7 +122,7 @@ void Game::run()
 	//model_ = glm::rotate(model_, glm::radians(0.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 
 	camera_position_ = glm::vec3(0.0f, 0.5f, 5.0f);
-	view_ = look_at(camera_position_, camera_position_ + glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+	view_ = look_at(camera_position_, camera_position_ + camera_front_, glm::vec3(0.0f, 1.0f, 0.0f));
 
 	int w, h;
 	window_.get_size(&w, &h);
@@ -267,6 +270,18 @@ void Game::handle_events()
 						}
 					}
 				}
+				if(e.gaxis.axis == SDL_GAMEPAD_AXIS_RIGHTX)
+				{
+					right_joystick_info_.x_axis_ = e.gaxis.value;
+				}
+				if(e.gaxis.axis == SDL_GAMEPAD_AXIS_RIGHTY)
+				{
+					right_joystick_info_.y_axis_ = e.gaxis.value;
+				}
+				break;
+
+			case SDL_EVENT_MOUSE_MOTION:
+				mouse_info_.set_info(e.motion.x, e.motion.y, e.motion.xrel, e.motion.yrel);
 				break;
 
 			case SDL_EVENT_WINDOW_CLOSE_REQUESTED:
@@ -295,12 +310,98 @@ void Game::draw()
 	window_.swap_buffers();
 }
 
+template<typename Arithmetic1, typename Arithmetic2, typename Arithmetic3>
+double lerp(Arithmetic1 a, Arithmetic2 b, Arithmetic3 t) //TODO : à terme, remplacer par la fonction std::lerp de C++20
+{
+	double a_d = static_cast<double>(a);
+	double b_d = static_cast<double>(b);
+	double t_d = static_cast<double>(t);
+
+	return a_d + t_d * (b_d - a_d);
+}
+
 void Game::update()
 {
+	//TODO : créer une fonction pour le code suivant
+	static Uint64 last_time = 0, current_time = 0;
+	current_time = SDL_GetTicks();
+	if(!gamepad_.is_open() && current_time > last_time + 1000) //tester une fois par seconde
+	{
+		gamepad_.open();
+		last_time = current_time;
+	}
+
+	static bool should_reset = false;
+	static float saved_yaw = euler_angles_.yaw_;
+	static float saved_pitch = euler_angles_.pitch_;
+	static float temp = 0.0f;
+	//TODO : rencentrer la vue sur 0 si aucun mouvement de la caméra ??
+	if(mouse_info_.is_mouse_moving_)
+	{
+		calculate_euler_angles(CameraRotationSource::MOUSE);
+		should_reset = true;
+		saved_yaw = euler_angles_.yaw_;
+		saved_pitch = euler_angles_.pitch_;
+		temp = 0.0f;
+
+	}
+	else if(abs(right_joystick_info_.x_axis_) > sdl::Gamepad::joystick_deadzone_ 
+	     || abs(right_joystick_info_.y_axis_) > sdl::Gamepad::joystick_deadzone_)
+	{
+		calculate_euler_angles(CameraRotationSource::GAMEPAD);
+		should_reset = true;
+		saved_yaw = euler_angles_.yaw_;
+		saved_pitch = euler_angles_.pitch_;
+		temp = 0.0f;
+	}
+	else
+	{
+		//std::cout << "YAW: " << euler_angles_.yaw_ << ", PITCH: " << euler_angles_.pitch_ << std::endl;
+		if(should_reset)
+		{
+			
+			//std::cout << lerp(euler_angles_.yaw_, -90.0f, temp) << ", " << lerp(euler_angles_.pitch_, 0.0f, temp) << std::endl;
+
+			float yaw = lerp(saved_yaw, -90.0f, temp);
+			float pitch = lerp(saved_pitch, 0.0f, temp);
+			
+			euler_angles_.yaw_ = yaw;
+			euler_angles_.pitch_ = pitch;
+
+			glm::vec3 front = glm::vec3(
+				cos(glm::radians(yaw)) * cos(glm::radians(pitch)),
+				sin(glm::radians(pitch)),
+				sin(glm::radians(yaw)) * cos(glm::radians(pitch))
+			);
+			camera_front_ = glm::normalize(front);
+			view_ = look_at(camera_position_, camera_position_ + camera_front_, glm::vec3(0.0f, 1.0f, 0.0f));
+			shader_program_.set_uniform_matrix_4fv("view", glm::value_ptr(view_));
+
+			//std::cout << "YAW: " << euler_angles_.yaw_ << ", PITCH: " << euler_angles_.pitch_ << std::endl;
+
+			temp += 0.01f;
+			std::cout << "TEMP: " << temp << ", YAW: " << yaw << ", PITCH: " << pitch << std::endl;
+			if(temp > 1.0f)
+			{
+				temp = 0.0f;
+				should_reset = false;
+				//right_joystick_info_.x_axis_ = 0.0f;
+				//right_joystick_info_.y_axis_ = 0.0f;
+
+				//euler_angles_.yaw_ = yaw;
+				//euler_angles_.pitch_ = pitch;
+
+				//std::cout << right_joystick_info_.x_axis_ << ", " << right_joystick_info_.y_axis_ << std::endl;
+				//std::cout << "YAW: " << euler_angles_.yaw_ << ", PITCH: " << euler_angles_.pitch_ << std::endl;
+			}
+		}
+	}
+
+	//TODO : créer une fonction pour le code suivant
 	if(direction_state_.at(Direction::UP).is_direction_ || direction_state_.at(Direction::DOWN).is_direction_)
 	{
 		if((direction_state_.at(Direction::UP).is_from_joystick_ || direction_state_.at(Direction::DOWN).is_from_joystick_) //Stick relâché (haut, bas)
-		&& abs(gamepad_.get_axis(SDL_GAMEPAD_AXIS_LEFTY)) < gamepad_.joystick_deadzone_)
+		&& abs(gamepad_.get_axis(SDL_GAMEPAD_AXIS_LEFTY)) < sdl::Gamepad::joystick_deadzone_)
 		{
 			if(direction_state_.at(Direction::UP).is_direction_)
 			{
@@ -324,14 +425,14 @@ void Game::update()
 			{
 				camera_position_ -= (direction_state_.at(Direction::DOWN).y_intensity_ * 0.05f) * camera_forward;
 			}
-			view_ = look_at(camera_position_, camera_position_ + glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+			view_ = look_at(camera_position_, camera_position_ + camera_front_, glm::vec3(0.0f, 1.0f, 0.0f));
 		}
 	}
 
 	if(direction_state_.at(Direction::LEFT).is_direction_ || direction_state_.at(Direction::RIGHT).is_direction_)
 	{
 		if((direction_state_.at(Direction::LEFT).is_from_joystick_ || direction_state_.at(Direction::RIGHT).is_from_joystick_) //Stick relâché (gauche, droite)
-		&& abs(gamepad_.get_axis(SDL_GAMEPAD_AXIS_LEFTX)) < gamepad_.joystick_deadzone_)
+		&& abs(gamepad_.get_axis(SDL_GAMEPAD_AXIS_LEFTX)) < sdl::Gamepad::joystick_deadzone_)
 		{
 			if(direction_state_.at(Direction::LEFT).is_direction_)
 			{
@@ -355,10 +456,56 @@ void Game::update()
 			{
 				camera_position_ -= (direction_state_.at(Direction::RIGHT).x_intensity_ * 0.05f) * camera_left;
 			}
-			view_ = look_at(camera_position_, camera_position_ + glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+			view_ = look_at(camera_position_, camera_position_ + camera_front_, glm::vec3(0.0f, 1.0f, 0.0f));
 		}
 	}
+	camera_position_.y = 0.5f; //TODO : doit être égal à la hauteur du sol
 	shader_program_.set_uniform_3f("view_position_", camera_position_);
+}
+
+void Game::calculate_euler_angles(CameraRotationSource source)
+{
+	if(source == CameraRotationSource::MOUSE)
+	{
+		euler_angles_.yaw_ += (std::min(mouse_info_.x_rel_, 15.0f) / 15.0f); //TODO : hardcodé
+		euler_angles_.pitch_ += (std::min(-mouse_info_.y_rel_, 15.0f) / 15.0f); // "-" pour que le sens soit bon (mettre la souris vers le haut déplace la caméra vers le haut). Enlever "-" pour inverser la caméra
+		mouse_info_.is_mouse_moving_ = false;
+	}
+	else if(source == CameraRotationSource::GAMEPAD)
+	{
+		float sensitivity = 0.5f;
+		euler_angles_.yaw_ += (right_joystick_info_.x_axis_ / SDL_JOYSTICK_AXIS_MAX) * sensitivity;
+		euler_angles_.pitch_ += -(right_joystick_info_.y_axis_ / SDL_JOYSTICK_AXIS_MAX) * sensitivity; // "-" pour que le sens soit bon (mettre la souris vers le haut déplace la caméra vers le haut). Enlever "-" pour inverser la caméra
+	}
+
+	//TODO : std::max/std::min/std::clamp ?
+	if(euler_angles_.pitch_ > 25.0f)
+	{
+		euler_angles_.pitch_ = 25.0f;
+	}
+	else if(euler_angles_.pitch_ < -25.0f)
+	{
+		euler_angles_.pitch_ = -25.0f;
+	}
+
+	//TODO : std::max/std::min/std::clamp ?
+	if(euler_angles_.yaw_ > -50.0f)
+	{
+		euler_angles_.yaw_ = -50.0f;
+	}
+	else if(euler_angles_.yaw_ < -130.0f)
+	{
+		euler_angles_.yaw_ = -130.0f;
+	}
+
+	glm::vec3 front = glm::vec3(
+		cos(glm::radians(euler_angles_.yaw_)) * cos(glm::radians(euler_angles_.pitch_)),
+		sin(glm::radians(euler_angles_.pitch_)),
+		sin(glm::radians(euler_angles_.yaw_)) * cos(glm::radians(euler_angles_.pitch_))
+	);
+	camera_front_ = glm::normalize(front);
+	view_ = look_at(camera_position_, camera_position_ + camera_front_, glm::vec3(0.0f, 1.0f, 0.0f));
+	shader_program_.set_uniform_matrix_4fv("view", glm::value_ptr(view_));
 }
 
 glm::mat4 Game::look_at(glm::vec3 camera_position, glm::vec3 camera_target_position, glm::vec3 up_vector) const

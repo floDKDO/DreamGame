@@ -30,6 +30,16 @@ Window::Window()
 		SDL_Log("(SDL_CreateWindow) %s\n", SDL_GetError());
 	}
 
+	//TODO : voir si je garde
+	if(!SDL_SetHint(SDL_HINT_MOUSE_RELATIVE_CURSOR_VISIBLE, "1"))
+	{
+		SDL_Log("(SDL_SetHint) %s\n", SDL_GetError());
+	}
+	if(!SDL_SetHint(SDL_HINT_MOUSE_RELATIVE_MODE_CENTER, "0"))
+	{
+		SDL_Log("(SDL_SetHint) %s\n", SDL_GetError());
+	}
+
 	if((context_ = SDL_GL_CreateContext(window_)) == nullptr)
 	{
 		SDL_Log("(SDL_GL_CreateContext) %s\n", SDL_GetError());
