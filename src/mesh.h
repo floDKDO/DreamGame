@@ -1,3 +1,5 @@
+#pragma once
+
 #include "shader_program.h"
 #include "texture.h"
 #include "vertices.h"

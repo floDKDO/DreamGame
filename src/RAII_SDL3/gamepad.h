@@ -8,6 +8,12 @@ namespace sdl
 class Gamepad
 {
 	public:
+		enum class JoystickAxis
+		{
+			X_AXIS,
+			Y_AXIS
+		};
+
 		Gamepad(); //SDL_OpenGamepad
 		Gamepad(const Gamepad& gamepad) = delete;
 		Gamepad(Gamepad&& gamepad) = delete;
