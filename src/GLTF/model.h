@@ -1,6 +1,6 @@
 #pragma once
 
-#include "mesh.h"
+#include "Render/mesh.h"
 #include "gltf.h"
 
 #include <tinygltf/tiny_gltf_v3.h>

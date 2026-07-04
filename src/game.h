@@ -2,8 +2,8 @@
 
 #include "RAII_SDL3/sdl.h"
 #include "RAII_SDL3/window.h"
-#include "model.h"
-#include "camera.h"
+#include "GLTF/model.h"
+#include "Camera/camera.h"
 
 class Game
 {
