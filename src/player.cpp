@@ -1,15 +1,23 @@
-#include "camera_movement.h"
+#include "player.h"
+#include "utils.h"
 
+#include <glm/gtc/type_ptr.hpp>
 #include <iostream>
 
-const float CameraMovement::max_movement_intensity_ = 1.0f;
+const float Player::max_movement_intensity_ = 1.0f;
 
-CameraMovement::CameraMovement(glm::mat4& view, glm::vec3& camera_position, glm::vec3& camera_front)
-	: camera_position_(camera_position), camera_front_(camera_front), view_(view), is_arrow_key_pressed_(false), is_pad_pressed_(false),
-	is_movement_from_joystick_(false), x_movement_intensity_(0.0f), y_movement_intensity_(0.0f)
+Player::Player(glm::mat4& view_matrix)
+	: view_matrix_(view_matrix), model_("resources/models/capsule.glb"), position_(glm::vec3(0.0f, 0.0f, 0.0f)), 
+	is_arrow_key_pressed_(false), is_pad_pressed_(false), is_movement_from_joystick_(false), 
+	x_movement_intensity_(0.0f), y_movement_intensity_(0.0f)
 {}
 
-void CameraMovement::set_key_direction_active(Direction direction) //arrow keys + pad
+void Player::draw(ShaderProgram& shader_program)
+{
+	model_.draw(shader_program);
+}
+
+void Player::set_key_direction_active(Direction direction) //arrow keys + pad
 {
 	//Annuler la direction si on appuie à la fois sur le clavier et le pad de la manette
 	if(is_pad_pressed_ && is_arrow_key_pressed_)
@@ -61,7 +69,7 @@ void CameraMovement::set_key_direction_active(Direction direction) //arrow keys 
 	is_movement_from_joystick_ = false;
 }
 
-void CameraMovement::set_key_direction_inactive(Direction direction) //arrow keys + pad
+void Player::set_key_direction_inactive(Direction direction) //arrow keys + pad
 {
 	is_movement_from_joystick_ = false;
 	if(direction == Direction::UP || direction == Direction::DOWN)
@@ -74,7 +82,7 @@ void CameraMovement::set_key_direction_inactive(Direction direction) //arrow key
 	}
 }
 
-void CameraMovement::set_direction_joystick(Sint16 axis_value, sdl::Gamepad::JoystickAxis joystick_axis)
+void Player::set_direction_joystick(Sint16 axis_value, sdl::Gamepad::JoystickAxis joystick_axis)
 {
 	is_movement_from_joystick_ = true;
 	if(joystick_axis == sdl::Gamepad::JoystickAxis::X_AXIS)
@@ -87,30 +95,30 @@ void CameraMovement::set_direction_joystick(Sint16 axis_value, sdl::Gamepad::Joy
 	}
 }
 
-void CameraMovement::handle_events(const SDL_Event& e)
+void Player::handle_events(const SDL_Event& e)
 {
 	switch(e.type)
 	{
 		case SDL_EVENT_KEY_DOWN:
 			//if(!is_arrow_key_pressed_) //pour avoir le même comportement que SDL_EVENT_GAMEPAD_BUTTON_DOWN qui n'est pas appelé en boucle
 			//{
-				is_arrow_key_pressed_ = true;
-				if(e.key.key == SDLK_UP || e.key.scancode == SDL_SCANCODE_W)
-				{
-					set_key_direction_active(Direction::UP);
-				}
-				if(e.key.key == SDLK_DOWN || e.key.scancode == SDL_SCANCODE_S)
-				{
-					set_key_direction_active(Direction::DOWN);
-				}
-				if(e.key.key == SDLK_LEFT || e.key.scancode == SDL_SCANCODE_A)
-				{
-					set_key_direction_active(Direction::LEFT);
-				}
-				if(e.key.key == SDLK_RIGHT || e.key.scancode == SDL_SCANCODE_D)
-				{
-					set_key_direction_active(Direction::RIGHT);
-				}
+			is_arrow_key_pressed_ = true;
+			if(e.key.key == SDLK_UP || e.key.scancode == SDL_SCANCODE_W)
+			{
+				set_key_direction_active(Direction::UP);
+			}
+			if(e.key.key == SDLK_DOWN || e.key.scancode == SDL_SCANCODE_S)
+			{
+				set_key_direction_active(Direction::DOWN);
+			}
+			if(e.key.key == SDLK_LEFT || e.key.scancode == SDL_SCANCODE_A)
+			{
+				set_key_direction_active(Direction::LEFT);
+			}
+			if(e.key.key == SDLK_RIGHT || e.key.scancode == SDL_SCANCODE_D)
+			{
+				set_key_direction_active(Direction::RIGHT);
+			}
 			//}
 			break;
 
@@ -204,19 +212,20 @@ void CameraMovement::handle_events(const SDL_Event& e)
 	}
 }
 
-void CameraMovement::update()
+void Player::update()
 {
-	//std::cout << x_movement_intensity_ << ", " << y_movement_intensity_ << std::endl;
-
 	if(y_movement_intensity_ != 0.0f)
 	{
-		glm::vec3 camera_forward = glm::vec3(-view_[0][2], -view_[1][2], -view_[2][2]);
-		camera_position_ += (y_movement_intensity_ * 0.05f) * camera_forward; //TODO : hardcodé
+		position_ += (y_movement_intensity_ * 0.05f) * utils::get_camera_forward(view_matrix_); //TODO : hardcodé
 	}
 
 	if(x_movement_intensity_ != 0.0f)
 	{
-		glm::vec3 camera_left = glm::vec3(-view_[0][0], -view_[1][0], -view_[2][0]);
-		camera_position_ -= (x_movement_intensity_ * 0.05f) * camera_left; //TODO : hardcodé
+		position_ -= (x_movement_intensity_ * 0.05f) * utils::get_camera_left(view_matrix_); //TODO : hardcodé
 	}
+
+	position_.y = -1.5f; //TODO : hauteur du sol
+
+	model_.compute_model(position_, -glm::degrees(atan2((x_movement_intensity_ * 0.05f)/* * utils::get_camera_left(view_matrix_).x*/, (y_movement_intensity_ * 0.05f)/* * utils::get_camera_forward(view_matrix_).z*/))
+		, glm::vec3(0.0f, 1.0f, 0.0f));
 }

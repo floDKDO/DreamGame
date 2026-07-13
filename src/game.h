@@ -4,6 +4,7 @@
 #include "RAII_SDL3/window.h"
 #include "GLTF/model.h"
 #include "Camera/camera.h"
+#include "player.h"
 
 class Game
 {
@@ -22,8 +23,9 @@ class Game
 		sdl::Window window_;
 		GLenum glew_;
 		ShaderProgram shader_program_;
-		glm::mat4 model_;
-		glm::mat4 view_;
+		glm::mat4 model_matrix_;
+		glm::mat4 view_matrix_;
+		Player player_;
 		Camera camera_;
 		bool running_;
 		sdl::Gamepad gamepad_;

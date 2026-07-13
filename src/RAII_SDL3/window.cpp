@@ -31,10 +31,10 @@ Window::Window()
 	}
 
 	//TODO : voir si je garde
-	if(!SDL_SetHint(SDL_HINT_MOUSE_RELATIVE_CURSOR_VISIBLE, "1"))
+	/*if(!SDL_SetHint(SDL_HINT_MOUSE_RELATIVE_CURSOR_VISIBLE, "1"))
 	{
 		SDL_Log("(SDL_SetHint) %s\n", SDL_GetError());
-	}
+	}*/
 	if(!SDL_SetHint(SDL_HINT_MOUSE_RELATIVE_MODE_CENTER, "0"))
 	{
 		SDL_Log("(SDL_SetHint) %s\n", SDL_GetError());
@@ -87,6 +87,11 @@ void Window::get_size(int* w, int* h) const
 	{
 		SDL_Log("(SDL_GetWindowSize) %s\n", SDL_GetError());
 	}
+}
+
+SDL_GLContext Window::get_context() const
+{
+	return context_;
 }
 
 }

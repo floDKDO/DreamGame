@@ -1,26 +1,24 @@
 #version 450 core
 
-layout (location = 0) in vec3 position_;
-layout (location = 1) in vec3 normal_;
-layout (location = 2) in vec2 texture_coordinates_;
-layout (location = 3) in vec4 color_;
+layout (location = 0) in vec3 position_attribute_;
+layout (location = 1) in vec3 normal_attribute_;
+layout (location = 2) in vec2 texture_coordinates_attribute_;
+layout (location = 3) in vec4 color_attribute_;
 
-out vec4 output_color_;
-out vec2 output_text_coord_;
-out vec3 output_normal_;
+out vec4 color_;
+out vec2 texture_coordinates_;
+out vec3 normal_;
 out vec3 world_position_;
 
-uniform mat4 model;
-uniform mat4 view;
-uniform mat4 projection;
-
-uniform mat4 transformation_matrix;
+uniform mat4 model_matrix_;
+uniform mat4 view_matrix_;
+uniform mat4 projection_matrix_;
 
 void main()
 {
-	gl_Position = projection * view * model * transformation_matrix * vec4(position_, 1.0f);
-	output_color_ = color_;
-	output_text_coord_ = texture_coordinates_;
-	output_normal_ = mat3(transpose(inverse(model))) * normal_;
-	world_position_ = vec3(model * vec4(position_, 1.0f));
+	gl_Position = projection_matrix_ * view_matrix_ * model_matrix_ * vec4(position_attribute_, 1.0f);
+	color_ = color_attribute_;
+	texture_coordinates_ = texture_coordinates_attribute_;
+	normal_ = mat3(transpose(inverse(model_matrix_))) * normal_attribute_;
+	world_position_ = vec3(model_matrix_ * vec4(position_attribute_, 1.0f));
 }

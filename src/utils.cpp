@@ -6,6 +6,16 @@
 namespace utils
 {
 
+glm::vec3 get_camera_forward(glm::mat4 view_matrix)
+{
+	return glm::vec3(-view_matrix[0][2], -view_matrix[1][2], -view_matrix[2][2]);
+}
+
+glm::vec3 get_camera_left(glm::mat4 view_matrix)
+{
+	return glm::vec3(-view_matrix[0][0], -view_matrix[1][0], -view_matrix[2][0]);
+}
+
 void GLAPIENTRY message_callback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, [[maybe_unused]] const void* user_param)
 {
 	auto lambda_source = [&source]() -> std::string

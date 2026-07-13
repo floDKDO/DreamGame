@@ -18,6 +18,7 @@ class Window
 		SDL_Window* fetch() const;
 		void swap_buffers() const;
 		void get_size(int* w, int* h) const;
+		SDL_GLContext get_context() const;
 
 	private:
 		SDL_Window* window_;

@@ -1,5 +1,6 @@
 #include "model.h"
 
+#include <glm/gtc/matrix_transform.hpp>
 #include <limits>
 #include <iostream>
 
@@ -115,6 +116,16 @@ void Model::print_info_gltf() const
 	}
 
 	std::cout << "*********************************************************************************************\n\n";
+}
+
+void Model::compute_model(glm::vec3 translation_vector, float angle, glm::vec3 axis)
+{
+	for(Mesh& mesh : meshes_)
+	{
+		mesh.set_model_matrix_to_identity(); //reset de la matrice model à chaque frame
+		mesh.translate(translation_vector);
+		mesh.rotate(glm::radians(angle), axis);
+	}
 }
 
 //count devrait être égal pour tous les attributs donc on peut prendre le count de l'attribut [0]
@@ -325,7 +336,7 @@ void Model::load_meshes()
 			tg3_primitive primitive = mesh.primitives[k];
 			std::vector<GLushort> ebo_values = get_ebo_values(primitive);
 			Vertices vertices = get_vertices(primitive);
-			meshes_.push_back(Mesh(ebo_values, vertices, textures, nodes_.back().transformation_matrix_, primitive.mode)); 
+			meshes_.push_back(Mesh(ebo_values, vertices, textures, nodes_.back().model_matrix_, primitive.mode));
 
 			/*for(GLushort ebo : ebo_values)
 			{
