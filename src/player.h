@@ -12,7 +12,7 @@ class Player
 
 		void draw(ShaderProgram& shader_program);
 		void handle_events(const SDL_Event& e);
-		void update();
+		void update(float delta_time);
 
 		glm::mat4& view_matrix_;
 		glm::vec3 position_;

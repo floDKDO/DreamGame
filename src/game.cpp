@@ -62,8 +62,18 @@ void Game::run()
 
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
+	Uint64 second = 0;              //en ms
+	Uint64 begin_current_frame = 0; //en ms
+	Uint64 last_frame = 0;          //en ms
+	float delta_time = 0;           //en secondes
+	unsigned int frame_count = 0;
+
 	while(running_)
 	{
+		begin_current_frame = SDL_GetTicks();
+		delta_time = (float(begin_current_frame) - float(last_frame)) / 1000.0f; //conversion en secondes
+		frame_count += 1;
+
 		handle_events();
 
 		////////////////////////////////////////////////////////////////////////////////////////
@@ -73,8 +83,17 @@ void Game::run()
 		ImGui::ShowDemoWindow(); // Show demo window! :)
 		////////////////////////////////////////////////////////////////////////////////////////
 
-		update();
+		update(delta_time);
 		draw();
+
+		if(SDL_GetTicks() - second >= 1000)
+		{
+			std::string fps_count = ", FPS: " + std::to_string(frame_count);
+			update_fps_count(fps_count);
+			second = SDL_GetTicks();
+			frame_count = 0;
+		}
+		last_frame = begin_current_frame;
 	}
 }
 
@@ -145,10 +164,15 @@ void Game::check_gamepad()
 	}
 }
 
-void Game::update()
+void Game::update_fps_count(std::string_view fps) const
 {
-	camera_.update();
-	player_.update();
+	window_.set_title("DreamGame" + std::string(fps));
+}
+
+void Game::update(float delta_time)
+{
+	camera_.update(delta_time);
+	player_.update(delta_time);
 	check_gamepad();
 	shader_program_.set_uniform_3f("view_position_", camera_.camera_position_);
 }

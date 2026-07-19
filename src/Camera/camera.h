@@ -11,7 +11,7 @@ class Camera
 		Camera(glm::mat4& view_matrix, glm::vec3& target_position);
 
 		void handle_events(const SDL_Event& e);
-		void update();
+		void update(float delta_time);
 
 		glm::vec3& target_position_;
 		glm::vec3 target_to_camera_offset_;
@@ -23,8 +23,11 @@ class Camera
 		struct EulerAngles
 		{
 			EulerAngles()
-				: pitch_(30.0f), yaw_(-90.0f), roll_(0.0f) //TODO : hardcodé
+				: pitch_(30.0f), yaw_(-90.0f), roll_(0.0f)
 			{}
+
+			static const float min_pitch_;
+			static const float max_pitch_;
 
 			//valeur des angles en degrés
 			float pitch_;
@@ -35,7 +38,7 @@ class Camera
 		void set_rotation_mouse(float xrel, float yrel);
 		void set_rotation_joystick(Sint16 axis_value, sdl::Gamepad::JoystickAxis joystick_axis);
 		void mouse_motion_event_end();
-		void calculate_euler_angles();
+		void calculate_euler_angles(float delta_time);
 
 		glm::mat4& view_matrix_;
 		EulerAngles euler_angles_;

@@ -1,7 +1,11 @@
 #include "camera.h"
 
 #include <glm/gtc/type_ptr.hpp>
+#include <algorithm>
 #include <iostream>
+
+const float Camera::EulerAngles::min_pitch_ = -25.0f;
+const float Camera::EulerAngles::max_pitch_ = 40.0f;
 
 Camera::Camera(glm::mat4& view_matrix, glm::vec3& target_position)
 	: view_matrix_(view_matrix), target_position_(target_position), target_to_camera_offset_(glm::vec3(0.0f, 2.5f, 0.0f)), 
@@ -47,14 +51,14 @@ void Camera::handle_events(const SDL_Event& e)
 	}
 }
 
-void Camera::update()
+void Camera::update(float delta_time)
 {
 	view_matrix_ = look_at(camera_position_, target_position_ + target_to_camera_offset_, glm::vec3(0.0f, 1.0f, 0.0f));
 
 	//On est obligé de gérer nous-même car il n'y a pas d'événements qui détecte la fin du mouvement de souris
 	mouse_motion_event_end();
 
-	calculate_euler_angles();
+	calculate_euler_angles(delta_time);
 }
 
 glm::mat4 Camera::look_at(glm::vec3 camera_position, glm::vec3 camera_target_position, glm::vec3 up_vector) const
@@ -103,8 +107,10 @@ void Camera::set_rotation_mouse(float xrel, float yrel)
 {
 	is_rotation_from_joystick_ = false;
 	mouse_motion_last_time_ = SDL_GetTicks();
-	x_rotation_intensity_ = xrel * 2.0f; //TODO : hardcodé
-	y_rotation_intensity_ = yrel * 2.0f; //TODO : hardcodé
+
+	float max_mouse_rel_value = 10.0f;
+	x_rotation_intensity_ = std::clamp(xrel / max_mouse_rel_value, -1.0f, 1.0f);
+	y_rotation_intensity_ = std::clamp(yrel / max_mouse_rel_value, -1.0f, 1.0f);
 }
 
 void Camera::set_rotation_joystick(Sint16 axis_value, sdl::Gamepad::JoystickAxis joystick_axis)
@@ -122,43 +128,21 @@ void Camera::set_rotation_joystick(Sint16 axis_value, sdl::Gamepad::JoystickAxis
 
 void Camera::mouse_motion_event_end()
 {
-	if(!is_rotation_from_joystick_ && SDL_GetTicks() > mouse_motion_last_time_ + 100) //TODO : hardcodé
+	if(!is_rotation_from_joystick_ && SDL_GetTicks() > mouse_motion_last_time_ + 100) //100 ms
 	{
 		x_rotation_intensity_ = 0.0f;
 		y_rotation_intensity_ = 0.0f;
 	}
 }
 
-void Camera::calculate_euler_angles()
+void Camera::calculate_euler_angles(float delta_time)
 {
 	//yaw et pitch n'ont pas de valeur max/min (grandissent à l'infini si on ne met pas les deux if avec valeur maximale) => pas un problème car on utilise cos et sin
+	float sensitivity = 100.0f;
+	euler_angles_.yaw_ += x_rotation_intensity_ * sensitivity * delta_time;
+	euler_angles_.pitch_ = std::clamp(euler_angles_.pitch_ + -y_rotation_intensity_ * sensitivity * delta_time, EulerAngles::min_pitch_, EulerAngles::max_pitch_); // "-" pour que le sens soit bon (mettre la souris vers le haut déplace la caméra vers le haut). Enlever "-" pour inverser la caméra
 
-	if(!is_rotation_from_joystick_)
-	{
-		euler_angles_.yaw_ += (std::min(x_rotation_intensity_, 15.0f) / 15.0f); //TODO : hardcodé
-		euler_angles_.pitch_ += (std::min(-y_rotation_intensity_, 15.0f) / 15.0f); // "-" pour que le sens soit bon (mettre la souris vers le haut déplace la caméra vers le haut). Enlever "-" pour inverser la caméra
-	}
-	else
-	{
-		float sensitivity = 0.5f;
-		euler_angles_.yaw_ += x_rotation_intensity_ * sensitivity;
-		euler_angles_.pitch_ += -y_rotation_intensity_ * sensitivity; // "-" pour que le sens soit bon (mettre la souris vers le haut déplace la caméra vers le haut). Enlever "-" pour inverser la caméra
-	}
-
-	//TODO : std::max/std::min/std::clamp ?
-	if(euler_angles_.pitch_ > 40.0f) //TODO : hardcodé
-	{
-		euler_angles_.pitch_ = 40.0f; //TODO : hardcodé
-	}
-	else if(euler_angles_.pitch_ < -25.0f) //TODO : hardcodé
-	{
-		euler_angles_.pitch_ = -25.0f; //TODO : hardcodé
-	}
-
-	//std::cout << "yaw: " << euler_angles_.yaw_ << ", pitch: " << euler_angles_.pitch_ << ", vrai: " << sin(glm::radians(euler_angles_.yaw_)) * cos(glm::radians(euler_angles_.pitch_)) << ", faux: " << sin(glm::radians(euler_angles_.yaw_))/* * cos(glm::radians(euler_angles_.pitch_))*/ << std::endl;
-
-	float distance_camera_target = 10.0f; //TODO : hardcodé
-
+	float distance_camera_target = 10.0f;
 	glm::vec3 euler_rotation = distance_camera_target * glm::vec3(
 		cos(glm::radians(euler_angles_.yaw_)) * cos(glm::radians(euler_angles_.pitch_)), //x
 		sin(glm::radians(euler_angles_.pitch_)),										 //y

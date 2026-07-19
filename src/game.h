@@ -16,8 +16,9 @@ class Game
 	private:
 		void handle_events();
 		void draw();
-		void update();
+		void update(float delta_time);
 		void check_gamepad();
+		void update_fps_count(std::string_view fps) const;
 
 		sdl::SDL sdl_;
 		sdl::Window window_;

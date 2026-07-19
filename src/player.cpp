@@ -210,22 +210,24 @@ void Player::handle_events(const SDL_Event& e)
 		default:
 			break;
 	}
-}
+} 
 
-void Player::update()
+void Player::update(float delta_time)
 {
+	float sensitivity = 7.5f;
 	if(y_movement_intensity_ != 0.0f)
 	{
-		position_ += (y_movement_intensity_ * 0.05f) * utils::get_camera_forward(view_matrix_); //TODO : hardcodé
+		position_ += (y_movement_intensity_ * sensitivity * delta_time) * utils::get_camera_forward(view_matrix_);
 	}
 
 	if(x_movement_intensity_ != 0.0f)
 	{
-		position_ -= (x_movement_intensity_ * 0.05f) * utils::get_camera_left(view_matrix_); //TODO : hardcodé
+		position_ -= (x_movement_intensity_ * sensitivity * delta_time) * utils::get_camera_left(view_matrix_);
 	}
 
 	position_.y = -1.5f; //TODO : hauteur du sol
 
-	model_.compute_model(position_, -glm::degrees(atan2((x_movement_intensity_ * 0.05f)/* * utils::get_camera_left(view_matrix_).x*/, (y_movement_intensity_ * 0.05f)/* * utils::get_camera_forward(view_matrix_).z*/))
-		, glm::vec3(0.0f, 1.0f, 0.0f));
+	model_.compute_model(position_, 
+		-glm::degrees(atan2((x_movement_intensity_ * 7.5f * delta_time)/* * utils::get_camera_left(view_matrix_).x*/, (y_movement_intensity_ * 7.5f * delta_time)/* * utils::get_camera_forward(view_matrix_).z*/)), 
+		glm::vec3(0.0f, 1.0f, 0.0f));
 }

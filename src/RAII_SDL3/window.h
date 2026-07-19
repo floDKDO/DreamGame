@@ -19,6 +19,7 @@ class Window
 		void swap_buffers() const;
 		void get_size(int* w, int* h) const;
 		SDL_GLContext get_context() const;
+		void set_title(std::string_view title) const;
 
 	private:
 		SDL_Window* window_;
