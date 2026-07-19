@@ -16,7 +16,6 @@ class Camera
 		glm::vec3& target_position_;
 		glm::vec3 target_to_camera_offset_;
 		glm::vec3 camera_position_;
-		glm::vec3 camera_front_;
 
 	private:
 		glm::mat4 look_at(glm::vec3 camera_position, glm::vec3 camera_target_position, glm::vec3 up_vector) const;
@@ -27,6 +26,7 @@ class Camera
 				: pitch_(30.0f), yaw_(-90.0f), roll_(0.0f) //TODO : hardcodé
 			{}
 
+			//valeur des angles en degrés
 			float pitch_;
 			float yaw_;
 			float roll_; //inutilisé pour l'instant

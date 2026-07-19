@@ -4,9 +4,9 @@
 #include <iostream>
 
 Camera::Camera(glm::mat4& view_matrix, glm::vec3& target_position)
-	: view_matrix_(view_matrix), target_position_(target_position), target_to_camera_offset_(glm::vec3(0.0f, 2.5f, 0.0f)), camera_position_(target_position + target_to_camera_offset_),
-	camera_front_(glm::vec3(0.0f, 0.0f, -1.0f)), euler_angles_(), mouse_motion_last_time_(0), is_rotation_from_joystick_(false), 
-	x_rotation_intensity_(0.0f), y_rotation_intensity_(0.0f)
+	: view_matrix_(view_matrix), target_position_(target_position), target_to_camera_offset_(glm::vec3(0.0f, 2.5f, 0.0f)), 
+	camera_position_(target_position + target_to_camera_offset_), euler_angles_(), 
+	mouse_motion_last_time_(0), is_rotation_from_joystick_(false), x_rotation_intensity_(0.0f), y_rotation_intensity_(0.0f)
 {}
 
 void Camera::handle_events(const SDL_Event& e)
@@ -53,19 +53,28 @@ void Camera::update()
 
 	//On est obligé de gérer nous-même car il n'y a pas d'événements qui détecte la fin du mouvement de souris
 	mouse_motion_event_end();
+
 	calculate_euler_angles();
 }
 
 glm::mat4 Camera::look_at(glm::vec3 camera_position, glm::vec3 camera_target_position, glm::vec3 up_vector) const
 {
-	glm::vec3 forward = glm::normalize(camera_position - camera_target_position);
+	glm::vec3 forward = glm::normalize(camera_position - camera_target_position); //on obtient un vecteur qui part de la target vers la caméra
 	glm::vec3 left = glm::normalize(glm::cross(up_vector, forward));
 	glm::vec3 up = glm::normalize(glm::cross(forward, left));
+
+	//operator[] est column major
+	//=> mat[0][1] = colonne 0 ligne 1
 
 	glm::mat4 translation = glm::mat4(1.0f);
 	translation[3][0] = -camera_position.x;
 	translation[3][1] = -camera_position.y;
 	translation[3][2] = -camera_position.z;
+	//***Translation matrix***
+	//(1    0    0  -x_camera)
+	//(0    1    0  -y_camera)
+	//(0    0    1  -z_camera)
+	//(0    0    0    1      )
 
 	glm::mat4 rotation = glm::mat4(1.0f);
 	rotation[0][0] = left.x;
@@ -78,6 +87,11 @@ glm::mat4 Camera::look_at(glm::vec3 camera_position, glm::vec3 camera_target_pos
 	rotation[2][1] = forward.y;
 	rotation[2][2] = forward.z;
 	rotation = glm::transpose(rotation);
+	//*********Rotation matrix**********
+	//(leftx     lefty     leftz      0)
+	//(upx        upy       upz       0)
+	//(forwardx  forwardy  forwardz   0)
+	//(   0         0         0       1)
 
 	glm::mat4 view_matrix = glm::mat4(1.0f);
 	view_matrix = rotation * translation;
@@ -117,6 +131,8 @@ void Camera::mouse_motion_event_end()
 
 void Camera::calculate_euler_angles()
 {
+	//yaw et pitch n'ont pas de valeur max/min (grandissent à l'infini si on ne met pas les deux if avec valeur maximale) => pas un problème car on utilise cos et sin
+
 	if(!is_rotation_from_joystick_)
 	{
 		euler_angles_.yaw_ += (std::min(x_rotation_intensity_, 15.0f) / 15.0f); //TODO : hardcodé
@@ -139,13 +155,14 @@ void Camera::calculate_euler_angles()
 		euler_angles_.pitch_ = -25.0f; //TODO : hardcodé
 	}
 
+	//std::cout << "yaw: " << euler_angles_.yaw_ << ", pitch: " << euler_angles_.pitch_ << ", vrai: " << sin(glm::radians(euler_angles_.yaw_)) * cos(glm::radians(euler_angles_.pitch_)) << ", faux: " << sin(glm::radians(euler_angles_.yaw_))/* * cos(glm::radians(euler_angles_.pitch_))*/ << std::endl;
+
 	float distance_camera_target = 10.0f; //TODO : hardcodé
 
-	glm::vec3 front = distance_camera_target * glm::vec3(
-		cos(glm::radians(euler_angles_.yaw_)) * cos(glm::radians(euler_angles_.pitch_)),
-		sin(glm::radians(euler_angles_.pitch_)),
-		sin(glm::radians(euler_angles_.yaw_)) * cos(glm::radians(euler_angles_.pitch_))
+	glm::vec3 euler_rotation = distance_camera_target * glm::vec3(
+		cos(glm::radians(euler_angles_.yaw_)) * cos(glm::radians(euler_angles_.pitch_)), //x
+		sin(glm::radians(euler_angles_.pitch_)),										 //y
+		sin(glm::radians(euler_angles_.yaw_)) * cos(glm::radians(euler_angles_.pitch_))  //z
 	);
-	camera_position_ = front + target_position_;
-	camera_front_ = glm::normalize(target_position_ - camera_position_);
+	camera_position_ = euler_rotation /*+ target_to_camera_offset_*/ + target_position_;
 }
