@@ -5,40 +5,32 @@
 
 #include <tinygltf/tiny_gltf_v3.h>
 
-class Model
+class Node
 {
 	public:
-		explicit Model(std::string_view path);
-		Model(const Model& model) = delete;
-		Model(Model&& model) = delete;
-		Model& operator=(const Model& model) = delete;
-		Model& operator=(Model&& model) = delete;
-		~Model();
+		explicit Node(std::string_view path);
 
 		void draw(ShaderProgram& shader_program);
 		void print_info_gltf() const;
-		void compute_model(glm::vec3 translation_vector, float angle, glm::vec3 axis);
+		void open_gltf_file();
+
+		//TODO : englober les 3 vecteurs dans une struct Transform
+		glm::vec3 position_;
+
+		glm::vec4 rotation_; //TODO : inutile pour l'instant (utiliser à terme glm::quat ??)
+
+		struct RotationInfo
+		{
+			float angle_;
+			glm::vec3 axis_;
+		};
+		RotationInfo rotation_info_;
+
+		glm::vec3 scale_;
 
 	private:
-		struct Node
-		{
-			Node()
-				: mesh_index_(-1), model_matrix_(glm::mat4(1.0f))
-			{}
-
-			Node(int32_t mesh_index, double rotation[4], double scale[3], double translation[3])
-				: mesh_index_(mesh_index), model_matrix_(gltf::get_transformation_matrix(rotation, scale, translation))
-			{}
-
-			Node(int32_t mesh_index, double matrix[16])
-				: mesh_index_(mesh_index), model_matrix_(gltf::get_mat4_from_1d_matrix(matrix))
-			{}
-
-			int32_t mesh_index_;
-			glm::mat4 model_matrix_;
-		};
-
-		void open_gltf_file();
+		glm::mat4 compute_model(/*glm::vec3 translation_vector, float angle, glm::vec3 axis*/); 
+		
 		void load_meshes();
 		uint64_t get_attributes_count(const tg3_primitive& primitive) const;
 		std::vector<GLushort> get_ebo_values(const tg3_primitive& primitive) const;
@@ -84,6 +76,8 @@ class Model
 		std::string path_;
 		tg3_model model_;
 		tg3_error_stack errors_;
-		std::vector<Node> nodes_;
+
 		std::vector<Mesh> meshes_;
+		int32_t mesh_index_; //TODO : inutile ??
+		//glm::mat4 model_matrix_; //TODO : toujours utile ??
 };

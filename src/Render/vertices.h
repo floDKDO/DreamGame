@@ -38,7 +38,7 @@ class Vertices
 		struct Vertex
 		{
 			Vertex()
-				: position_(glm::vec3(0.0f, 0.0f, 0.0f)), normal_(glm::vec3(0.0f, 0.0f, 0.0f)), texture_coordinates_(glm::vec2(0.0f, 0.0f)), color_(glm::vec4(0.0f, 0.0f, 0.0f, 1.0f))
+				: position_(0.0f, 0.0f, 0.0f), normal_(0.0f, 0.0f, 0.0f), texture_coordinates_(0.0f, 0.0f), color_(0.0f, 0.0f, 0.0f, 1.0f)
 			{}
 
 			Vertex(glm::vec3 position, glm::vec3 normal, glm::vec2 texture_coordinates, glm::vec4 color)

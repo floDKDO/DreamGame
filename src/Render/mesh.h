@@ -9,12 +9,8 @@
 class Mesh
 {
 	public: 
-		Mesh(std::vector<GLushort> ebo_values, Vertices vertices, std::vector<Texture> textures, glm::mat4 model_matrix, GLenum draw_mode);
+		Mesh(std::vector<GLushort> ebo_values, Vertices vertices, std::vector<Texture> textures, GLenum draw_mode);
 		void draw(ShaderProgram& shader_progam);
-
-		void set_model_matrix_to_identity();
-		void translate(glm::vec3 translation_vector);
-		void rotate(float angle, glm::vec3 axis);
 
 	private:
 		void load_vertex_attribute(GLuint vbo_binding_index, Vertices::AttributeIndex attribute_index);
@@ -27,7 +23,6 @@ class Mesh
 		std::vector<GLushort> ebo_values_;
 		Vertices vertices_;
 		std::vector<Texture> textures_;
-		glm::mat4 model_matrix_;
 		GLuint ebo_, vbo_, vao_;
 		GLenum draw_mode_;
 };

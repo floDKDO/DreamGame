@@ -1,7 +1,8 @@
 #pragma once
 
-#include "GLTF/model.h"
+#include "GLTF/node.h"
 #include "RAII_SDL3/gamepad.h"
+#include "Render/shader_program.h"
 
 #include <SDL3/SDL.h>
 
@@ -15,11 +16,10 @@ class Player
 		void update(float delta_time);
 
 		glm::mat4& view_matrix_;
-		glm::vec3 position_;
+		//glm::vec3 position_;
+		Node model_;
 
 	private:
-		Model model_;
-
 		///////////////////////////////////
 		enum class Direction
 		{

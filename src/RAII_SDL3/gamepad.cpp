@@ -42,16 +42,16 @@ void Gamepad::open()
 	SDL_JoystickID* joysticks = nullptr;
 	if((joysticks = SDL_GetGamepads(&count)) == nullptr)
 	{
-		SDL_Log("(SDL_GetGamepads) %s\n", SDL_GetError());
+		//SDL_Log("(SDL_GetGamepads) %s\n", SDL_GetError()); //TODO : décommenter
 	}
 
-	std::cout << count << " controller(s) connected!\n";
+	//std::cout << count << " controller(s) connected!\n"; //TODO : décommenter
 
 	if(joysticks != nullptr)
 	{
 		if((gamepad_ = SDL_OpenGamepad(joysticks[0])) == nullptr)
 		{
-			SDL_Log("(SDL_OpenGamepad) %s\n", SDL_GetError());
+			//SDL_Log("(SDL_OpenGamepad) %s\n", SDL_GetError()); //TODO : décommenter
 		}
 		SDL_free(joysticks);
 	}

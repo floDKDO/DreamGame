@@ -2,7 +2,7 @@
 
 #include "RAII_SDL3/sdl.h"
 #include "RAII_SDL3/window.h"
-#include "GLTF/model.h"
+#include "GLTF/node.h"
 #include "Camera/camera.h"
 #include "player.h"
 
@@ -24,11 +24,13 @@ class Game
 		sdl::Window window_;
 		GLenum glew_;
 		ShaderProgram shader_program_;
-		glm::mat4 model_matrix_;
-		glm::mat4 view_matrix_;
+		ShaderProgram shader_program_phong_;
+		//glm::mat4 model_matrix_;
+		glm::mat4 view_matrix_; //TODO : placée ici car partagée entre la caméra et le joueur (peut-être la placer à un autre endroit)
 		Player player_;
 		Camera camera_;
 		bool running_;
 		sdl::Gamepad gamepad_;
-		Model temp_model_;
+		Node temp_model_;
+		Node light_source_;
 };

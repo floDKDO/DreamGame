@@ -12,8 +12,8 @@
 //TODO : free ImGui
 
 Game::Game()
-	: sdl_(), window_(), glew_(glewInit()), shader_program_(), model_matrix_(glm::mat4(1.0f)), view_matrix_(glm::mat4(1.0f)), player_(view_matrix_),
-	camera_(view_matrix_, player_.position_), running_(true), gamepad_(), temp_model_("resources/models/container.gltf")
+	: sdl_(), window_(), glew_(glewInit()), shader_program_(), shader_program_phong_(), /*model_matrix_(glm::mat4(1.0f)),*/ view_matrix_(glm::mat4(1.0f)), player_(view_matrix_),
+	camera_(view_matrix_, player_.model_.position_), running_(true), gamepad_(), temp_model_("resources/models/corridor.glb"), light_source_("resources/models/light_source.glb")
 {
 	//model_matrix_ = glm::rotate(model_matrix_, glm::radians(-10.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 
@@ -51,14 +51,24 @@ void Game::run()
 	glm::mat4 projection_matrix = glm::mat4(1.0f);
 	projection_matrix = glm::perspective(glm::radians(45.0f), float(w) / float(h), 0.1f, 100.0f);
 
+	shader_program_phong_.create_shader(GL_VERTEX_SHADER, "resources/shaders/base_shader.vert");
+	shader_program_phong_.create_shader(GL_FRAGMENT_SHADER, "resources/shaders/phong_shader.frag");
+	shader_program_phong_.link();
+	shader_program_phong_.use();
+	shader_program_phong_.set_uniform_1i("texture_sampler0_", 0);
+	//shader_program_phong_.set_uniform_matrix_4fv("model_matrix_", glm::value_ptr(model_matrix_));
+	shader_program_phong_.set_uniform_matrix_4fv("view_matrix_", glm::value_ptr(view_matrix_));
+	shader_program_phong_.set_uniform_matrix_4fv("projection_matrix_", glm::value_ptr(projection_matrix));
+
 	shader_program_.create_shader(GL_VERTEX_SHADER, "resources/shaders/base_shader.vert");
 	shader_program_.create_shader(GL_FRAGMENT_SHADER, "resources/shaders/base_shader.frag");
 	shader_program_.link();
 	shader_program_.use();
-	shader_program_.set_uniform_1i("texture_sampler0_", 0);
-	shader_program_.set_uniform_matrix_4fv("model_matrix_", glm::value_ptr(model_matrix_));
+	//shader_program_.set_uniform_matrix_4fv("model_matrix_", glm::value_ptr(model_matrix_));
 	shader_program_.set_uniform_matrix_4fv("view_matrix_", glm::value_ptr(view_matrix_));
 	shader_program_.set_uniform_matrix_4fv("projection_matrix_", glm::value_ptr(projection_matrix));
+
+	light_source_.position_ = glm::vec3(0.0f, 5.0f, 0.0f);
 
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
@@ -137,13 +147,17 @@ void Game::draw()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	shader_program_.use();
-	//model_matrix_ = glm::rotate(model_matrix_, glm::radians(float(glm::sin(SDL_GetTicks() / 1000))), glm::vec3(1.0f, 0.0f, 0.0f));
-	shader_program_.set_uniform_matrix_4fv("model_matrix_", glm::value_ptr(model_matrix_));
+	//shader_program_.set_uniform_matrix_4fv("model_matrix_", glm::value_ptr(model_matrix_));
 	shader_program_.set_uniform_matrix_4fv("view_matrix_", glm::value_ptr(view_matrix_));
 	glDrawArrays(GL_TRIANGLES, 0, 36);
+	light_source_.draw(shader_program_);
 
-	temp_model_.draw(shader_program_);
-	player_.draw(shader_program_);
+	shader_program_phong_.use();
+	//shader_program_phong_.set_uniform_matrix_4fv("model_matrix_", glm::value_ptr(model_matrix_));
+	shader_program_phong_.set_uniform_matrix_4fv("view_matrix_", glm::value_ptr(view_matrix_));
+	glDrawArrays(GL_TRIANGLES, 0, 36);
+	temp_model_.draw(shader_program_phong_);
+	player_.draw(shader_program_phong_);
 
 	////////////////////////////////////////////////////////////////////////////////////////
 	ImGui::Render();
@@ -174,5 +188,6 @@ void Game::update(float delta_time)
 	camera_.update(delta_time);
 	player_.update(delta_time);
 	check_gamepad();
-	shader_program_.set_uniform_3f("view_position_", camera_.camera_position_);
+	shader_program_phong_.set_uniform_3f("view_position_", camera_.camera_position_);
+	shader_program_phong_.set_uniform_3f("light_position_", light_source_.position_);
 }

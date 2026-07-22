@@ -7,7 +7,7 @@
 const float Player::max_movement_intensity_ = 1.0f;
 
 Player::Player(glm::mat4& view_matrix)
-	: view_matrix_(view_matrix), model_("resources/models/capsule.glb"), position_(glm::vec3(0.0f, 0.0f, 0.0f)), 
+	: view_matrix_(view_matrix), model_("resources/models/capsule.glb"), //position_(glm::vec3(0.0f, 0.0f, 0.0f)), 
 	is_arrow_key_pressed_(false), is_pad_pressed_(false), is_movement_from_joystick_(false), 
 	x_movement_intensity_(0.0f), y_movement_intensity_(0.0f)
 {}
@@ -217,17 +217,20 @@ void Player::update(float delta_time)
 	float sensitivity = 7.5f;
 	if(y_movement_intensity_ != 0.0f)
 	{
-		position_ += (y_movement_intensity_ * sensitivity * delta_time) * utils::get_camera_forward(view_matrix_);
+		model_.position_ += (y_movement_intensity_ * sensitivity * delta_time) * utils::get_camera_forward(view_matrix_);
 	}
 
 	if(x_movement_intensity_ != 0.0f)
 	{
-		position_ -= (x_movement_intensity_ * sensitivity * delta_time) * utils::get_camera_left(view_matrix_);
+		model_.position_ -= (x_movement_intensity_ * sensitivity * delta_time) * utils::get_camera_left(view_matrix_);
 	}
 
-	position_.y = -1.5f; //TODO : hauteur du sol
+	model_.position_.y = 0.75f; //TODO : hauteur du sol
 
-	model_.compute_model(position_, 
-		-glm::degrees(atan2((x_movement_intensity_ * 7.5f * delta_time)/* * utils::get_camera_left(view_matrix_).x*/, (y_movement_intensity_ * 7.5f * delta_time)/* * utils::get_camera_forward(view_matrix_).z*/)), 
-		glm::vec3(0.0f, 1.0f, 0.0f));
+	model_.rotation_info_.angle_ = -glm::degrees(atan2((x_movement_intensity_ * 7.5f * delta_time)/* * utils::get_camera_left(view_matrix_).x*/, (y_movement_intensity_ * 7.5f * delta_time)/* * utils::get_camera_forward(view_matrix_).z*/));
+	model_.rotation_info_.axis_ = glm::vec3(0.0f, 1.0f, 0.0f);
+
+	//model_.compute_model(position_, 
+	//	-glm::degrees(atan2((x_movement_intensity_ * 7.5f * delta_time)/* * utils::get_camera_left(view_matrix_).x*/, (y_movement_intensity_ * 7.5f * delta_time)/* * utils::get_camera_forward(view_matrix_).z*/)), 
+	//	glm::vec3(0.0f, 1.0f, 0.0f));
 }

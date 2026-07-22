@@ -1,30 +1,14 @@
 #include "mesh.h"
 
 #include <stb/stb_image.h>
-#include <glm/gtc/type_ptr.hpp>
 #include <iostream>
 
 //TODO : créer un destructeur qui libère le VAO/VBO/EBO et les textures
 
-Mesh::Mesh(std::vector<GLushort> ebo_values, Vertices vertices, std::vector<Texture> textures, glm::mat4 model_matrix, GLenum draw_mode)
-	: ebo_values_(ebo_values), vertices_(vertices), textures_(textures), model_matrix_(model_matrix), draw_mode_(draw_mode == -1 ? GL_TRIANGLES : draw_mode)
+Mesh::Mesh(std::vector<GLushort> ebo_values, Vertices vertices, std::vector<Texture> textures, GLenum draw_mode)
+	: ebo_values_(ebo_values), vertices_(vertices), textures_(textures), draw_mode_(draw_mode == -1 ? GL_TRIANGLES : draw_mode)
 {
 	load_mesh();
-}
-
-void Mesh::set_model_matrix_to_identity()
-{
-	model_matrix_ = glm::mat4(1.0f);
-}
-
-void Mesh::translate(glm::vec3 translation_vector)
-{
-	model_matrix_ = glm::translate(model_matrix_, translation_vector);
-}
-
-void Mesh::rotate(float angle, glm::vec3 axis)
-{
-	model_matrix_ = glm::rotate(model_matrix_, glm::radians(angle), axis);
 }
 
 void Mesh::load_vertex_attribute(GLuint vbo_binding_index, Vertices::AttributeIndex attribute_index)
@@ -126,7 +110,6 @@ void Mesh::load_mesh()
 
 void Mesh::draw(ShaderProgram& shader_progam)
 {
-	shader_progam.set_uniform_matrix_4fv("model_matrix_", glm::value_ptr(model_matrix_));
 	glBindVertexArray(vao_);
 	glDrawElements(draw_mode_, GLsizei(ebo_values_.size()), GL_UNSIGNED_SHORT, 0);
 	//glBindVertexArray(0); //= unbind, provoque des erreurs

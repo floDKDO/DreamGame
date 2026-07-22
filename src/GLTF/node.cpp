@@ -1,31 +1,31 @@
-#include "model.h"
+#include "node.h"
 
-#include <glm/gtc/matrix_transform.hpp>
-#include <limits>
+#ifndef GLM_ENABLE_EXPERIMENTAL
+#define GLM_ENABLE_EXPERIMENTAL
+#endif
+#include <glm/gtc/type_ptr.hpp>
+#include <glm/gtx/matrix_decompose.hpp>
+#include <glm/gtc/quaternion.hpp>
 #include <iostream>
 
-
-Model::Model(std::string_view path) //si le modèle vient de Blender, il doit avoir été exporté en ayant coché "Transform: + Y Up"
-	: path_(path)
+Node::Node(std::string_view path)
+	: path_(path), mesh_index_(-1), //model_matrix_(glm::mat4(1.0f)), 
+	position_(0.0f, 0.0f, 0.0f), 
+	rotation_(0.0f, 0.0f, 0.0f, 1.0f), rotation_info_({0.0f, glm::vec3(0.0f, 1.0f, 0.0f)}),
+	scale_(1.0f, 1.0f, 1.0f)
 {
 	open_gltf_file();
 	print_info_gltf();
 	load_meshes();
 }
 
-Model::~Model()
-{
-	tg3_model_free(&model_);
-	tg3_error_stack_free(&errors_);
-}
-
-void Model::open_gltf_file()
+void Node::open_gltf_file()
 {
 	tg3_parse_options opts;
 	tg3_parse_options_init(&opts);
 	tg3_error_stack_init(&errors_);
-	
-	tg3_error_code err = tg3_parse_file(&model_, &errors_, path_.c_str(), uint32_t(path_.length()), &opts); 
+
+	tg3_error_code err = tg3_parse_file(&model_, &errors_, path_.c_str(), uint32_t(path_.length()), &opts);
 	if(err != TG3_OK)
 	{
 		for(uint32_t i = 0; i < errors_.count; i++)
@@ -36,7 +36,7 @@ void Model::open_gltf_file()
 	}
 }
 
-void Model::print_info_gltf() const
+void Node::print_info_gltf() const
 {
 	std::cout << "\n**** Info on the GLTF file/model ****\n";
 	std::cout << "- File name: " << path_ << std::endl;
@@ -118,18 +118,116 @@ void Model::print_info_gltf() const
 	std::cout << "*********************************************************************************************\n\n";
 }
 
-void Model::compute_model(glm::vec3 translation_vector, float angle, glm::vec3 axis)
+glm::mat4 Node::compute_model(/*glm::vec3 translation_vector, float angle, glm::vec3 axis*/)
 {
-	for(Mesh& mesh : meshes_)
+	glm::mat4 model_matrix = glm::mat4(1.0f); //reset de la matrice model à chaque frame
+	model_matrix = glm::translate(model_matrix, position_);
+
+	//TODO : rotation (vérifier)
+	//model_matrix *= glm::mat4_cast(glm::quat(rotation_));
+	model_matrix = glm::rotate(model_matrix, rotation_info_.angle_, rotation_info_.axis_);
+
+	model_matrix = glm::scale(model_matrix, scale_);
+
+	return model_matrix;
+
+	/*model_matrix_ = glm::mat4(1.0f); //reset de la matrice model à chaque frame
+	model_matrix_ = glm::translate(model_matrix_, translation_vector);
+	model_matrix_ = glm::rotate(model_matrix_, glm::radians(angle), axis);*/
+}
+
+void Node::load_meshes()
+{
+	std::vector<Texture> textures;
+	for(uint32_t i = 0; i < model_.textures_count; ++i)
 	{
-		mesh.set_model_matrix_to_identity(); //reset de la matrice model à chaque frame
-		mesh.translate(translation_vector);
-		mesh.rotate(glm::radians(angle), axis);
+		Texture mesh_texture;
+		tg3_texture texture = model_.textures[i];
+		tg3_image image = model_.images[texture.source];
+		tg3_sampler sampler = model_.samplers[texture.sampler];
+
+		mesh_texture.texture_unit_ = i;
+		if(image.buffer_view == -1)
+		{
+			std::string image_str = std::string(image.uri.data);
+			if(bool(tg3_is_data_uri(image.uri.data, image.uri.len)))
+			{
+				mesh_texture.image_path_ = "";
+				//std::string image_data_base64 = image_str.substr(image_str.find(',') + 1); //+1 pour ne pas prendre la virgule
+				std::cout << "****ERROR****: Embedded GLTF not handled for now!\n";
+			}
+			else
+			{
+				mesh_texture.image_path_ = "resources/models/" + image_str;
+			}
+		}
+		else
+		{
+			mesh_texture.image_path_ = "";
+			tg3_buffer_view buffer_view = model_.buffer_views[image.buffer_view];
+			tg3_buffer buffer = model_.buffers[buffer_view.buffer];
+			mesh_texture.image_data_.reserve(buffer_view.byte_length);
+
+			//std::copy(buffer.data.data, buffer.data.data + buffer_view.byte_length, std::back_inserter(mesh_texture.image_data_)); //TODO : mieux que la boucle for suivante ?
+			for(uint64_t j = 0; j < buffer_view.byte_length; ++j)
+			{
+				mesh_texture.image_data_.push_back(buffer.data.data[buffer_view.byte_offset + j]);
+			}
+		}
+		mesh_texture.min_filter_ = sampler.min_filter;
+		mesh_texture.mag_filter_ = sampler.mag_filter;
+		mesh_texture.wrap_s_ = sampler.wrap_s;
+		mesh_texture.wrap_t_ = sampler.wrap_t;
+
+		textures.push_back(mesh_texture);
+	}
+
+	if(model_.nodes_count != 1)
+	{
+		std::cerr << "Warning: multiple nodes for a node! Only taking the first node.\n";
+	}
+
+	tg3_node node = model_.nodes[0];
+	if(gltf::is_1d_matrix_identity(node.matrix)) //=> ignorer la matrice si elle est la matrice identité
+	{
+		position_ = glm::vec3(node.translation[0], node.translation[1], node.translation[2]);
+		rotation_ = glm::vec4(node.rotation[0], node.rotation[1], node.rotation[2], node.rotation[3]);
+		scale_ = glm::vec3(node.scale[0], node.scale[1], node.scale[2]);
+	}
+	else
+	{
+		//nodes_.push_back({Node(node.mesh, node.matrix), glm::vec3(node.translation[0], node.translation[1], node.translation[2])});
+
+		//TODO : à vérifier
+		//position_ = glm::vec3(node.matrix[3], node.matrix[7], node.matrix[11]);
+
+		//glm::mat4 model_matrix = glm::mat4(1.0f);
+		//model_matrix = glm::decompose(model_matrix, scale_, glm::quat(rotation_), position_, glm::vec3(1.0f), glm::vec4(1.0f));
+		//rotation_ = glm::conjugate(glm::quat(rotation_));
+		//gltf::print_mat4(model_matrix);
+		std::cerr << "************************CAS PAS ENCORE GERE************************\n";
+	}
+
+	tg3_mesh mesh = model_.meshes[node.mesh];
+	for(uint32_t k = 0; k < mesh.primitives_count; ++k)
+	{
+		tg3_primitive primitive = mesh.primitives[k];
+		std::vector<GLushort> ebo_values = get_ebo_values(primitive);
+		Vertices vertices = get_vertices(primitive);
+		meshes_.push_back(Mesh(ebo_values, vertices, textures, primitive.mode));
+
+		/*for(GLushort ebo : ebo_values)
+		{
+			std::cout << ebo << ", ";
+		}
+		std::cout << std::endl;*/
+
+		//vertices.print();
 	}
 }
 
 //count devrait être égal pour tous les attributs donc on peut prendre le count de l'attribut [0]
-uint64_t Model::get_attributes_count(const tg3_primitive& primitive) const
+uint64_t Node::get_attributes_count(const tg3_primitive& primitive) const
 {
 	if(primitive.attributes_count > 0)
 	{
@@ -141,7 +239,7 @@ uint64_t Model::get_attributes_count(const tg3_primitive& primitive) const
 	}
 }
 
-std::vector<GLushort> Model::get_ebo_values(const tg3_primitive& primitive) const
+std::vector<GLushort> Node::get_ebo_values(const tg3_primitive& primitive) const
 {
 	tg3_accessor accessor = model_.accessors[primitive.indices];
 	tg3_buffer_view buffer_view = model_.buffer_views[accessor.buffer_view];
@@ -158,7 +256,7 @@ std::vector<GLushort> Model::get_ebo_values(const tg3_primitive& primitive) cons
 	return ebo_value;
 }
 
-std::vector<glm::vec4> Model::get_vec4_color_attribute(const tg3_str_int_pair& attribute) const
+std::vector<glm::vec4> Node::get_vec4_color_attribute(const tg3_str_int_pair& attribute) const
 {
 	tg3_accessor accessor = model_.accessors[attribute.value];
 	std::string component_type_str = gltf::get_component_type_str(accessor.component_type);
@@ -220,7 +318,7 @@ std::vector<glm::vec4> Model::get_vec4_color_attribute(const tg3_str_int_pair& a
 	return vec4_vector;
 }
 
-std::vector<glm::vec4> Model::vec3_to_vec4_colors(std::vector<glm::vec3> vector) const
+std::vector<glm::vec4> Node::vec3_to_vec4_colors(std::vector<glm::vec3> vector) const
 {
 	std::vector<glm::vec4> vector_vec4;
 	vector_vec4.reserve(vector.size());
@@ -231,7 +329,7 @@ std::vector<glm::vec4> Model::vec3_to_vec4_colors(std::vector<glm::vec3> vector)
 	return vector_vec4;
 }
 
-Vertices Model::get_vertices(const tg3_primitive& primitive)
+Vertices Node::get_vertices(const tg3_primitive& primitive)
 {
 	Vertices vertices(get_attributes_count(primitive));
 
@@ -272,85 +370,9 @@ Vertices Model::get_vertices(const tg3_primitive& primitive)
 	return vertices;
 }
 
-void Model::load_meshes()
+void Node::draw(ShaderProgram& shader_program)
 {
-	std::vector<Texture> textures;
-	for(uint32_t i = 0; i < model_.textures_count; ++i)
-	{
-		Texture mesh_texture;
-		tg3_texture texture = model_.textures[i];
-		tg3_image image = model_.images[texture.source];
-		tg3_sampler sampler = model_.samplers[texture.sampler];
-
-		mesh_texture.texture_unit_ = i;
-		if(image.buffer_view == -1)
-		{
-			std::string image_str = std::string(image.uri.data);
-			if(bool(tg3_is_data_uri(image.uri.data, image.uri.len)))
-			{
-				mesh_texture.image_path_ = "";
-				//std::string image_data_base64 = image_str.substr(image_str.find(',') + 1); //+1 pour ne pas prendre la virgule
-				std::cout << "****ERROR****: Embedded GLTF not handled for now!\n";
-			}
-			else
-			{
-				mesh_texture.image_path_ = "resources/models/" + image_str;
-			}
-		}
-		else
-		{
-			mesh_texture.image_path_ = "";
-			tg3_buffer_view buffer_view = model_.buffer_views[image.buffer_view];
-			tg3_buffer buffer = model_.buffers[buffer_view.buffer];
-			mesh_texture.image_data_.reserve(buffer_view.byte_length);
-
-			//std::copy(buffer.data.data, buffer.data.data + buffer_view.byte_length, std::back_inserter(mesh_texture.image_data_)); //TODO : mieux que la boucle for suivante ?
-			for(uint64_t j = 0; j < buffer_view.byte_length; ++j)
-			{
-				mesh_texture.image_data_.push_back(buffer.data.data[buffer_view.byte_offset + j]);
-			}
-		}
-		mesh_texture.min_filter_ = sampler.min_filter;
-		mesh_texture.mag_filter_ = sampler.mag_filter;
-		mesh_texture.wrap_s_ = sampler.wrap_s;
-		mesh_texture.wrap_t_ = sampler.wrap_t;
-
-		textures.push_back(mesh_texture);
-	}
-
-	for(uint32_t i = 0; i < model_.nodes_count; ++i)
-	{
-		tg3_node node = model_.nodes[i];
-		if(gltf::is_1d_matrix_identity(node.matrix)) //=> ignorer la matrice si elle est la matrice identité
-		{
-			nodes_.push_back(Node(node.mesh, node.rotation, node.scale, node.translation));
-		}
-		else
-		{
-			nodes_.push_back(Node(node.mesh, node.matrix));
-		}
-
-		tg3_mesh mesh = model_.meshes[node.mesh];
-		for(uint32_t k = 0; k < mesh.primitives_count; ++k)
-		{
-			tg3_primitive primitive = mesh.primitives[k];
-			std::vector<GLushort> ebo_values = get_ebo_values(primitive);
-			Vertices vertices = get_vertices(primitive);
-			meshes_.push_back(Mesh(ebo_values, vertices, textures, nodes_.back().model_matrix_, primitive.mode));
-
-			/*for(GLushort ebo : ebo_values)
-			{
-				std::cout << ebo << ", ";
-			}
-			std::cout << std::endl;*/
-
-			//vertices.print();
-		}
-	}
-}
-
-void Model::draw(ShaderProgram& shader_program)
-{
+	shader_program.set_uniform_matrix_4fv("model_matrix_", glm::value_ptr(compute_model()));
 	for(Mesh& mesh : meshes_)
 	{
 		mesh.draw(shader_program);

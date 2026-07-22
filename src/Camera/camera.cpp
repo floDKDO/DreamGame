@@ -8,7 +8,7 @@ const float Camera::EulerAngles::min_pitch_ = -25.0f;
 const float Camera::EulerAngles::max_pitch_ = 40.0f;
 
 Camera::Camera(glm::mat4& view_matrix, glm::vec3& target_position)
-	: view_matrix_(view_matrix), target_position_(target_position), target_to_camera_offset_(glm::vec3(0.0f, 2.5f, 0.0f)), 
+	: view_matrix_(view_matrix), target_position_(target_position), target_to_camera_offset_(0.0f, 2.5f, 0.0f), 
 	camera_position_(target_position + target_to_camera_offset_), euler_angles_(), 
 	mouse_motion_last_time_(0), is_rotation_from_joystick_(false), x_rotation_intensity_(0.0f), y_rotation_intensity_(0.0f)
 {}
