@@ -2,6 +2,7 @@
 
 #include <fstream>
 #include <sstream>
+#include <filesystem>
 #include <iostream>
 
 
@@ -12,9 +13,48 @@ constexpr int info_log_size_ = 512;
 
 }
 
-ShaderProgram::ShaderProgram()
+ShaderProgram::ShaderProgram(std::vector<std::string> shader_paths)
 	: shader_program_(glCreateProgram())
-{}
+{
+	for(const std::string& shader_path : shader_paths)
+	{
+		std::filesystem::path path = shader_path;
+		if(path.extension() == ".vert")
+		{
+			std::cout << "Shader VERTEX: " << shader_path << std::endl;
+			create_shader(GL_VERTEX_SHADER, shader_path);
+		}
+		else if(path.extension() == ".frag")
+		{
+			std::cout << "Shader FRAGMENT: " << shader_path << std::endl;
+			create_shader(GL_FRAGMENT_SHADER, shader_path);
+		}
+	}
+	link();
+}
+
+ShaderProgram::ShaderProgram(ShaderProgram&& shader_program)
+	: shader_program_(shader_program.shader_program_), shaders_(shader_program.shaders_), uniforms_(shader_program.uniforms_)
+{
+	shader_program.shader_program_ = 0; // void glDeleteProgram(GLuint program); -> "A value of 0 for program will be silently ignored."
+}
+
+ShaderProgram& ShaderProgram::operator=(ShaderProgram&& shader_program)
+{
+	if(this == &shader_program)
+	{
+		return *this;
+	}
+
+	if(glIsProgram(shader_program_) == GL_TRUE)
+	{
+		glDeleteProgram(shader_program_);
+	}
+
+	shader_program_ = shader_program.shader_program_;
+	shader_program.shader_program_ = 0; // void glDeleteProgram(GLuint program); -> "A value of 0 for program will be silently ignored."
+	return *this;
+}
 
 ShaderProgram::~ShaderProgram()
 {

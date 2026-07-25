@@ -10,16 +10,14 @@
 class ShaderProgram
 {
 	public:
-		ShaderProgram();
+		ShaderProgram(std::vector<std::string> shader_paths);
 		~ShaderProgram();
 
 		ShaderProgram(const ShaderProgram&) = delete;
-		ShaderProgram(ShaderProgram&&) = delete;
+		ShaderProgram(ShaderProgram&& shader_program);
 		ShaderProgram& operator=(const ShaderProgram&) = delete;
-		ShaderProgram& operator=(ShaderProgram&&) = delete;
+		ShaderProgram& operator=(ShaderProgram&& shader_program);
 
-		void create_shader(GLenum shader_type, std::string_view shader_path);
-		void link() const;
 		void use() const;
 		void set_uniform_1f(const GLchar* name, GLfloat value);
 		void set_uniform_1i(const GLchar* name, GLint value);
@@ -27,6 +25,8 @@ class ShaderProgram
 		void set_uniform_3f(const GLchar* name, glm::vec3 v);
 
 	private:
+		void create_shader(GLenum shader_type, std::string_view shader_path);
+		void link() const;
 		void insert_uniform(const GLchar* name);
 
 		GLuint shader_program_;
