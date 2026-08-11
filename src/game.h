@@ -2,7 +2,7 @@
 
 #include "RAII_SDL3/sdl.h"
 #include "RAII_SDL3/window.h"
-#include "GLTF/node.h"
+#include "glTF/node.h"
 #include "Camera/camera.h"
 #include "player.h"
 
@@ -17,8 +17,7 @@ class Game
 		void handle_events();
 		void draw();
 		void update(float delta_time);
-		void check_gamepad();
-		void update_fps_count(std::string_view fps) const;
+		void update_fps_count(Uint64& last_fps_refresh, unsigned int& frame_count_this_second) const;
 
 		sdl::SDL sdl_;
 		sdl::Window window_;
@@ -31,6 +30,6 @@ class Game
 		Camera camera_;
 		bool running_;
 		sdl::Gamepad gamepad_;
-		Node temp_model_;
-		Node light_source_;
+		gltf::Node temp_model_;
+		gltf::Node light_source_;
 };

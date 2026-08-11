@@ -10,10 +10,10 @@ class Mesh
 {
 	public: 
 		Mesh(std::vector<GLushort> ebo_values, Vertices vertices, std::vector<Texture> textures, GLenum draw_mode);
-		void draw(ShaderProgram& shader_progam);
+		void draw(ShaderProgram& shader_program);
 
 	private:
-		void load_vertex_attribute(GLuint vbo_binding_index, Vertices::AttributeIndex attribute_index);
+		void load_vertex_attribute(GLuint vbo_binding_index, VertexAttribute::Name attribute_name);
 		void create_ebo();
 		void create_vbo();
 		void create_vao();

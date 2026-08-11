@@ -58,7 +58,7 @@ void Camera::update(float delta_time)
 	//On est obligé de gérer nous-même car il n'y a pas d'événements qui détecte la fin du mouvement de souris
 	mouse_motion_event_end();
 
-	calculate_euler_angles(delta_time);
+	compute_euler_angles(delta_time);
 }
 
 glm::mat4 Camera::look_at(glm::vec3 camera_position, glm::vec3 camera_target_position, glm::vec3 up_vector) const
@@ -70,7 +70,7 @@ glm::mat4 Camera::look_at(glm::vec3 camera_position, glm::vec3 camera_target_pos
 	//operator[] est column major
 	//=> mat[0][1] = colonne 0 ligne 1
 
-	glm::mat4 translation = glm::mat4(1.0f);
+	glm::mat4 translation(1.0f);
 	translation[3][0] = -camera_position.x;
 	translation[3][1] = -camera_position.y;
 	translation[3][2] = -camera_position.z;
@@ -80,7 +80,7 @@ glm::mat4 Camera::look_at(glm::vec3 camera_position, glm::vec3 camera_target_pos
 	//(0    0    1  -z_camera)
 	//(0    0    0    1      )
 
-	glm::mat4 rotation = glm::mat4(1.0f);
+	glm::mat4 rotation(1.0f);
 	rotation[0][0] = left.x;
 	rotation[0][1] = left.y;
 	rotation[0][2] = left.z;
@@ -97,7 +97,7 @@ glm::mat4 Camera::look_at(glm::vec3 camera_position, glm::vec3 camera_target_pos
 	//(forwardx  forwardy  forwardz   0)
 	//(   0         0         0       1)
 
-	glm::mat4 view_matrix = glm::mat4(1.0f);
+	glm::mat4 view_matrix(1.0f);
 	view_matrix = rotation * translation;
 
 	return view_matrix;
@@ -135,7 +135,7 @@ void Camera::mouse_motion_event_end()
 	}
 }
 
-void Camera::calculate_euler_angles(float delta_time)
+void Camera::compute_euler_angles(float delta_time)
 {
 	//yaw et pitch n'ont pas de valeur max/min (grandissent à l'infini si on ne met pas les deux if avec valeur maximale) => pas un problème car on utilise cos et sin
 	float sensitivity = 100.0f;

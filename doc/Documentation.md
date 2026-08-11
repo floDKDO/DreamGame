@@ -5,13 +5,13 @@
 ### Explications
 
 <p align="center">
-  <img src="https://github.com/floDKDO/DreamGame/blob/main/doc/atan2.png" alt="atan2" width="500"/>
+  <img src="https://github.com/floDKDO/DreamGame/blob/main/doc/images/atan2.png" alt="atan2" width="500"/>
 </p>
 
 ### Différences entre atan et atan2
 
 <p align="center">
-  <img src="https://github.com/floDKDO/DreamGame/blob/main/doc/atan_vs_atan2.png" alt="atan Vs atan2" width="500"/>
+  <img src="https://github.com/floDKDO/DreamGame/blob/main/doc/images/atan_vs_atan2.png" alt="atan Vs atan2" width="500"/>
 </p>
 
 
@@ -29,8 +29,8 @@ glm::vec3 front_vector = glm::vec3(
 ### Schémas
 
 <p align="center">
-  <img src="https://github.com/floDKDO/DreamGame/blob/main/doc/yaw.png" alt="Yaw" width="400"/>
-  <img src="https://github.com/floDKDO/DreamGame/blob/main/doc/pitch.png" alt="Pitch" width="400"/>
+  <img src="https://github.com/floDKDO/DreamGame/blob/main/doc/images/yaw.png" alt="Yaw" width="400"/>
+  <img src="https://github.com/floDKDO/DreamGame/blob/main/doc/images/pitch.png" alt="Pitch" width="400"/>
 </p>
 
 
@@ -77,7 +77,7 @@ glm::vec3 front_vector = glm::vec3(
 ### Soustraction entre deux points donne un vecteur
 
 <p align="center">
-  <img src="https://github.com/floDKDO/DreamGame/blob/main/doc/vecteur_soustraction.png" alt="Soustraction vecteur" width="500"/>
+  <img src="https://github.com/floDKDO/DreamGame/blob/main/doc/images/vecteur_soustraction.png" alt="Soustraction vecteur" width="500"/>
 </p>
 
 ### Calculer "diffuse"

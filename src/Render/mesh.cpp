@@ -11,12 +11,12 @@ Mesh::Mesh(std::vector<GLushort> ebo_values, Vertices vertices, std::vector<Text
 	load_mesh();
 }
 
-void Mesh::load_vertex_attribute(GLuint vbo_binding_index, Vertices::AttributeIndex attribute_index)
+void Mesh::load_vertex_attribute(GLuint vbo_binding_index, VertexAttribute::Name attribute_name)
 {
-	std::size_t offset = vertices_.get_attribute_offset(attribute_index);
-	glEnableVertexArrayAttrib(vao_, attribute_index);
-	glVertexArrayAttribFormat(vao_, attribute_index, vertices_.get_number_of_attribute_values(attribute_index), GL_FLOAT, GL_FALSE, GLuint(offset));
-	glVertexArrayAttribBinding(vao_, attribute_index, vbo_binding_index);
+	VertexAttribute::Info attribute_info = Vertex::get_attribute_info(attribute_name);
+	glEnableVertexArrayAttrib(vao_, attribute_info.index_);
+	glVertexArrayAttribFormat(vao_, attribute_info.index_, attribute_info.component_count_, GL_FLOAT, attribute_info.normalized_, GLuint(attribute_info.offset_));
+	glVertexArrayAttribBinding(vao_, attribute_info.index_, vbo_binding_index);
 }
 
 void Mesh::create_ebo()
@@ -28,7 +28,7 @@ void Mesh::create_ebo()
 void Mesh::create_vbo()
 {
 	glCreateBuffers(1, &vbo_);
-	glNamedBufferStorage(vbo_, vertices_.get_length() * vertices_.get_vertex_size(), vertices_.get_data(), GL_DYNAMIC_STORAGE_BIT);
+	glNamedBufferStorage(vbo_, vertices_.get_vertices_number() * sizeof(Vertex), vertices_.get_vertices_data(), GL_DYNAMIC_STORAGE_BIT);
 }
 
 void Mesh::create_vao()
@@ -37,27 +37,27 @@ void Mesh::create_vao()
 
 	glCreateVertexArrays(1, &vao_);
 	glBindVertexArray(vao_);
-	glVertexArrayVertexBuffer(vao_, vbo_binding_index, vbo_, 0, GLsizei(vertices_.get_vertex_size()));
+	glVertexArrayVertexBuffer(vao_, vbo_binding_index, vbo_, 0, GLsizei(sizeof(Vertex)));
 	glVertexArrayElementBuffer(vao_, ebo_);
 
-	if(vertices_.has_positions_)
+	if(vertices_.has_position_attribute())
 	{
-		load_vertex_attribute(vbo_binding_index, Vertices::AttributeIndex::POSITION);
+		load_vertex_attribute(vbo_binding_index, VertexAttribute::Name::POSITION);
 	}
 
-	if(vertices_.has_normals_)
+	if(vertices_.has_normal_attribute())
 	{
-		load_vertex_attribute(vbo_binding_index, Vertices::AttributeIndex::NORMAL);
+		load_vertex_attribute(vbo_binding_index, VertexAttribute::Name::NORMAL);
 	}
 
-	if(vertices_.has_texture_coordinates_)
+	if(vertices_.has_texture_coordinates_attribute())
 	{
-		load_vertex_attribute(vbo_binding_index, Vertices::AttributeIndex::TEXTURE_COORD);
+		load_vertex_attribute(vbo_binding_index, VertexAttribute::Name::TEXTURE_COORD);
 	}
 
-	if(vertices_.has_colors_)
+	if(vertices_.has_color_attribute())
 	{
-		load_vertex_attribute(vbo_binding_index, Vertices::AttributeIndex::COLOR);
+		load_vertex_attribute(vbo_binding_index, VertexAttribute::Name::COLOR);
 	}
 }
 
@@ -108,9 +108,9 @@ void Mesh::load_mesh()
 	create_textures();
 }
 
-void Mesh::draw(ShaderProgram& shader_progam)
+void Mesh::draw(ShaderProgram& shader_program)
 {
 	glBindVertexArray(vao_);
 	glDrawElements(draw_mode_, GLsizei(ebo_values_.size()), GL_UNSIGNED_SHORT, 0);
-	//glBindVertexArray(0); //= unbind, provoque des erreurs
+	//glBindVertexArray(0); //= unbind, commenté car provoque des erreurs
 }

@@ -38,7 +38,7 @@ class Camera
 		void set_rotation_mouse(float xrel, float yrel);
 		void set_rotation_joystick(Sint16 axis_value, sdl::Gamepad::JoystickAxis joystick_axis);
 		void mouse_motion_event_end();
-		void calculate_euler_angles(float delta_time);
+		void compute_euler_angles(float delta_time);
 
 		glm::mat4& view_matrix_;
 		EulerAngles euler_angles_;

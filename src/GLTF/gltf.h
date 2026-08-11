@@ -19,6 +19,5 @@ std::string get_component_type_str(int32_t component_type);
 std::size_t get_component_type_size(int32_t component_type);
 std::string get_filter_str(int32_t filter);
 std::string get_wrap_str(int32_t wrap);
-GLfloat ieee754_to_float(uint64_t ieee754_number);
 
 }

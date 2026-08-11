@@ -5,6 +5,9 @@
 #include <string_view>
 #include <vector>
 
+namespace gltf
+{
+
 class Scene
 {
 	public:
@@ -19,5 +22,7 @@ class Scene
 
 	private:
 		std::string path_;
-		std::vector<Node> nodes_;
+		std::vector<gltf::Node> nodes_;
 };
+
+}

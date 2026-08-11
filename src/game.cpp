@@ -22,7 +22,7 @@ Game::Game()
 	window_.get_size(&w, &h); 
 	glViewport(0, 0, w, h);
 
-	SDL_SetWindowRelativeMouseMode(window_.fetch(), true);
+	window_.set_relative_mouse_mode(true);
 
 	stbi_set_flip_vertically_on_load(true);
 
@@ -49,7 +49,7 @@ void Game::run()
 {
 	int w, h;
 	window_.get_size(&w, &h);
-	glm::mat4 projection_matrix = glm::mat4(1.0f);
+	glm::mat4 projection_matrix(1.0f);
 	projection_matrix = glm::perspective(glm::radians(45.0f), float(w) / float(h), 0.1f, 100.0f);
 
 	shader_program_phong_.use();
@@ -67,17 +67,16 @@ void Game::run()
 
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-	Uint64 second = 0;              //en ms
 	Uint64 begin_current_frame = 0; //en ms
 	Uint64 last_frame = 0;          //en ms
-	float delta_time = 0;           //en secondes
-	unsigned int frame_count = 0;
+	float  delta_time = 0;          //en secondes
+	Uint64 last_fps_refresh = 0;    //en ms
+	unsigned int frame_count_this_second = 0; //nombre de frames par seconde
 
 	while(running_)
 	{
 		begin_current_frame = SDL_GetTicks();
 		delta_time = (float(begin_current_frame) - float(last_frame)) / 1000.0f; //conversion en secondes
-		frame_count += 1;
 
 		handle_events();
 
@@ -91,13 +90,7 @@ void Game::run()
 		update(delta_time);
 		draw();
 
-		if(SDL_GetTicks() - second >= 1000)
-		{
-			std::string fps_count = ", FPS: " + std::to_string(frame_count);
-			update_fps_count(fps_count);
-			second = SDL_GetTicks();
-			frame_count = 0;
-		}
+		update_fps_count(last_fps_refresh, frame_count_this_second);
 		last_frame = begin_current_frame;
 	}
 }
@@ -162,27 +155,22 @@ void Game::draw()
 	window_.swap_buffers();
 }
 
-void Game::check_gamepad()
+void Game::update_fps_count(Uint64& last_fps_refresh, unsigned int& frame_count_this_second) const
 {
-	static Uint64 last_time = 0, current_time = 0;
-	current_time = SDL_GetTicks();
-	if(!gamepad_.is_open() && current_time > last_time + 1000) //tester une fois par seconde
+	frame_count_this_second += 1;
+	if(SDL_GetTicks() >= last_fps_refresh + 1000) //tester une fois par seconde pour obtenir des frames par seconde
 	{
-		gamepad_.open();
-		last_time = current_time;
+		window_.update_fps(frame_count_this_second);
+		last_fps_refresh = SDL_GetTicks();
+		frame_count_this_second = 0;
 	}
-}
-
-void Game::update_fps_count(std::string_view fps) const
-{
-	window_.set_title("DreamGame" + std::string(fps));
 }
 
 void Game::update(float delta_time)
 {
 	camera_.update(delta_time);
 	player_.update(delta_time);
-	check_gamepad();
+	gamepad_.check(1000); //tester une fois par seconde
 	shader_program_phong_.set_uniform_3f("view_position_", camera_.camera_position_);
 	shader_program_phong_.set_uniform_3f("light_position_", light_source_.position_);
 }

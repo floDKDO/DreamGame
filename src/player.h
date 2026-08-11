@@ -1,6 +1,6 @@
 #pragma once
 
-#include "GLTF/node.h"
+#include "glTF/node.h"
 #include "RAII_SDL3/gamepad.h"
 #include "Render/shader_program.h"
 
@@ -17,7 +17,7 @@ class Player
 
 		glm::mat4& view_matrix_;
 		//glm::vec3 position_;
-		Node model_;
+		gltf::Node model_;
 
 	private:
 		///////////////////////////////////

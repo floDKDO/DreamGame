@@ -227,10 +227,10 @@ void Player::update(float delta_time)
 
 	model_.position_.y = 0.75f; //TODO : hauteur du sol
 
-	model_.rotation_info_.angle_ = -glm::degrees(atan2((x_movement_intensity_ * 7.5f * delta_time)/* * utils::get_camera_left(view_matrix_).x*/, (y_movement_intensity_ * 7.5f * delta_time)/* * utils::get_camera_forward(view_matrix_).z*/));
+	model_.rotation_info_.angle_ = -glm::degrees(atan2((x_movement_intensity_ * sensitivity * delta_time)/* * utils::get_camera_left(view_matrix_).x*/, (y_movement_intensity_ * sensitivity * delta_time)/* * utils::get_camera_forward(view_matrix_).z*/));
 	model_.rotation_info_.axis_ = glm::vec3(0.0f, 1.0f, 0.0f);
 
 	//model_.compute_model(position_, 
-	//	-glm::degrees(atan2((x_movement_intensity_ * 7.5f * delta_time)/* * utils::get_camera_left(view_matrix_).x*/, (y_movement_intensity_ * 7.5f * delta_time)/* * utils::get_camera_forward(view_matrix_).z*/)), 
+	//	-glm::degrees(atan2((x_movement_intensity_ * sensitivity * delta_time)/* * utils::get_camera_left(view_matrix_).x*/, (y_movement_intensity_ * sensitivity * delta_time)/* * utils::get_camera_forward(view_matrix_).z*/)), 
 	//	glm::vec3(0.0f, 1.0f, 0.0f));
 }

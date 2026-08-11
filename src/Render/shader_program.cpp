@@ -1,4 +1,5 @@
 #include "shader_program.h"
+#include "utils.h"
 
 #include <fstream>
 #include <sstream>
@@ -21,12 +22,10 @@ ShaderProgram::ShaderProgram(std::vector<std::string> shader_paths)
 		std::filesystem::path path = shader_path;
 		if(path.extension() == ".vert")
 		{
-			std::cout << "Shader VERTEX: " << shader_path << std::endl;
 			create_shader(GL_VERTEX_SHADER, shader_path);
 		}
 		else if(path.extension() == ".frag")
 		{
-			std::cout << "Shader FRAGMENT: " << shader_path << std::endl;
 			create_shader(GL_FRAGMENT_SHADER, shader_path);
 		}
 	}
@@ -66,17 +65,7 @@ void ShaderProgram::create_shader(GLenum shader_type, std::string_view shader_pa
 	shaders_.push_back(glCreateShader(shader_type));
 	GLuint shader = shaders_.back();
 
-	std::string shader_path_str = std::string(shader_path);
-	std::ifstream shader_file(shader_path_str);
-	if(!shader_file.is_open())
-	{
-		std::cerr << "Error: unable to open the requested file (" << shader_path << ")!\n";
-	}
-
-	std::stringstream shader_stream;
-	shader_stream << shader_file.rdbuf();
-
-	std::string str_source_code = shader_stream.str();
+	std::string str_source_code = utils::get_string_from_file(shader_path);
 	const char* source_code = str_source_code.c_str();
 
 	glShaderSource(shader, 1, &source_code, nullptr);

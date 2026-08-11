@@ -9,7 +9,7 @@ namespace gltf
 
 glm::mat4 get_mat4_from_1d_matrix(double m[16])
 {
-	glm::mat4 matrix_mat4 = glm::mat4(1.0f);
+	glm::mat4 matrix_mat4(1.0f);
 	for(glm::length_t i = 0; i < 4 * 4; i += 4)
 	{
 		for(glm::length_t j = 0; j < 4; ++j)
@@ -22,15 +22,15 @@ glm::mat4 get_mat4_from_1d_matrix(double m[16])
 
 glm::mat4 get_transformation_matrix(double rotation[4], double scale[3], double translation[3])
 {
-	glm::mat4 matrix_mat4 = glm::mat4(1.0f);
-	glm::vec4 rotation_vec4 = glm::vec4(float(rotation[0]), float(rotation[1]), float(rotation[2]), float(rotation[3]));
-	glm::vec3 scale_vec3 = glm::vec3(float(scale[0]), float(scale[1]), float(scale[2]));
-	glm::vec3 translation_vec3 = glm::vec3(float(translation[0]), float(translation[1]), float(translation[2]));
+	glm::mat4 matrix_mat4(1.0f);
+	glm::vec4 rotation_vec4(rotation[0], rotation[1], rotation[2], rotation[3]);
+	glm::vec3 scale_vec3(scale[0], scale[1], scale[2]);
+	glm::vec3 translation_vec3(translation[0], translation[1], translation[2]);
 
 	matrix_mat4 = glm::translate(matrix_mat4, translation_vec3);
 	if(rotation_vec4.x != 0.0f || rotation_vec4.y != 0.0f || rotation_vec4.z != 0.0f)
 	{
-		matrix_mat4 = glm::rotate(matrix_mat4, glm::acos(rotation_vec4.w) * 2.0f, glm::vec3(rotation_vec4.x, rotation_vec4.y, rotation_vec4.z)); //glm::acos donne l'angle en radian donc pas besoin d'utiliser glm::radians
+		matrix_mat4 = glm::rotate(matrix_mat4, glm::acos(rotation_vec4.w), glm::vec3(rotation_vec4.x, rotation_vec4.y, rotation_vec4.z)); //glm::acos donne l'angle en radian donc pas besoin d'utiliser glm::radians
 	}
 	matrix_mat4 = glm::scale(matrix_mat4, scale_vec3);
 
@@ -65,7 +65,7 @@ void print_1d_matrix(double m[16])
 
 bool is_mat4_identity(glm::mat4 m)
 {
-	glm::mat4 identity = glm::mat4(1.0f);
+	glm::mat4 identity(1.0f);
 	for(glm::length_t i = 0; i < 4; ++i)
 	{
 		for(glm::length_t j = 0; j < 4; ++j)
@@ -81,7 +81,7 @@ bool is_mat4_identity(glm::mat4 m)
 
 bool is_1d_matrix_identity(double m[16])
 {
-	glm::mat4 identity = glm::mat4(1.0f);
+	glm::mat4 identity(1.0f);
 	for(glm::length_t i = 0; i < 4 * 4; i += 4)
 	{
 		for(glm::length_t j = 0; j < 4; ++j)
@@ -286,13 +286,6 @@ std::string get_wrap_str(int32_t wrap)
 			break;
 	}
 	return wrap_str;
-}
-
-GLfloat ieee754_to_float(uint64_t ieee754_number)
-{
-	GLfloat float_number;
-	std::memcpy(&float_number, &ieee754_number, sizeof(float_number)); //obligé de faire cela pour convertir un nombre IEEE-754 en float (voir https://stackoverflow.com/questions/56710780/how-is-1-encoded-in-c-c-as-a-float-assuming-ieee-754-single-precision-represe)
-	return float_number;
 }
 
 }

@@ -23,12 +23,18 @@ class Gamepad
 
 		SDL_Gamepad* fetch() const;
 		Sint16 get_axis(SDL_GamepadAxis axis) const;
-		bool is_open() const;
-		void open();
+		void check(Uint64 period);
 
 		static const float joystick_deadzone_;
 
 	private:
+		bool is_open() const;
+		void open();
+
+		//for the check method
+		Uint64 last_check_time_;
+		Uint64 current_check_time_;
+
 		SDL_Gamepad* gamepad_;
 };
 

@@ -2,6 +2,9 @@
 
 #include <iostream>
 
+namespace gltf
+{
+
 Scene::Scene(std::string_view path)
 	: path_(path)
 {
@@ -43,8 +46,10 @@ Scene::~Scene()
 
 void Scene::draw(ShaderProgram& shader_program)
 {
-	for(Node& node : nodes_)
+	for(gltf::Node& node : nodes_)
 	{
 		node.draw(shader_program);
 	}
+}
+
 }

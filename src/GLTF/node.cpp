@@ -1,4 +1,5 @@
 #include "node.h"
+#include "gltf.h"
 
 #ifndef GLM_ENABLE_EXPERIMENTAL
 #define GLM_ENABLE_EXPERIMENTAL
@@ -8,9 +9,12 @@
 #include <glm/gtc/quaternion.hpp>
 #include <iostream>
 
+namespace gltf
+{
+
 Node::Node(std::string_view path)
 	: path_(path), mesh_index_(-1), //model_matrix_(glm::mat4(1.0f)), 
-	position_(0.0f, 0.0f, 0.0f), 
+	position_(0.0f, 0.0f, 0.0f),
 	rotation_(0.0f, 0.0f, 0.0f, 1.0f), rotation_info_({0.0f, glm::vec3(0.0f, 1.0f, 0.0f)}),
 	scale_(1.0f, 1.0f, 1.0f)
 {
@@ -38,7 +42,7 @@ void Node::open_gltf_file()
 
 void Node::print_info_gltf() const
 {
-	std::cout << "\n**** Info on the GLTF file/model ****\n";
+	std::cout << "\n**** Info on the glTF file/model ****\n";
 	std::cout << "- File name: " << path_ << std::endl;
 	std::cout << "- The model has " << model_.nodes_count << " node(s), " << model_.meshes_count << " meshe(s), " << model_.buffer_views_count << " buffer view(s), " << model_.accessors_count << " accessor(s), " << model_.textures_count << " texture(s), " << model_.samplers_count << " sampler(s) and " << model_.images_count << " image(s).\n";
 
@@ -52,12 +56,12 @@ void Node::print_info_gltf() const
 
 		tg3_mesh mesh = model_.meshes[node.mesh];
 		std::cout << "- Mesh " << model_.nodes->mesh << ": " << std::endl;
-		for(uint32_t k = 0; k < mesh.primitives_count; ++k)
+		for(uint32_t j = 0; j < mesh.primitives_count; ++j)
 		{
-			tg3_primitive primitive = mesh.primitives[k];
-			for(uint32_t kk = 0; kk < primitive.attributes_count; kk++)
+			tg3_primitive primitive = mesh.primitives[j];
+			for(uint32_t k = 0; k < primitive.attributes_count; k++)
 			{
-				std::cout << "   .Primitive: " << primitive.attributes[kk].key.data << " = " << primitive.attributes[kk].value << std::endl;
+				std::cout << "   .Primitive: " << primitive.attributes[k].key.data << " = " << primitive.attributes[k].value << std::endl;
 			}
 			std::cout << "   .Indices: " << primitive.indices << std::endl;
 		}
@@ -120,7 +124,7 @@ void Node::print_info_gltf() const
 
 glm::mat4 Node::compute_model(/*glm::vec3 translation_vector, float angle, glm::vec3 axis*/)
 {
-	glm::mat4 model_matrix = glm::mat4(1.0f); //reset de la matrice model à chaque frame
+	glm::mat4 model_matrix(1.0f); //reset de la matrice model à chaque frame
 	model_matrix = glm::translate(model_matrix, position_);
 
 	//TODO : rotation (vérifier)
@@ -131,7 +135,7 @@ glm::mat4 Node::compute_model(/*glm::vec3 translation_vector, float angle, glm::
 
 	return model_matrix;
 
-	/*model_matrix_ = glm::mat4(1.0f); //reset de la matrice model à chaque frame
+	/*model_matrix_(1.0f); //reset de la matrice model à chaque frame
 	model_matrix_ = glm::translate(model_matrix_, translation_vector);
 	model_matrix_ = glm::rotate(model_matrix_, glm::radians(angle), axis);*/
 }
@@ -154,7 +158,7 @@ void Node::load_meshes()
 			{
 				mesh_texture.image_path_ = "";
 				//std::string image_data_base64 = image_str.substr(image_str.find(',') + 1); //+1 pour ne pas prendre la virgule
-				std::cout << "****ERROR****: Embedded GLTF not handled for now!\n";
+				std::cout << "****ERROR****: Embedded glTF not handled for now!\n";
 			}
 			else
 			{
@@ -201,7 +205,7 @@ void Node::load_meshes()
 		//TODO : à vérifier
 		//position_ = glm::vec3(node.matrix[3], node.matrix[7], node.matrix[11]);
 
-		//glm::mat4 model_matrix = glm::mat4(1.0f);
+		//glm::mat4 model_matrix(1.0f);
 		//model_matrix = glm::decompose(model_matrix, scale_, glm::quat(rotation_), position_, glm::vec3(1.0f), glm::vec4(1.0f));
 		//rotation_ = glm::conjugate(glm::quat(rotation_));
 		//gltf::print_mat4(model_matrix);
@@ -209,9 +213,9 @@ void Node::load_meshes()
 	}
 
 	tg3_mesh mesh = model_.meshes[node.mesh];
-	for(uint32_t k = 0; k < mesh.primitives_count; ++k)
+	for(uint32_t i = 0; i < mesh.primitives_count; ++i)
 	{
-		tg3_primitive primitive = mesh.primitives[k];
+		tg3_primitive primitive = mesh.primitives[i];
 		std::vector<GLushort> ebo_values = get_ebo_values(primitive);
 		Vertices vertices = get_vertices(primitive);
 		meshes_.push_back(Mesh(ebo_values, vertices, textures, primitive.mode));
@@ -276,7 +280,7 @@ std::vector<glm::vec4> Node::get_vec4_color_attribute(const tg3_str_int_pair& at
 		{
 			for(uint64_t i = buffer_view.byte_offset + accessor.byte_offset; i < buffer_view.byte_offset + buffer_view.byte_length; i += 4 * sizeof(GLubyte)) //car sizeof(glm::vec4) != 4 * sizeof(sizeof(GLubyte))
 			{
-				glm::vec4 vec4 = glm::vec4(0.0f, 0.0f, 0.0f, 0.0f);
+				glm::vec4 vec4(0.0f, 0.0f, 0.0f, 0.0f);
 				for(uint64_t j = 0; j < component_type_size * glm::vec4::length(); j += component_type_size)
 				{
 					uint8_t attribute_u8 = 0; //uint8_t car un unsigned short fait 8 bits
@@ -295,7 +299,7 @@ std::vector<glm::vec4> Node::get_vec4_color_attribute(const tg3_str_int_pair& at
 		{
 			for(uint64_t i = buffer_view.byte_offset + accessor.byte_offset; i < buffer_view.byte_offset + buffer_view.byte_length; i += 4 * sizeof(GLushort)) //car sizeof(glm::vec4) != 4 * sizeof(sizeof(GLushort))
 			{
-				glm::vec4 vec4 = glm::vec4(0.0f, 0.0f, 0.0f, 0.0f);
+				glm::vec4 vec4(0.0f, 0.0f, 0.0f, 0.0f);
 				for(uint64_t j = 0; j < component_type_size * glm::vec4::length(); j += component_type_size)
 				{
 					uint16_t attribute_u16 = 0; //uint16_t car un unsigned short fait 16 bits
@@ -377,4 +381,6 @@ void Node::draw(ShaderProgram& shader_program)
 	{
 		mesh.draw(shader_program);
 	}
+}
+
 }
