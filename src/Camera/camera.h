@@ -8,10 +8,14 @@
 class Camera
 {
 	public:
-		Camera(glm::mat4& view_matrix, glm::vec3& target_position);
+		Camera(glm::vec3& target_position);
 
 		void handle_events(const SDL_Event& e);
 		void update(float delta_time);
+
+		glm::vec3 get_camera_forward() const;
+		glm::vec3 get_camera_left() const;
+		glm::mat4 get_view_matrix() const;
 
 		glm::vec3& target_position_;
 		glm::vec3 target_to_camera_offset_;
@@ -40,7 +44,8 @@ class Camera
 		void mouse_motion_event_end();
 		void compute_euler_angles(float delta_time);
 
-		glm::mat4& view_matrix_;
+		glm::mat4 view_matrix_;
+
 		EulerAngles euler_angles_;
 		Uint64 mouse_motion_last_time_;
 		bool is_rotation_from_joystick_;

@@ -10,7 +10,7 @@
 class ShaderProgram
 {
 	public:
-		ShaderProgram(std::vector<std::string> shader_paths);
+		ShaderProgram(std::string_view shader_program_name, std::vector<std::string> shader_paths);
 		~ShaderProgram();
 
 		ShaderProgram(const ShaderProgram&) = delete;
@@ -30,6 +30,7 @@ class ShaderProgram
 		void insert_uniform(const GLchar* name);
 
 		GLuint shader_program_;
+		std::string shader_program_name_;
 		std::vector<GLuint> shaders_;
 		std::unordered_map<std::string, GLint> uniforms_;
 };

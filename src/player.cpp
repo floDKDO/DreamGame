@@ -6,8 +6,8 @@
 
 const float Player::max_movement_intensity_ = 1.0f;
 
-Player::Player(glm::mat4& view_matrix)
-	: view_matrix_(view_matrix), model_("resources/models/capsule.glb"), //position_(glm::vec3(0.0f, 0.0f, 0.0f)), 
+Player::Player()
+	: model_("resources/models/capsule.glb"), //position_(glm::vec3(0.0f, 0.0f, 0.0f)), 
 	is_arrow_key_pressed_(false), is_pad_pressed_(false), is_movement_from_joystick_(false), 
 	x_movement_intensity_(0.0f), y_movement_intensity_(0.0f)
 {}
@@ -212,25 +212,25 @@ void Player::handle_events(const SDL_Event& e)
 	}
 } 
 
-void Player::update(float delta_time)
+void Player::update(float delta_time, glm::vec3 camera_forward, glm::vec3 camera_left)
 {
 	float sensitivity = 7.5f;
 	if(y_movement_intensity_ != 0.0f)
 	{
-		model_.position_ += (y_movement_intensity_ * sensitivity * delta_time) * utils::get_camera_forward(view_matrix_);
+		model_.position_ += (y_movement_intensity_ * sensitivity * delta_time) * camera_forward;
 	}
 
 	if(x_movement_intensity_ != 0.0f)
 	{
-		model_.position_ -= (x_movement_intensity_ * sensitivity * delta_time) * utils::get_camera_left(view_matrix_);
+		model_.position_ -= (x_movement_intensity_ * sensitivity * delta_time) * camera_left;
 	}
 
 	model_.position_.y = 0.75f; //TODO : hauteur du sol
 
-	model_.rotation_info_.angle_ = -glm::degrees(atan2((x_movement_intensity_ * sensitivity * delta_time)/* * utils::get_camera_left(view_matrix_).x*/, (y_movement_intensity_ * sensitivity * delta_time)/* * utils::get_camera_forward(view_matrix_).z*/));
+	model_.rotation_info_.angle_ = -glm::degrees(atan2((x_movement_intensity_ * sensitivity * delta_time)/* * camera_left.x*/, (y_movement_intensity_ * sensitivity * delta_time)/* * camera_forward.z*/));
 	model_.rotation_info_.axis_ = glm::vec3(0.0f, 1.0f, 0.0f);
 
 	//model_.compute_model(position_, 
-	//	-glm::degrees(atan2((x_movement_intensity_ * sensitivity * delta_time)/* * utils::get_camera_left(view_matrix_).x*/, (y_movement_intensity_ * sensitivity * delta_time)/* * utils::get_camera_forward(view_matrix_).z*/)), 
+	//	-glm::degrees(atan2((x_movement_intensity_ * sensitivity * delta_time)/* * camera_left.x*/, (y_movement_intensity_ * sensitivity * delta_time)/* * camera_forward.z*/)), 
 	//	glm::vec3(0.0f, 1.0f, 0.0f));
 }

@@ -14,12 +14,13 @@ constexpr int info_log_size_ = 512;
 
 }
 
-ShaderProgram::ShaderProgram(std::vector<std::string> shader_paths)
-	: shader_program_(glCreateProgram())
+ShaderProgram::ShaderProgram(std::string_view shader_program_name, std::vector<std::string> shader_paths)
+	: shader_program_(glCreateProgram()), shader_program_name_(shader_program_name)
 {
 	for(const std::string& shader_path : shader_paths)
 	{
 		std::filesystem::path path = shader_path;
+
 		if(path.extension() == ".vert")
 		{
 			create_shader(GL_VERTEX_SHADER, shader_path);
@@ -33,7 +34,7 @@ ShaderProgram::ShaderProgram(std::vector<std::string> shader_paths)
 }
 
 ShaderProgram::ShaderProgram(ShaderProgram&& shader_program)
-	: shader_program_(shader_program.shader_program_), shaders_(shader_program.shaders_), uniforms_(shader_program.uniforms_)
+	: shader_program_(shader_program.shader_program_), shader_program_name_(shader_program.shader_program_name_), shaders_(shader_program.shaders_), uniforms_(shader_program.uniforms_)
 {
 	shader_program.shader_program_ = 0; // void glDeleteProgram(GLuint program); -> "A value of 0 for program will be silently ignored."
 }

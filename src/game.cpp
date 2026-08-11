@@ -12,12 +12,9 @@
 //TODO : free ImGui
 
 Game::Game()
-	: sdl_(), window_(), glew_(glewInit()), shader_program_({"resources/shaders/base_shader.vert", "resources/shaders/base_shader.frag"}), 
-	shader_program_phong_({"resources/shaders/base_shader.vert", "resources/shaders/phong_shader.frag"}), /*model_matrix_(glm::mat4(1.0f)),*/ view_matrix_(glm::mat4(1.0f)), player_(view_matrix_),
-	camera_(view_matrix_, player_.model_.position_), running_(true), gamepad_(), temp_model_("resources/models/corridor.glb"), light_source_("resources/models/light_source.glb")
+	: sdl_(), window_(), glew_(glewInit()), player_(),
+	camera_(player_.model_.position_), running_(true), gamepad_(), temp_model_("resources/models/corridor.glb"), light_source_("resources/models/light_source.glb")
 {
-	//model_matrix_ = glm::rotate(model_matrix_, glm::radians(-10.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-
 	int w, h;
 	window_.get_size(&w, &h); 
 	glViewport(0, 0, w, h);
@@ -43,6 +40,9 @@ Game::Game()
 	ImGui_ImplSDL3_InitForOpenGL(window_.fetch(), window_.get_context());
 	ImGui_ImplOpenGL3_Init();
 	////////////////////////////////////////////////////////////////////////////////////////
+
+	shader_programs_.insert(std::make_pair("Base", ShaderProgram("Base", {"resources/shaders/base_shader.vert", "resources/shaders/base_shader.frag"})));
+	shader_programs_.insert(std::make_pair("Phong", ShaderProgram("Phong", {"resources/shaders/base_shader.vert", "resources/shaders/phong_shader.frag"})));
 }
 
 void Game::run()
@@ -52,16 +52,16 @@ void Game::run()
 	glm::mat4 projection_matrix(1.0f);
 	projection_matrix = glm::perspective(glm::radians(45.0f), float(w) / float(h), 0.1f, 100.0f);
 
-	shader_program_phong_.use();
-	shader_program_phong_.set_uniform_1i("texture_sampler0_", 0);
-	//shader_program_phong_.set_uniform_matrix_4fv("model_matrix_", glm::value_ptr(model_matrix_));
-	shader_program_phong_.set_uniform_matrix_4fv("view_matrix_", glm::value_ptr(view_matrix_));
-	shader_program_phong_.set_uniform_matrix_4fv("projection_matrix_", glm::value_ptr(projection_matrix));
+	ShaderProgram& phong_program = shader_programs_.at("Phong");
+	phong_program.use();
+	phong_program.set_uniform_1i("texture_sampler0_", 0);
+	phong_program.set_uniform_matrix_4fv("view_matrix_", glm::value_ptr(camera_.get_view_matrix()));
+	phong_program.set_uniform_matrix_4fv("projection_matrix_", glm::value_ptr(projection_matrix));
 
-	shader_program_.use();
-	//shader_program_.set_uniform_matrix_4fv("model_matrix_", glm::value_ptr(model_matrix_));
-	shader_program_.set_uniform_matrix_4fv("view_matrix_", glm::value_ptr(view_matrix_));
-	shader_program_.set_uniform_matrix_4fv("projection_matrix_", glm::value_ptr(projection_matrix));
+	ShaderProgram& base_program = shader_programs_.at("Base");
+	base_program.use();
+	base_program.set_uniform_matrix_4fv("view_matrix_", glm::value_ptr(camera_.get_view_matrix()));
+	base_program.set_uniform_matrix_4fv("projection_matrix_", glm::value_ptr(projection_matrix));
 
 	light_source_.position_ = glm::vec3(0.0f, 5.0f, 0.0f);
 
@@ -134,18 +134,18 @@ void Game::draw()
 	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	shader_program_.use();
-	//shader_program_.set_uniform_matrix_4fv("model_matrix_", glm::value_ptr(model_matrix_));
-	shader_program_.set_uniform_matrix_4fv("view_matrix_", glm::value_ptr(view_matrix_));
+	ShaderProgram& base_program = shader_programs_.at("Base");
+	base_program.use();
+	base_program.set_uniform_matrix_4fv("view_matrix_", glm::value_ptr(camera_.get_view_matrix()));
 	glDrawArrays(GL_TRIANGLES, 0, 36);
-	light_source_.draw(shader_program_);
+	light_source_.draw(base_program);
 
-	shader_program_phong_.use();
-	//shader_program_phong_.set_uniform_matrix_4fv("model_matrix_", glm::value_ptr(model_matrix_));
-	shader_program_phong_.set_uniform_matrix_4fv("view_matrix_", glm::value_ptr(view_matrix_));
+	ShaderProgram& phong_program = shader_programs_.at("Phong");
+	phong_program.use();
+	phong_program.set_uniform_matrix_4fv("view_matrix_", glm::value_ptr(camera_.get_view_matrix()));
 	glDrawArrays(GL_TRIANGLES, 0, 36);
-	temp_model_.draw(shader_program_phong_);
-	player_.draw(shader_program_phong_);
+	temp_model_.draw(phong_program);
+	player_.draw(phong_program);
 
 	////////////////////////////////////////////////////////////////////////////////////////
 	ImGui::Render();
@@ -169,8 +169,10 @@ void Game::update_fps_count(Uint64& last_fps_refresh, unsigned int& frame_count_
 void Game::update(float delta_time)
 {
 	camera_.update(delta_time);
-	player_.update(delta_time);
+	player_.update(delta_time, camera_.get_camera_forward(), camera_.get_camera_left());
 	gamepad_.check(1000); //tester une fois par seconde
-	shader_program_phong_.set_uniform_3f("view_position_", camera_.camera_position_);
-	shader_program_phong_.set_uniform_3f("light_position_", light_source_.position_);
+
+	ShaderProgram& phong_program = shader_programs_.at("Phong");
+	phong_program.set_uniform_3f("view_position_", camera_.camera_position_);
+	phong_program.set_uniform_3f("light_position_", light_source_.position_);
 }

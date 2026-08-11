@@ -7,8 +7,9 @@
 const float Camera::EulerAngles::min_pitch_ = -25.0f;
 const float Camera::EulerAngles::max_pitch_ = 40.0f;
 
-Camera::Camera(glm::mat4& view_matrix, glm::vec3& target_position)
-	: view_matrix_(view_matrix), target_position_(target_position), target_to_camera_offset_(0.0f, 2.5f, 0.0f), 
+Camera::Camera(glm::vec3& target_position)
+	: view_matrix_(look_at(camera_position_, target_position_ + target_to_camera_offset_, glm::vec3(0.0f, 1.0f, 0.0f))), 
+	target_position_(target_position), target_to_camera_offset_(0.0f, 2.5f, 0.0f),
 	camera_position_(target_position + target_to_camera_offset_), euler_angles_(), 
 	mouse_motion_last_time_(0), is_rotation_from_joystick_(false), x_rotation_intensity_(0.0f), y_rotation_intensity_(0.0f)
 {}
@@ -59,6 +60,21 @@ void Camera::update(float delta_time)
 	mouse_motion_event_end();
 
 	compute_euler_angles(delta_time);
+}
+
+glm::vec3 Camera::get_camera_forward() const
+{
+	return glm::vec3(-view_matrix_[0][2], -view_matrix_[1][2], -view_matrix_[2][2]);
+}
+
+glm::vec3 Camera::get_camera_left() const
+{
+	return glm::vec3(-view_matrix_[0][0], -view_matrix_[1][0], -view_matrix_[2][0]);
+}
+
+glm::mat4 Camera::get_view_matrix() const
+{
+	return view_matrix_;
 }
 
 glm::mat4 Camera::look_at(glm::vec3 camera_position, glm::vec3 camera_target_position, glm::vec3 up_vector) const

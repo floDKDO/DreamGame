@@ -9,13 +9,12 @@
 class Player
 {
 	public:
-		Player(glm::mat4& view_matrix);
+		Player();
 
 		void draw(ShaderProgram& shader_program);
 		void handle_events(const SDL_Event& e);
-		void update(float delta_time);
+		void update(float delta_time, glm::vec3 camera_forward, glm::vec3 camera_left);
 
-		glm::mat4& view_matrix_;
 		//glm::vec3 position_;
 		gltf::Node model_;
 

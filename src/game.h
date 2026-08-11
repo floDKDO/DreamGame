@@ -22,10 +22,8 @@ class Game
 		sdl::SDL sdl_;
 		sdl::Window window_;
 		GLenum glew_;
-		ShaderProgram shader_program_;
-		ShaderProgram shader_program_phong_;
-		//glm::mat4 model_matrix_;
-		glm::mat4 view_matrix_; //TODO : placée ici car partagée entre la caméra et le joueur (peut-être la placer à un autre endroit)
+		std::unordered_map<std::string, ShaderProgram> shader_programs_;
+
 		Player player_;
 		Camera camera_;
 		bool running_;
