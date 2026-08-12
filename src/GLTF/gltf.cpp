@@ -289,4 +289,15 @@ std::string get_wrap_str(int32_t wrap)
 	return wrap_str;
 }
 
+std::vector<glm::vec4> vec3_to_vec4_colors(std::vector<glm::vec3> vector)
+{
+	std::vector<glm::vec4> vector_vec4;
+	vector_vec4.reserve(vector.size());
+	for(const glm::vec3& v : vector)
+	{
+		vector_vec4.push_back(glm::vec4(v, 1.0f)); //1.0f = alpha
+	}
+	return vector_vec4;
+}
+
 }

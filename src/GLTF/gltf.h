@@ -1,7 +1,10 @@
 #pragma once
 
 #include <glm/mat4x4.hpp>
+#include <glm/vec3.hpp>
+#include <glm/vec4.hpp>
 #include <string>
+#include <vector>
 
 namespace gltf
 {
@@ -18,5 +21,6 @@ std::string get_component_type_str(int32_t component_type);
 std::size_t get_component_type_size(int32_t component_type);
 std::string get_filter_str(int32_t filter);
 std::string get_wrap_str(int32_t wrap);
+std::vector<glm::vec4> vec3_to_vec4_colors(std::vector<glm::vec3> vector);
 
 }

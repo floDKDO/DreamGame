@@ -13,7 +13,7 @@
 
 Game::Game()
 	: sdl_(), window_(), glew_(glewInit()), player_(intput_manager_),
-	camera_(intput_manager_, player_.model_.position_), running_(true), gamepad_(), temp_model_("resources/models/corridor.glb"), light_source_("resources/models/light_source.glb")
+	camera_(intput_manager_, player_.model_.position_), running_(true), gamepad_(), temp_model_("resources/models/temp.gltf"), light_source_("resources/models/light_source.glb")
 {
 	int w, h;
 	window_.get_size(&w, &h); 
