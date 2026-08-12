@@ -5,6 +5,7 @@
 #include "glTF/node.h"
 #include "Camera/camera.h"
 #include "player.h"
+#include "Input/input_manager.h"
 
 class Game
 {
@@ -23,6 +24,7 @@ class Game
 		sdl::Window window_;
 		GLenum glew_;
 		std::unordered_map<std::string, ShaderProgram> shader_programs_;
+		InputManager intput_manager_;
 
 		Player player_;
 		Camera camera_;

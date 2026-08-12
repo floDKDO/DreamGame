@@ -5,7 +5,7 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #endif
 #include <glm/gtc/type_ptr.hpp>
-#include <glm/gtx/matrix_decompose.hpp>
+//#include <glm/gtx/matrix_decompose.hpp>
 #include <glm/gtc/quaternion.hpp>
 #include <iostream>
 

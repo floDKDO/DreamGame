@@ -21,7 +21,7 @@ set(IMGUI_DIR "${CMAKE_SOURCE_DIR}/third_party/imgui")
 set(TINYGLTF_DIR "${CMAKE_SOURCE_DIR}/third_party/tinygltf") 
 
 file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS src/*.cpp src/*.h src/Camera/*.cpp src/Camera/*.h src/glTF/*.cpp src/glTF/*.h src/RAII_SDL3/*.cpp src/RAII_SDL3/*.h src/Render/*.cpp src/Render/*.h ${STB_DIR}/*.cpp ${STB_DIR}/*.h ${IMGUI_DIR}/*.cpp ${IMGUI_DIR}/*.h ${TINYGLTF_DIR}/*.c ${TINYGLTF_DIR}/*.h)
-add_executable(${PROJECT_NAME} ${SOURCES})
+add_executable(${PROJECT_NAME} ${SOURCES} "src/Input/mouse_keyboard_input.cpp" "src/Input/mouse_keyboard_input.h" "src/Input/gamepad_input.cpp" "src/Input/gamepad_input.h" "src/Input/input_manager.cpp" "src/Input/input_manager.h" "src/Input/input_common.h")
 
 add_custom_command(
  TARGET  ${PROJECT_NAME} POST_BUILD

@@ -1,5 +1,6 @@
 #include "gltf.h"
 
+#include <GL/glew.h>
 #include <tinygltf/tiny_gltf_v3.h>
 #include <glm/gtc/matrix_transform.hpp>
 #include <iostream>

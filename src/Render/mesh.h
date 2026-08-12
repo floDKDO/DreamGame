@@ -4,8 +4,6 @@
 #include "texture.h"
 #include "vertices.h"
 
-#include <glm/mat4x4.hpp>
-
 class Mesh
 {
 	public: 
@@ -13,7 +11,7 @@ class Mesh
 		void draw(ShaderProgram& shader_program);
 
 	private:
-		void load_vertex_attribute(GLuint vbo_binding_index, VertexAttribute::Name attribute_name);
+		void load_vertex_attribute(GLuint vbo_binding_index, attribute::Name attribute_name);
 		void create_ebo();
 		void create_vbo();
 		void create_vao();

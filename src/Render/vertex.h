@@ -5,7 +5,7 @@
 #include <glm/vec3.hpp>
 #include <glm/vec4.hpp>
 
-namespace VertexAttribute
+namespace attribute
 {
 
 enum class Name
@@ -36,7 +36,7 @@ struct Vertex
 		: position_(position), normal_(normal), texture_coordinates_(texture_coordinates), color_(color)
 	{}
 
-	static VertexAttribute::Info get_attribute_info(VertexAttribute::Name attribute_name);
+	static attribute::Info get_attribute_info(attribute::Name attribute_name);
 
 	glm::vec3 position_;
 	glm::vec3 normal_;

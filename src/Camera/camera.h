@@ -1,6 +1,6 @@
 #pragma once
 
-#include "RAII_SDL3/gamepad.h"
+#include "Input/input_manager.h"
 
 #include <glm/mat4x4.hpp>
 #include <glm/vec3.hpp>
@@ -8,9 +8,8 @@
 class Camera
 {
 	public:
-		Camera(glm::vec3& target_position);
+		Camera(InputManager& input_manager, glm::vec3& target_position);
 
-		void handle_events(const SDL_Event& e);
 		void update(float delta_time);
 
 		glm::vec3 get_camera_forward() const;
@@ -22,8 +21,6 @@ class Camera
 		glm::vec3 camera_position_;
 
 	private:
-		glm::mat4 look_at(glm::vec3 camera_position, glm::vec3 camera_target_position, glm::vec3 up_vector) const;
-
 		struct EulerAngles
 		{
 			EulerAngles()
@@ -39,16 +36,10 @@ class Camera
 			float roll_; //inutilisé pour l'instant
 		};
 
-		void set_rotation_mouse(float xrel, float yrel);
-		void set_rotation_joystick(Sint16 axis_value, sdl::Gamepad::JoystickAxis joystick_axis);
-		void mouse_motion_event_end();
+		glm::mat4 look_at(glm::vec3 camera_position, glm::vec3 camera_target_position, glm::vec3 up_vector) const;
 		void compute_euler_angles(float delta_time);
 
+		InputManager& input_manager_;
 		glm::mat4 view_matrix_;
-
 		EulerAngles euler_angles_;
-		Uint64 mouse_motion_last_time_;
-		bool is_rotation_from_joystick_;
-		float x_rotation_intensity_;
-		float y_rotation_intensity_;
 };

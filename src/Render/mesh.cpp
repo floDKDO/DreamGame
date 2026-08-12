@@ -11,9 +11,9 @@ Mesh::Mesh(std::vector<GLushort> ebo_values, Vertices vertices, std::vector<Text
 	load_mesh();
 }
 
-void Mesh::load_vertex_attribute(GLuint vbo_binding_index, VertexAttribute::Name attribute_name)
+void Mesh::load_vertex_attribute(GLuint vbo_binding_index, attribute::Name attribute_name)
 {
-	VertexAttribute::Info attribute_info = Vertex::get_attribute_info(attribute_name);
+	attribute::Info attribute_info = Vertex::get_attribute_info(attribute_name);
 	glEnableVertexArrayAttrib(vao_, attribute_info.index_);
 	glVertexArrayAttribFormat(vao_, attribute_info.index_, attribute_info.component_count_, GL_FLOAT, attribute_info.normalized_, GLuint(attribute_info.offset_));
 	glVertexArrayAttribBinding(vao_, attribute_info.index_, vbo_binding_index);
@@ -42,22 +42,22 @@ void Mesh::create_vao()
 
 	if(vertices_.has_position_attribute())
 	{
-		load_vertex_attribute(vbo_binding_index, VertexAttribute::Name::POSITION);
+		load_vertex_attribute(vbo_binding_index, attribute::Name::POSITION);
 	}
 
 	if(vertices_.has_normal_attribute())
 	{
-		load_vertex_attribute(vbo_binding_index, VertexAttribute::Name::NORMAL);
+		load_vertex_attribute(vbo_binding_index, attribute::Name::NORMAL);
 	}
 
 	if(vertices_.has_texture_coordinates_attribute())
 	{
-		load_vertex_attribute(vbo_binding_index, VertexAttribute::Name::TEXTURE_COORD);
+		load_vertex_attribute(vbo_binding_index, attribute::Name::TEXTURE_COORD);
 	}
 
 	if(vertices_.has_color_attribute())
 	{
-		load_vertex_attribute(vbo_binding_index, VertexAttribute::Name::COLOR);
+		load_vertex_attribute(vbo_binding_index, attribute::Name::COLOR);
 	}
 }
 

@@ -12,8 +12,8 @@
 //TODO : free ImGui
 
 Game::Game()
-	: sdl_(), window_(), glew_(glewInit()), player_(),
-	camera_(player_.model_.position_), running_(true), gamepad_(), temp_model_("resources/models/corridor.glb"), light_source_("resources/models/light_source.glb")
+	: sdl_(), window_(), glew_(glewInit()), player_(intput_manager_),
+	camera_(intput_manager_, player_.model_.position_), running_(true), gamepad_(), temp_model_("resources/models/corridor.glb"), light_source_("resources/models/light_source.glb")
 {
 	int w, h;
 	window_.get_size(&w, &h); 
@@ -120,8 +120,7 @@ void Game::handle_events()
 			default:
 				break;
 		}
-		camera_.handle_events(e);
-		player_.handle_events(e);
+		intput_manager_.handle_events(e);
 
 		////////////////////////////////////////////////////////////////////////////////////////
 		ImGui_ImplSDL3_ProcessEvent(&e);
@@ -171,6 +170,7 @@ void Game::update(float delta_time)
 	camera_.update(delta_time);
 	player_.update(delta_time, camera_.get_camera_forward(), camera_.get_camera_left());
 	gamepad_.check(1000); //tester une fois par seconde
+	intput_manager_.update(delta_time);
 
 	ShaderProgram& phong_program = shader_programs_.at("Phong");
 	phong_program.set_uniform_3f("view_position_", camera_.camera_position_);
