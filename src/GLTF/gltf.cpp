@@ -8,7 +8,7 @@
 namespace gltf
 {
 
-glm::mat4 get_mat4_from_1d_matrix(double m[16])
+glm::mat4 get_mat4_from_1d_matrix(const double m[16])
 {
 	glm::mat4 matrix_mat4(1.0f);
 	for(glm::length_t i = 0; i < 4 * 4; i += 4)

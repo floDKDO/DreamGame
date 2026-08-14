@@ -1,38 +1,43 @@
-#include "player.h"
-
-#include <glm/gtc/type_ptr.hpp>
-#include <iostream>
-
-Player::Player(InputManager& input_manager)
-	: model_("resources/models/capsule.glb"), input_manager_(input_manager)
-{}
-
-void Player::draw(ShaderProgram& shader_program)
-{
-	model_.draw(shader_program);
-}
-
-void Player::update(float delta_time, glm::vec3 camera_forward, glm::vec3 camera_left)
-{
-	float sensitivity = 7.5f;
-	input::Info input_info = input_manager_.get_input_info();
-
-	if(input_info.y_movement_intensity_ != 0.0f)
-	{
-		model_.position_ += (input_info.y_movement_intensity_ * sensitivity * delta_time) * camera_forward;
-	}
-
-	if(input_info.x_movement_intensity_ != 0.0f)
-	{
-		model_.position_ -= (input_info.x_movement_intensity_ * sensitivity * delta_time) * camera_left;
-	}
-
-	model_.position_.y = 0.75f; //TODO : hauteur du sol
-
-	model_.rotation_info_.angle_ = -glm::degrees(atan2((input_info.x_movement_intensity_ * sensitivity * delta_time)/* * camera_left.x*/, (input_info.y_movement_intensity_ * sensitivity * delta_time)/* * camera_forward.z*/));
-	model_.rotation_info_.axis_ = glm::vec3(0.0f, 1.0f, 0.0f);
-
-	//model_.compute_model(position_, 
-	//	-glm::degrees(atan2((x_movement_intensity_ * sensitivity * delta_time)/* * camera_left.x*/, (y_movement_intensity_ * sensitivity * delta_time)/* * camera_forward.z*/)), 
-	//	glm::vec3(0.0f, 1.0f, 0.0f));
-}
+//#include "player.h"
+//
+//#include <glm/gtc/type_ptr.hpp>
+//#include <iostream>
+//
+//Player::Player(InputManager& input_manager)
+//	: model_("resources/models/capsule.glb"), input_manager_(input_manager)
+//{}
+//
+//void Player::draw(ShaderProgram& shader_program)
+//{
+//	model_.draw(shader_program);
+//}
+//
+//void Player::update(float delta_time, glm::vec3 camera_forward, glm::vec3 camera_left)
+//{
+//	float sensitivity = 7.5f;
+//	input::Info input_info = input_manager_.get_input_info();
+//
+//	if(input_info.y_movement_intensity_ != 0.0f)
+//	{
+//		model_.translate((input_info.y_movement_intensity_ * sensitivity * delta_time) * camera_forward);
+//		//model_.transform_.position_ += (input_info.y_movement_intensity_ * sensitivity * delta_time) * camera_forward;
+//	}
+//
+//	if(input_info.x_movement_intensity_ != 0.0f)
+//	{
+//		model_.translate(-((input_info.x_movement_intensity_ * sensitivity * delta_time) * camera_left));
+//		//model_.transform_.position_ -= (input_info.x_movement_intensity_ * sensitivity * delta_time) * camera_left;
+//	}
+//
+//	//TODO : à gérer
+//	//model_.transform_.position_.y = 0.75f; //TODO : hauteur du sol
+//
+//	model_.set_rotation_info(gltf::Node::RotationInfo{-glm::degrees(atan2((input_info.x_movement_intensity_ * sensitivity * delta_time)/* * camera_left.x*/, (input_info.y_movement_intensity_ * sensitivity * delta_time)/* * camera_forward.z*/)), glm::vec3(0.0f, 1.0f, 0.0f)});
+//
+//	//model_.rotation_info_.angle_ = -glm::degrees(atan2((input_info.x_movement_intensity_ * sensitivity * delta_time)/* * camera_left.x*/, (input_info.y_movement_intensity_ * sensitivity * delta_time)/* * camera_forward.z*/));
+//	//model_.rotation_info_.axis_ = glm::vec3(0.0f, 1.0f, 0.0f);
+//
+//	//model_.compute_model(position_, 
+//	//	-glm::degrees(atan2((x_movement_intensity_ * sensitivity * delta_time)/* * camera_left.x*/, (y_movement_intensity_ * sensitivity * delta_time)/* * camera_forward.z*/)), 
+//	//	glm::vec3(0.0f, 1.0f, 0.0f));
+//}

@@ -12,8 +12,10 @@
 //TODO : free ImGui
 
 Game::Game()
-	: sdl_(), window_(), glew_(glewInit()), player_(intput_manager_),
-	camera_(intput_manager_, player_.model_.position_), running_(true), gamepad_(), temp_model_("resources/models/temp.gltf"), light_source_("resources/models/light_source.glb")
+	: sdl_(), window_(), glew_(glewInit()), 
+	temp_(0.0f),  //TODO : à retirer (remplacer par la position du joueur)
+	// //TODO : à gérer player_(intput_manager_),
+	camera_(intput_manager_, temp_ /* //TODO : à gérer player_.model_.transform_.position_*/), running_(true), gamepad_(), test_scene_("resources/models/test_scene.glb") //, temp_model_("resources/models/corridor.glb"), light_source_("resources/models/light_source.glb")
 {
 	int w, h;
 	window_.get_size(&w, &h); 
@@ -63,7 +65,8 @@ void Game::run()
 	base_program.set_uniform_matrix_4fv("view_matrix_", glm::value_ptr(camera_.get_view_matrix()));
 	base_program.set_uniform_matrix_4fv("projection_matrix_", glm::value_ptr(projection_matrix));
 
-	light_source_.position_ = glm::vec3(0.0f, 5.0f, 0.0f);
+	//TODO : à gérer
+	//light_source_.transform_.position_ = glm::vec3(0.0f, 5.0f, 0.0f);
 
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
@@ -137,14 +140,17 @@ void Game::draw()
 	base_program.use();
 	base_program.set_uniform_matrix_4fv("view_matrix_", glm::value_ptr(camera_.get_view_matrix()));
 	glDrawArrays(GL_TRIANGLES, 0, 36);
-	light_source_.draw(base_program);
+	//TODO : à gérer
+	//light_source_.draw(base_program);
 
 	ShaderProgram& phong_program = shader_programs_.at("Phong");
 	phong_program.use();
 	phong_program.set_uniform_matrix_4fv("view_matrix_", glm::value_ptr(camera_.get_view_matrix()));
 	glDrawArrays(GL_TRIANGLES, 0, 36);
-	temp_model_.draw(phong_program);
-	player_.draw(phong_program);
+	//TODO : à gérer
+	//temp_model_.draw(phong_program);
+	//player_.draw(phong_program);
+	test_scene_.draw(phong_program);
 
 	////////////////////////////////////////////////////////////////////////////////////////
 	ImGui::Render();
@@ -168,11 +174,12 @@ void Game::update_fps_count(Uint64& last_fps_refresh, unsigned int& frame_count_
 void Game::update(float delta_time)
 {
 	camera_.update(delta_time);
-	player_.update(delta_time, camera_.get_camera_forward(), camera_.get_camera_left());
+	//player_.update(delta_time, camera_.get_camera_forward(), camera_.get_camera_left());
 	gamepad_.check(1000); //tester une fois par seconde
 	intput_manager_.update(delta_time);
 
 	ShaderProgram& phong_program = shader_programs_.at("Phong");
 	phong_program.set_uniform_3f("view_position_", camera_.camera_position_);
-	phong_program.set_uniform_3f("light_position_", light_source_.position_);
+	//TODO : à gérer
+	//phong_program.set_uniform_3f("light_position_", light_source_.transform_.position_);
 }

@@ -1,6 +1,7 @@
 #pragma once
 
-#include "node.h"
+#include "model.h"
+#include "gltf_file.h"
 
 #include <string_view>
 #include <vector>
@@ -19,10 +20,12 @@ class Scene
 		~Scene();
 
 		void draw(ShaderProgram& shader_program);
+		Model& get_model_by_name(std::string name);
 
 	private:
+		glTFFile gltf_file_;
 		std::string path_;
-		std::vector<gltf::Node> nodes_;
+		std::vector<Model> models_;
 };
 
 }

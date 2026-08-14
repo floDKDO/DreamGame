@@ -2,7 +2,7 @@
 
 #include "RAII_SDL3/sdl.h"
 #include "RAII_SDL3/window.h"
-#include "glTF/node.h"
+#include "glTF/scene.h"
 #include "Camera/camera.h"
 #include "player.h"
 #include "Input/input_manager.h"
@@ -26,10 +26,12 @@ class Game
 		std::unordered_map<std::string, ShaderProgram> shader_programs_;
 		InputManager intput_manager_;
 
-		Player player_;
+		//Player player_;
+		glm::vec3 temp_; //TODO : à retirer
 		Camera camera_;
 		bool running_;
 		sdl::Gamepad gamepad_;
-		gltf::Node temp_model_;
-		gltf::Node light_source_;
+		//gltf::Model temp_model_;
+		//gltf::Model light_source_;
+		gltf::Scene test_scene_;
 };

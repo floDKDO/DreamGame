@@ -1,5 +1,9 @@
 #include "gltf_file.h"
 
+#ifndef GLM_ENABLE_EXPERIMENTAL
+#define GLM_ENABLE_EXPERIMENTAL
+#endif
+#include <glm/gtx/matrix_decompose.hpp>
 #include <iostream>
 
 glTFFile::glTFFile(std::string_view path)
@@ -31,8 +35,8 @@ void glTFFile::print_info() const
 	std::cout << "\n**** Info on the glTF file ****\n";
 	std::cout << "- General information: " << std::endl;
 	std::cout << "    - File name: " << path_ << std::endl;
-	std::cout << "    - The file contains " << model_.scenes->nodes_count << " model(s) (= root node(s)).\n";
-	std::cout << "    - There are " << model_.nodes_count << " node(s), " << model_.meshes_count << " meshe(s), " << model_.accessors_count << " accessor(s), " << model_.buffer_views_count << " buffer view(s), " << model_.buffers_count << " buffer(s), " << model_.textures_count << " texture(s), " << model_.samplers_count << " sampler(s) and " << model_.images_count << " image(s).\n";
+	std::cout << "    - The file contains " << model_.scenes->nodes_count << " root node(s).\n";
+	std::cout << "    - There are " << model_.nodes_count << " node(s), " << model_.meshes_count << " mesh(es), " << model_.accessors_count << " accessor(s), " << model_.buffer_views_count << " buffer view(s), " << model_.buffers_count << " buffer(s), " << model_.textures_count << " texture(s), " << model_.samplers_count << " sampler(s) and " << model_.images_count << " image(s).\n";
 
 	std::cout << "- File content: " << std::endl;
 	std::cout << "    - Node(s) and mesh(es): " << std::endl;
@@ -121,9 +125,202 @@ void glTFFile::print_info() const
 	std::cout << "*********************************************************************************************\n\n";
 }
 
-tg3_model glTFFile::get_model() const
+/*tg3_model glTFFile::get_model() const
 {
 	return model_;
+}*/
+
+glm::vec3 glTFFile::get_node_position(const tg3_node& node) const
+{
+	glm::vec3 position(1.0f);
+	if(node.has_matrix)
+	{
+		//TODO : à vérifier
+		position = glm::vec3(node.matrix[3], node.matrix[7], node.matrix[11]);
+	}
+	else
+	{
+		position = glm::vec3(node.translation[0], node.translation[1], node.translation[2]);
+	}
+	return position;
+}
+
+glm::vec4 glTFFile::get_node_rotation(const tg3_node& node) const
+{
+	glm::vec4 rotation(0.0f);
+	if(node.has_matrix)
+	{
+		//TODO
+		std::cerr << "(Rotation1) ************************CAS PAS ENCORE GERE************************\n";
+	}
+	else
+	{
+		std::cerr << "(Rotation2) ************************CAS PAS ENCORE GERE************************\n";
+		//glm::quat rotation_quaternion = glm::quat(node.rotation[0], node.rotation[1], node.rotation[2], node.rotation[3]);
+		//rotation = glm::eulerAngles(rotation_quaternion)
+		//rotation = glm::vec4(node.rotation[0], node.rotation[1], node.rotation[2], node.rotation[3]);
+	}
+	return rotation;
+}
+
+glm::vec3 glTFFile::get_node_scale(const tg3_node& node) const
+{
+	glm::vec3 scale(1.0f);
+	if(node.has_matrix)
+	{
+		//TODO : vérifier
+		glm::decompose(gltf::get_mat4_from_1d_matrix(node.matrix), scale, glm::quat(1, 0, 0, 0), glm::vec3(1.0f), glm::vec3(1.0f), glm::vec4(1.0f));
+	}
+	else
+	{
+		scale = glm::vec3(node.scale[0], node.scale[1], node.scale[2]);
+	}
+	return scale;
+}
+
+/*std::vector<std::pair<unsigned int, gltf::Node>> glTFFile::get_nodes() const
+{
+	std::vector<std::pair<unsigned int, gltf::Node>> nodes;
+	if(model_.scenes_count > 1)
+	{
+		std::cerr << "(Scenes count > 1) ************************CAS PAS ENCORE GERE************************\n";
+	}
+
+	//TODO : séparer cette méthode en deux (une qui prend un root node en paramètre)
+	//Pour chaque root node, créer un model <=> il y aura autant de models qu'il y a de root nodes
+
+	tg3_scene scene = model_.scenes[0];
+	for(uint32_t i = 0; i < scene.nodes_count; ++i)
+	{
+		int32_t root_node_index = scene.nodes[i];
+		tg3_node root_node = model_.nodes[root_node_index];
+		get_node(root_node, nodes);
+	}
+
+	return nodes;
+}*/
+
+/*void glTFFile::get_node(const tg3_node& node, std::vector<std::pair<unsigned int, gltf::Node>>& nodes) const
+{
+	gltf::Node::Transform transform;
+	if(node.mesh != -1)
+	{
+		int32_t node_mesh_index = node.mesh;
+		tg3_mesh node_mesh = model_.meshes[node_mesh_index];
+	}
+	if(bool(node.has_matrix))
+	{
+		//TODO
+		std::cerr << "(Has matrix == true) ************************CAS PAS ENCORE GERE************************\n";
+	}
+	else
+	{
+		transform.position_ = get_node_position(node);
+		transform.rotation_ = get_node_rotation(node);
+		transform.scale_ = get_node_scale(node);
+	}
+
+	//TODO : pas bien écrit 
+	std::optional<Mesh> mesh = get_mesh(node);
+	nodes.push_back({0, gltf::Node(mesh.value(), transform)}); //TODO : manque le niveau du node
+
+	for(uint32_t i = 0; i < node.children_count; ++i)
+	{
+		get_node(model_.nodes[node.children[i]], nodes);
+	}
+}*/
+
+/*gltf::Node glTFFile::get_node2(const tg3_node& node) const
+{
+	gltf::Node::Transform transform;
+	if(node.mesh != -1)
+	{
+		int32_t node_mesh_index = node.mesh;
+		tg3_mesh node_mesh = model_.meshes[node_mesh_index];
+	}
+	if(bool(node.has_matrix))
+	{
+		//TODO
+		std::cerr << "(Has matrix == true) ************************CAS PAS ENCORE GERE************************\n";
+	}
+	else
+	{
+		transform.position_ = get_node_position(node);
+		transform.rotation_ = get_node_rotation(node);
+		transform.scale_ = get_node_scale(node);
+	}
+
+	//TODO : pas bien écrit 
+	std::optional<Mesh> mesh = get_mesh(node);
+	if(mesh.has_value())
+	{
+		return gltf::Node(mesh.value(), transform); //TODO : manque le niveau du node
+	}
+	else
+	{
+		return gltf::Node(transform); //TODO : manque le niveau du node
+	}
+}*/
+
+gltf::Node glTFFile::get_node_and_its_children(const tg3_node& node_tg3, glm::mat4 parent_matrix) const
+{
+	gltf::Node::Transform transform;
+	if(node_tg3.mesh != -1)
+	{
+		int32_t node_mesh_index = node_tg3.mesh;
+		tg3_mesh node_mesh = model_.meshes[node_mesh_index];
+	}
+
+	//TODO : créer une méthode get_transform
+	if(bool(node_tg3.has_matrix))
+	{
+		//TODO
+		std::cerr << "(Has matrix == true) ************************CAS PAS ENCORE GERE************************\n";
+	}
+	else
+	{
+		transform.position_ = get_node_position(node_tg3);
+		transform.rotation_ = get_node_rotation(node_tg3);
+		transform.scale_ = get_node_scale(node_tg3);
+	}
+
+	//TODO : ici, remplacer transform par un appel à get_transform()
+	gltf::Node node(std::string(node_tg3.name.data), get_mesh(node_tg3), transform); //TODO : manque le niveau du node
+	node.parent_matrix_ = parent_matrix;
+	for(uint32_t i = 0; i < node_tg3.children_count; ++i)
+	{
+		node.add_child(std::make_unique<gltf::Node>(get_node_and_its_children(model_.nodes[node_tg3.children[i]], node.compute_model())));
+	}
+	return node;
+}
+
+std::vector<gltf::Model> glTFFile::get_models() const
+{
+	std::vector<gltf::Model> models;
+	if(model_.scenes_count > 1)
+	{
+		std::cerr << "(Scenes count > 1) ************************CAS PAS ENCORE GERE************************\n";
+	}
+
+	tg3_scene scene = model_.scenes[0];
+	for(uint32_t i = 0; i < scene.nodes_count; ++i) //il y a un model par root node
+	{
+		int32_t root_node_index = scene.nodes[i];
+		tg3_node root_node_tg3 = model_.nodes[root_node_index];
+
+		//il faut remplacer get_node2 par une méthode qui retourne l'objet de type gltf::Node avec déjà ses enfants
+		//gltf::Node root_node = get_node2(root_node_tg3);
+
+		////création de la hiérarchie de nodes (à la fin, le root node doit pointer sur ses enfants qui eux-mêmes doivent pointer sur leurs enfants etc.)
+		//for(uint32_t j = 0; j < root_node_tg3.children_count; ++j)
+		//{
+		//	root_node.add_child(std::make_unique<gltf::Node>(get_node3(model_.nodes[root_node_tg3.children[j]])));
+		//}
+		//models.push_back(gltf::Model(std::make_unique<gltf::Node>(std::move(root_node)))); //bizarre le std::move ici...
+
+		models.push_back(gltf::Model(std::make_unique<gltf::Node>(get_node_and_its_children(root_node_tg3, glm::mat4(1.0f)))));
+	}
+	return models;
 }
 
 //count devrait être égal pour tous les attributs donc on peut prendre le count de l'attribut [0]
@@ -180,7 +377,7 @@ Vertices glTFFile::get_vertices(const tg3_primitive& primitive) const
 	return vertices;
 }
 
-std::vector<Mesh> glTFFile::get_meshes(const tg3_node& node) const
+/*std::vector<Mesh> glTFFile::get_meshes(const tg3_node& node) const
 {
 	std::vector<Texture> textures = get_textures();
 	std::vector<Mesh> meshes;
@@ -188,7 +385,6 @@ std::vector<Mesh> glTFFile::get_meshes(const tg3_node& node) const
 	if(node.mesh != -1)
 	{
 		tg3_mesh mesh = model_.meshes[node.mesh];
-
 		for(uint32_t i = 0; i < mesh.primitives_count; ++i)
 		{
 			tg3_primitive primitive = mesh.primitives[i];
@@ -198,6 +394,26 @@ std::vector<Mesh> glTFFile::get_meshes(const tg3_node& node) const
 		}
 	}
 	return meshes;
+}*/
+
+std::optional<Mesh> glTFFile::get_mesh(const tg3_node& node) const
+{
+	if(node.mesh != -1)
+	{
+		std::vector<Texture> textures = get_textures();
+		tg3_mesh mesh_tg3 = model_.meshes[node.mesh];
+
+		if(mesh_tg3.primitives_count > 1)
+		{
+			std::cerr << "(Primitives count > 1) ************************CAS PAS ENCORE GERE************************\n";
+		}
+
+		tg3_primitive primitive = mesh_tg3.primitives[0];
+		std::vector<GLushort> ebo_values = get_ebo_values(primitive);
+		Vertices vertices = get_vertices(primitive);
+		return Mesh(ebo_values, vertices, textures, primitive.mode);
+	}
+	return std::nullopt; //cas où le node ne possède pas de mesh
 }
 
 std::vector<Texture> glTFFile::get_textures() const

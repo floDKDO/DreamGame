@@ -1,21 +1,34 @@
 #pragma once
 
 #include "gltf.h"
-#include "utils.h"
-#include "Render/mesh.h"
+#include "model.h"
 
 #include <tinygltf/tiny_gltf_v3.h>
 
+//TODO : namespace gltf ??
 class glTFFile
 {
 	public:
 		explicit glTFFile(std::string_view path);
 		void open();
 		void print_info() const;
-		tg3_model get_model() const;
+		//tg3_model get_model() const; //TODO : à terme, devra être retiré
+
+		//TODO : créer une méthode qui retourne les models du fichier
+
+		//TODO : implémenter (méthode qui parcourt récursivement les nodes d'un model)
+		//std::vector<std::pair<unsigned int, gltf::Node>> get_nodes() const;
+		//void get_node(const tg3_node& node, std::vector<std::pair<unsigned int, gltf::Node>>& nodes) const; //TODO : renommer (enlever get car retourne void)
+		//gltf::Node get_node2(const tg3_node& node) const;
+		gltf::Node get_node_and_its_children(const tg3_node& node_tg3, glm::mat4 parent_matrix) const;
+		std::vector<gltf::Model> get_models() const;
+
+		glm::vec3 get_node_position(const tg3_node& node) const;
+		glm::vec4 get_node_rotation(const tg3_node& node) const;
+		glm::vec3 get_node_scale(const tg3_node& node) const;
 		uint64_t get_attributes_count(const tg3_primitive& primitive) const;
 		Vertices get_vertices(const tg3_primitive& primitive) const;
-		std::vector<Mesh> get_meshes(const tg3_node& node) const;
+		std::optional<Mesh> get_mesh(const tg3_node& node) const;
 		std::vector<Texture> get_textures() const;
 		std::vector<GLushort> get_ebo_values(const tg3_primitive& primitive) const;
 		std::vector<glm::vec4> get_vec4_color_attribute(const tg3_str_int_pair& attribute) const;
