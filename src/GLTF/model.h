@@ -19,8 +19,8 @@ class Model
 		glm::vec3 get_position() const; //get position of root_node_
 		std::string get_name() const; //get name of root_node_
 
-		void set_transform(gltf::Node::Transform transform);
-		void set_rotation_info(gltf::Node::RotationInfo rotation_info);
+		void set_transform(Transform transform);
+		void set_rotation_info(Node::RotationInfo rotation_info);
 
 		void translate(glm::vec3 position);
 		void rotate(glm::vec4 rotation);
@@ -32,9 +32,6 @@ class Model
 
 		//glTFFile gltf_file_;
 		std::unique_ptr<Node> root_node_;
-
-		//TODO : Mettre tous les noeuds associés 
-		//std::vector<std::pair<unsigned int, Node>> nodes_; //unsigned int = node level
 };
 
 }

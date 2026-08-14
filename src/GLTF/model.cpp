@@ -31,7 +31,7 @@ std::string Model::get_name() const
 	return root_node_->get_name();
 }
 
-void Model::set_transform(gltf::Node::Transform transform)
+void Model::set_transform(Transform transform)
 {
 	/*for(std::pair<unsigned int, Node>& node_pair : nodes_)
 	{
@@ -40,7 +40,7 @@ void Model::set_transform(gltf::Node::Transform transform)
 	}*/
 }
 
-void Model::set_rotation_info(gltf::Node::RotationInfo rotation_info)
+void Model::set_rotation_info(Node::RotationInfo rotation_info)
 {
 	/*for(std::pair<unsigned int, Node>& node_pair : nodes_)
 	{

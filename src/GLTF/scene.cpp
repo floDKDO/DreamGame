@@ -16,7 +16,7 @@ Scene::~Scene()
 
 void Scene::draw(ShaderProgram& shader_program)
 {
-	for(gltf::Model& model : models_)
+	for(Model& model : models_)
 	{
 		model.draw(shader_program);
 	}
@@ -31,7 +31,7 @@ Model& Scene::get_model_by_name(std::string name)
 			return model;
 		}
 	}
-	//TODO
+	//TODO : à gérer
 }
 
 }

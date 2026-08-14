@@ -12,20 +12,13 @@
 namespace gltf
 {
 
-/*Node::Node(std::string_view path)
-	: gltf_file_(path), //model_matrix_(glm::mat4(1.0f)), 
-	rotation_info_({0.0f, glm::vec3(0.0f, 1.0f, 0.0f)})
-{
-	load_mesh();
-}*/
-
-Node::Node(std::string name, std::optional<Mesh> mesh, Transform transform)
+Node::Node(std::string name, Transform transform, std::optional<Mesh> mesh)
 	: name_(name), mesh_(mesh), transform_(transform), rotation_info_({0.0f, glm::vec3(0.0f, 1.0f, 0.0f)}), parent_matrix_(1.0f)
 {}
 
-glm::mat4 Node::compute_model(/*glm::vec3 translation_vector, float angle, glm::vec3 axis*/)
+glm::mat4 Node::compute_model()
 {
-	glm::mat4 model_matrix(1.0f); //reset de la matrice model à chaque frame
+	glm::mat4 model_matrix(1.0f); //reconstruction de la matrice model à chaque frame
 	model_matrix = glm::translate(model_matrix, transform_.position_);
 
 	//TODO : rotation (vérifier)
@@ -35,47 +28,6 @@ glm::mat4 Node::compute_model(/*glm::vec3 translation_vector, float angle, glm::
 	model_matrix *= parent_matrix_;
 
 	return model_matrix;
-
-	/*model_matrix_(1.0f); //reset de la matrice model à chaque frame
-	model_matrix_ = glm::translate(model_matrix_, translation_vector);
-	model_matrix_ = glm::rotate(model_matrix_, glm::radians(angle), axis);*/
-}
-
-//TODO : diviser en plusieurs méthodes et en mettre dans glTFFile
-void Node::load_mesh()
-{
-	/*const tg3_model& model = gltf_file_.get_model();
-
-	if(model.nodes_count != 1)
-	{
-		std::cerr << "Warning: multiple nodes for a node! Only taking the first node.\n";
-	}
-
-	tg3_node node = model.nodes[0];
-	transform_.position_ = gltf_file_.get_node_position(node);
-	transform_.rotation_ = gltf_file_.get_node_rotation(node);
-	transform_.scale_ = gltf_file_.get_node_scale(node);
-
-	//if(gltf::is_1d_matrix_identity(node.matrix)) //=> ignorer la matrice si elle est la matrice identité
-	//{
-	//	position_ = glm::vec3(node.translation[0], node.translation[1], node.translation[2]);
-	//	rotation_ = glm::vec4(node.rotation[0], node.rotation[1], node.rotation[2], node.rotation[3]);
-	//	scale_ = glm::vec3(node.scale[0], node.scale[1], node.scale[2]);
-	//}
-	//else
-	//{
-	//	//nodes_.push_back({Node(node.mesh, node.matrix), glm::vec3(node.translation[0], node.translation[1], node.translation[2])});
-
-	//	//TODO : à vérifier
-	//	//position_ = glm::vec3(node.matrix[3], node.matrix[7], node.matrix[11]);
-
-	//	//glm::mat4 model_matrix(1.0f);
-	//	//model_matrix = glm::decompose(model_matrix, scale_, glm::quat(rotation_), position_, glm::vec3(1.0f), glm::vec4(1.0f));
-	//	//rotation_ = glm::conjugate(glm::quat(rotation_));
-	//	//gltf::print_mat4(model_matrix);
-	//	std::cerr << "************************CAS PAS ENCORE GERE************************\n";
-	//}
-	mesh_ = std::make_unique<Mesh>(gltf_file_.get_mesh(node));*/
 }
 
 void Node::draw(ShaderProgram& shader_program)
