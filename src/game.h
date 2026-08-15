@@ -1,7 +1,7 @@
 #pragma once
 
-#include "RAII_SDL3/sdl.h"
 #include "RAII_SDL3/window.h"
+#include "backend.h"
 #include "glTF/scene.h"
 #include "Camera/camera.h"
 #include "player.h"
@@ -20,9 +20,9 @@ class Game
 		void update(float delta_time);
 		void update_fps_count(Uint64& last_fps_refresh, unsigned int& frame_count_this_second) const;
 
-		sdl::SDL sdl_;
-		sdl::Window window_;
-		GLenum glew_;
+		Backend backend_;
+
+		//sdl::Window window_;
 		std::unordered_map<std::string, ShaderProgram> shader_programs_;
 		InputManager intput_manager_;
 

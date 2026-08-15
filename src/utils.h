@@ -23,7 +23,6 @@ double lerp(Arithmetic1 a, Arithmetic2 b, Arithmetic3 t) //TODO : à terme, rempl
 std::string get_string_from_file(std::string_view path);
 glm::vec3 get_camera_forward(glm::mat4 view_matrix);
 glm::vec3 get_camera_left(glm::mat4 view_matrix);
-void GLAPIENTRY message_callback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, [[maybe_unused]] const void* user_param);
 GLfloat ieee754_to_float(uint64_t ieee754_number);
 
 }

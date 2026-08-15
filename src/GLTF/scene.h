@@ -20,12 +20,12 @@ class Scene
 		~Scene();
 
 		void draw(ShaderProgram& shader_program);
-		Model& get_model_by_name(std::string name);
+		Model* get_model_by_name(std::string name);
 
 	private:
 		glTFFile gltf_file_;
 		std::string path_;
-		std::vector<Model> models_;
+		std::vector<std::unique_ptr<Model>> models_;
 };
 
 }

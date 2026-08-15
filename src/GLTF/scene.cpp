@@ -16,22 +16,22 @@ Scene::~Scene()
 
 void Scene::draw(ShaderProgram& shader_program)
 {
-	for(Model& model : models_)
+	for(std::unique_ptr<Model>& model : models_)
 	{
-		model.draw(shader_program);
+		model->draw(shader_program);
 	}
 }
 
-Model& Scene::get_model_by_name(std::string name)
+Model* Scene::get_model_by_name(std::string name)
 {
-	for(Model& model : models_)
+	for(std::unique_ptr<Model>& model : models_)
 	{
-		if(model.get_name() == name)
+		if(model->get_name() == name)
 		{
-			return model;
+			return model.get();
 		}
 	}
-	//TODO : à gérer
+	return nullptr;
 }
 
 }

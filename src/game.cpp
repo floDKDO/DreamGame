@@ -5,44 +5,17 @@
 #include "imgui/imgui_impl_sdl3.h"
 #include "imgui/imgui_impl_opengl3.h"
 
-#include <stb/stb_image.h>
 #include <glm/gtc/type_ptr.hpp>
 #include <iostream>
 
 //TODO : free ImGui
 
 Game::Game()
-	: sdl_(), window_(), glew_(glewInit()), 
+	: backend_(), //window_(),
 	temp_(0.0f),  //TODO : à retirer (remplacer par la position du joueur)
 	// //TODO : à gérer player_(intput_manager_),
 	camera_(intput_manager_, temp_ /* //TODO : à gérer player_.model_.transform_.position_*/), running_(true), gamepad_(), test_scene_("resources/models/test_scene.glb") //, temp_model_("resources/models/corridor.glb"), light_source_("resources/models/light_source.glb")
 {
-	int w, h;
-	window_.get_size(&w, &h); 
-	glViewport(0, 0, w, h);
-
-	window_.set_relative_mouse_mode(true);
-
-	stbi_set_flip_vertically_on_load(true);
-
-	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_DEBUG_OUTPUT);
-	glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-	glDebugMessageCallback(utils::message_callback, nullptr);
-	glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_NOTIFICATION, 0, nullptr, GL_FALSE); //désactiver les messages de sévérité "Notification"
-
-	////////////////////////////////////////////////////////////////////////////////////////
-	IMGUI_CHECKVERSION();
-	ImGui::CreateContext();
-	ImGuiIO& io = ImGui::GetIO();
-	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
-	io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
-	io.MouseDrawCursor = true; //afficher un curseur de souris même s'il est caché par SDL
-
-	ImGui_ImplSDL3_InitForOpenGL(window_.fetch(), window_.get_context());
-	ImGui_ImplOpenGL3_Init();
-	////////////////////////////////////////////////////////////////////////////////////////
-
 	shader_programs_.insert(std::make_pair("Base", ShaderProgram("Base", {"resources/shaders/base_shader.vert", "resources/shaders/base_shader.frag"})));
 	shader_programs_.insert(std::make_pair("Phong", ShaderProgram("Phong", {"resources/shaders/base_shader.vert", "resources/shaders/phong_shader.frag"})));
 }
@@ -50,7 +23,7 @@ Game::Game()
 void Game::run()
 {
 	int w, h;
-	window_.get_size(&w, &h);
+	backend_.get_window_size(&w, &h);
 	glm::mat4 projection_matrix(1.0f);
 	projection_matrix = glm::perspective(glm::radians(45.0f), float(w) / float(h), 0.1f, 100.0f);
 
@@ -157,7 +130,7 @@ void Game::draw()
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 	////////////////////////////////////////////////////////////////////////////////////////
 
-	window_.swap_buffers();
+	backend_.swap_window_buffers(); //TODO : pas ouf, devrait directement être dans la classe Backend
 }
 
 void Game::update_fps_count(Uint64& last_fps_refresh, unsigned int& frame_count_this_second) const
@@ -165,7 +138,7 @@ void Game::update_fps_count(Uint64& last_fps_refresh, unsigned int& frame_count_
 	frame_count_this_second += 1;
 	if(SDL_GetTicks() >= last_fps_refresh + 1000) //tester une fois par seconde pour obtenir des frames par seconde
 	{
-		window_.update_fps(frame_count_this_second);
+		//window_.update_fps(frame_count_this_second); //TODO
 		last_fps_refresh = SDL_GetTicks();
 		frame_count_this_second = 0;
 	}

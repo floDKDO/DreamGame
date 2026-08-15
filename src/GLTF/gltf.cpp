@@ -21,7 +21,7 @@ glm::mat4 get_mat4_from_1d_matrix(const double m[16])
 	return matrix_mat4;
 }
 
-glm::mat4 get_transformation_matrix(double rotation[4], double scale[3], double translation[3])
+/*glm::mat4 get_transformation_matrix(double rotation[4], double scale[3], double translation[3])
 {
 	glm::mat4 matrix_mat4(1.0f);
 	glm::vec4 rotation_vec4(rotation[0], rotation[1], rotation[2], rotation[3]);
@@ -36,9 +36,9 @@ glm::mat4 get_transformation_matrix(double rotation[4], double scale[3], double 
 	matrix_mat4 = glm::scale(matrix_mat4, scale_vec3);
 
 	return matrix_mat4;
-}
+}*/
 
-void print_mat4(glm::mat4 m)
+/*void print_mat4(glm::mat4 m)
 {
 	for(glm::length_t i = 0; i < 4; ++i)
 	{
@@ -49,9 +49,9 @@ void print_mat4(glm::mat4 m)
 		std::cout << std::endl;
 	}
 	std::cout << std::endl;
-}
+}*/
 
-void print_1d_matrix(double m[16])
+/*void print_1d_matrix(double m[16])
 {
 	for(glm::length_t i = 0; i < 4 * 4; i += 4)
 	{
@@ -62,9 +62,9 @@ void print_1d_matrix(double m[16])
 		std::cout << std::endl;
 	}
 	std::cout << std::endl;
-}
+}*/
 
-bool is_mat4_identity(glm::mat4 m)
+/*bool is_mat4_identity(glm::mat4 m)
 {
 	glm::mat4 identity(1.0f);
 	for(glm::length_t i = 0; i < 4; ++i)
@@ -78,9 +78,9 @@ bool is_mat4_identity(glm::mat4 m)
 		}
 	}
 	return true;
-}
+}*/
 
-bool is_1d_matrix_identity(double m[16])
+/*bool is_1d_matrix_identity(double m[16])
 {
 	glm::mat4 identity(1.0f);
 	for(glm::length_t i = 0; i < 4 * 4; i += 4)
@@ -94,7 +94,7 @@ bool is_1d_matrix_identity(double m[16])
 		}
 	}
 	return true;
-}
+}*/
 
 std::string get_target_str(int32_t target)
 {
