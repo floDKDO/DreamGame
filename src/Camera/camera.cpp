@@ -15,7 +15,8 @@ Camera::Camera(InputManager& input_manager, glm::vec3& target_position)
 
 void Camera::update(float delta_time)
 {
-	view_matrix_ = look_at(camera_position_, target_position_ + target_to_camera_offset_, glm::vec3(0.0f, 1.0f, 0.0f));
+	//view_matrix_ = look_at(camera_position_, target_position_ + target_to_camera_offset_, glm::vec3(0.0f, 1.0f, 0.0f));
+	view_matrix_ = glm::lookAt(camera_position_, target_position_ + target_to_camera_offset_, glm::vec3(0.0f, 1.0f, 0.0f));
 	compute_euler_angles(delta_time);
 }
 

@@ -24,7 +24,7 @@ class Camera
 		struct EulerAngles
 		{
 			EulerAngles()
-				: pitch_(30.0f), yaw_(-90.0f), roll_(0.0f)
+				: pitch_(30.0f), yaw_(90.0f), roll_(0.0f) //TODO : la valeur de yaw aligne la caméra dans "le bon sens" (directement en face des axes), voir si cette orientation dérange
 			{}
 
 			static const float min_pitch_;

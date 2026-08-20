@@ -5,6 +5,8 @@
 #include "imgui/imgui_impl_sdl3.h"
 #include "imgui/imgui_impl_opengl3.h"
 
+#include "glTF/gltf.h"
+
 #include <glm/gtc/type_ptr.hpp>
 #include <iostream>
 
@@ -14,7 +16,7 @@ Game::Game()
 	: backend_(), //window_(),
 	temp_(0.0f),  //TODO : à retirer (remplacer par la position du joueur)
 	// //TODO : à gérer player_(intput_manager_),
-	camera_(intput_manager_, temp_ /* //TODO : à gérer player_.model_.transform_.position_*/), running_(true), gamepad_(), test_scene_("resources/models/test_scene.glb") //, temp_model_("resources/models/corridor.glb"), light_source_("resources/models/light_source.glb")
+	camera_(intput_manager_, temp_ /* //TODO : à gérer player_.model_.transform_.position_*/), running_(true), gamepad_(), test_scene_("resources/models/corridor.gltf"), gizmo_("resources/models/axis_gizmo2.glb"), projection_matrix_(1.0f) //, temp_model_("resources/models/corridor.glb"), light_source_("resources/models/light_source.glb")
 {
 	shader_programs_.insert(std::make_pair("Base", ShaderProgram("Base", {"resources/shaders/base_shader.vert", "resources/shaders/base_shader.frag"})));
 	shader_programs_.insert(std::make_pair("Phong", ShaderProgram("Phong", {"resources/shaders/base_shader.vert", "resources/shaders/phong_shader.frag"})));
@@ -24,19 +26,19 @@ void Game::run()
 {
 	int w, h;
 	backend_.get_window_size(&w, &h);
-	glm::mat4 projection_matrix(1.0f);
-	projection_matrix = glm::perspective(glm::radians(45.0f), float(w) / float(h), 0.1f, 100.0f);
+	projection_matrix_ = glm::perspective(glm::radians(45.0f), float(w) / float(h), 0.1f, 100.0f);
 
 	ShaderProgram& phong_program = shader_programs_.at("Phong");
 	phong_program.use();
 	phong_program.set_uniform_1i("texture_sampler0_", 0);
 	phong_program.set_uniform_matrix_4fv("view_matrix_", glm::value_ptr(camera_.get_view_matrix()));
-	phong_program.set_uniform_matrix_4fv("projection_matrix_", glm::value_ptr(projection_matrix));
+	phong_program.set_uniform_matrix_4fv("projection_matrix_", glm::value_ptr(projection_matrix_));
 
-	ShaderProgram& base_program = shader_programs_.at("Base");
+	//TODO
+	/*ShaderProgram& base_program = shader_programs_.at("Base");
 	base_program.use();
 	base_program.set_uniform_matrix_4fv("view_matrix_", glm::value_ptr(camera_.get_view_matrix()));
-	base_program.set_uniform_matrix_4fv("projection_matrix_", glm::value_ptr(projection_matrix));
+	base_program.set_uniform_matrix_4fv("projection_matrix_", glm::value_ptr(projection_matrix));*/
 
 	//TODO : à gérer
 	//light_source_.transform_.position_ = glm::vec3(0.0f, 5.0f, 0.0f);
@@ -56,11 +58,12 @@ void Game::run()
 
 		handle_events();
 
+		//TODO
 		////////////////////////////////////////////////////////////////////////////////////////
-		ImGui_ImplOpenGL3_NewFrame();
-		ImGui_ImplSDL3_NewFrame();
-		ImGui::NewFrame();
-		ImGui::ShowDemoWindow(); // Show demo window! :)
+		//ImGui_ImplOpenGL3_NewFrame();
+		//ImGui_ImplSDL3_NewFrame();
+		//ImGui::NewFrame();
+		//ImGui::ShowDemoWindow(); // Show demo window! :)
 		////////////////////////////////////////////////////////////////////////////////////////
 
 		update(delta_time);
@@ -99,7 +102,7 @@ void Game::handle_events()
 		intput_manager_.handle_events(e);
 
 		////////////////////////////////////////////////////////////////////////////////////////
-		ImGui_ImplSDL3_ProcessEvent(&e);
+		//ImGui_ImplSDL3_ProcessEvent(&e); //TODO
 		////////////////////////////////////////////////////////////////////////////////////////
 	}
 }
@@ -109,25 +112,27 @@ void Game::draw()
 	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	ShaderProgram& base_program = shader_programs_.at("Base");
-	base_program.use();
-	base_program.set_uniform_matrix_4fv("view_matrix_", glm::value_ptr(camera_.get_view_matrix()));
-	glDrawArrays(GL_TRIANGLES, 0, 36);
+	//TODO
+	//ShaderProgram& base_program = shader_programs_.at("Base");
+	//base_program.use();
+	//base_program.set_uniform_matrix_4fv("view_matrix_", glm::value_ptr(camera_.get_view_matrix()));
 	//TODO : à gérer
 	//light_source_.draw(base_program);
 
 	ShaderProgram& phong_program = shader_programs_.at("Phong");
 	phong_program.use();
 	phong_program.set_uniform_matrix_4fv("view_matrix_", glm::value_ptr(camera_.get_view_matrix()));
-	glDrawArrays(GL_TRIANGLES, 0, 36);
+	phong_program.set_uniform_3f("view_position_", camera_.camera_position_);
 	//TODO : à gérer
 	//temp_model_.draw(phong_program);
 	//player_.draw(phong_program);
 	test_scene_.draw(phong_program);
+	gizmo_.draw(phong_program);
 
+	//TODO
 	////////////////////////////////////////////////////////////////////////////////////////
-	ImGui::Render();
-	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+	//ImGui::Render();
+	//ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 	////////////////////////////////////////////////////////////////////////////////////////
 
 	backend_.swap_window_buffers(); //TODO : pas ouf, devrait directement être dans la classe Backend
@@ -151,8 +156,11 @@ void Game::update(float delta_time)
 	gamepad_.check(1000); //tester une fois par seconde
 	intput_manager_.update(delta_time);
 
-	ShaderProgram& phong_program = shader_programs_.at("Phong");
-	phong_program.set_uniform_3f("view_position_", camera_.camera_position_);
-	//TODO : à gérer
+	//TODO : à gérer (mettre dans draw())
 	//phong_program.set_uniform_3f("light_position_", light_source_.transform_.position_);
+
+	//TODO : à supprimer
+	ShaderProgram& phong_program = shader_programs_.at("Phong");
+	phong_program.use();
+	phong_program.set_uniform_3f("light_position_", glm::vec3(0.0f, 4.0f, 0.0f));
 }

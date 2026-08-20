@@ -34,4 +34,7 @@ class Game
 		//gltf::Model temp_model_;
 		//gltf::Model light_source_;
 		gltf::Scene test_scene_;
+		gltf::Scene gizmo_;
+
+		glm::mat4 projection_matrix_; //TODO : voir si je garde ici
 };

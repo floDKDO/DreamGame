@@ -27,7 +27,7 @@ class Node
 		std::string get_name() const;
 
 		Transform transform_;
-		RotationInfo rotation_info_;
+		RotationInfo rotation_info_; //TODO : utiliser à terme glm::quat ??
 		glm::mat4 parent_matrix_;
 		std::vector<std::unique_ptr<Node>> children_nodes_;
 

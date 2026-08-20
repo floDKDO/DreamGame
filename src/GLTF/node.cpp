@@ -21,9 +21,11 @@ glm::mat4 Node::compute_model()
 	glm::mat4 model_matrix(1.0f); //reconstruction de la matrice model à chaque frame
 	model_matrix = glm::translate(model_matrix, transform_.position_);
 
+	//std::cout << "Dans model de " << name_ << ", Quaternion: " << transform_.rotation_quaternion_.x << ", " << transform_.rotation_quaternion_.y << ", " << transform_.rotation_quaternion_.z << ", " << transform_.rotation_quaternion_.w << std::endl;
+
 	//TODO : rotation (vérifier)
-	//model_matrix *= glm::mat4_cast(glm::quat(rotation_));
-	model_matrix = glm::rotate(model_matrix, rotation_info_.angle_, rotation_info_.axis_);
+	model_matrix *= glm::mat4_cast(transform_.rotation_quaternion_);
+	//model_matrix = glm::rotate(model_matrix, rotation_info_.angle_, rotation_info_.axis_);
 	model_matrix = glm::scale(model_matrix, transform_.scale_);
 	model_matrix *= parent_matrix_;
 

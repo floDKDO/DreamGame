@@ -24,7 +24,7 @@ Backend::Backend()
 	glDebugMessageCallback(message_callback, nullptr);
 	glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_NOTIFICATION, 0, nullptr, GL_FALSE); //désactiver les messages de sévérité "Notification"
 
-	init_imgui();
+	//init_imgui(); //TODO
 }
 
 void Backend::init_imgui() const
@@ -136,5 +136,5 @@ void GLAPIENTRY message_callback(GLenum source, GLenum type, GLuint id, GLenum s
 		}
 	};
 
-	std::cout << "[OpenGL " << lamda_type() << "] - " << lambda_severity() << lambda_source() << "ID: " << id << ", MESSAGE (length=" << length << "): <" << message << ">\n";
+	std::cout << "[OpenGL " << lamda_type() << "] - " << lambda_severity() << lambda_source() << "ID: " << id << ", MESSAGE (length=" << length << "): \"" << message << "\"\n";
 }

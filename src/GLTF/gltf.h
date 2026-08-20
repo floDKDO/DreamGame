@@ -13,7 +13,7 @@ glm::mat4 get_mat4_from_1d_matrix(const double m[16]);
 
 //TODO : inutilisées
 //glm::mat4 get_transformation_matrix(double rotation[4], double scale[3], double translation[3]);
-//void print_mat4(glm::mat4 m);
+void print_mat4(glm::mat4 m);
 //void print_1d_matrix(double m[16]);
 //bool is_mat4_identity(glm::mat4 m);
 //bool is_1d_matrix_identity(double m[16]);

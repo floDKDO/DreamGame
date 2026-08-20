@@ -38,7 +38,7 @@ glm::mat4 get_mat4_from_1d_matrix(const double m[16])
 	return matrix_mat4;
 }*/
 
-/*void print_mat4(glm::mat4 m)
+void print_mat4(glm::mat4 m)
 {
 	for(glm::length_t i = 0; i < 4; ++i)
 	{
@@ -49,7 +49,7 @@ glm::mat4 get_mat4_from_1d_matrix(const double m[16])
 		std::cout << std::endl;
 	}
 	std::cout << std::endl;
-}*/
+}
 
 /*void print_1d_matrix(double m[16])
 {
