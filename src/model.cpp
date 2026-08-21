@@ -1,15 +1,12 @@
 #include "model.h"
 
-namespace gltf
-{
-
-/*Model::Model(std::string_view path)
-	: gltf_file_(path), nodes_(gltf_file_.get_nodes())
-{}*/
-
-Model::Model(std::unique_ptr<Node> root_node)
-	: root_node_(std::move(root_node))
+Model::Model(std::string_view path)
+	: gltf_file_(path), scene_(std::move(gltf_file_.get_scene()))
 {}
+
+/*Model::Model(std::unique_ptr<Node> root_node)
+	: root_node_(std::move(root_node))
+{}*/
 
 void Model::draw(ShaderProgram& shader_program)
 {
@@ -18,17 +15,18 @@ void Model::draw(ShaderProgram& shader_program)
 		Node& node = node_pair.second;
 		node.draw(shader_program);
 	}*/
-	root_node_->draw(shader_program);
+	//root_node_->draw(shader_program);
+	scene_->draw(shader_program);
 }
 
 glm::vec3 Model::get_position() const
 {
-	return root_node_->transform_.position_;
+	return scene_->get_model_position();
 }
 
 std::string Model::get_name() const
 {
-	return root_node_->get_name();
+	return scene_->get_model_name();
 }
 
 void Model::set_transform(Transform transform)
@@ -40,7 +38,7 @@ void Model::set_transform(Transform transform)
 	}*/
 }
 
-void Model::set_rotation_info(Node::RotationInfo rotation_info)
+void Model::set_rotation_info(gltf::Node::RotationInfo rotation_info)
 {
 	/*for(std::pair<unsigned int, Node>& node_pair : nodes_)
 	{
@@ -51,13 +49,13 @@ void Model::set_rotation_info(Node::RotationInfo rotation_info)
 
 void Model::translate(glm::vec3 position)
 {
-	translate_children(root_node_.get(), position);
+	translate_children(scene_->get_model(), position);
 }
 
-void Model::translate_children(Node* node, glm::vec3 position)
+void Model::translate_children(gltf::Node* node, glm::vec3 position)
 {
 	node->transform_.position_ += position;
-	for(std::unique_ptr<Node>& child_node : node->children_nodes_)
+	for(std::unique_ptr<gltf::Node>& child_node : node->children_nodes_)
 	{
 		child_node->transform_.position_ += position;
 		translate_children(child_node.get(), position);
@@ -75,17 +73,15 @@ void Model::rotate(glm::vec4 rotation)
 
 void Model::scale(glm::vec3 scale)
 {
-	scale_children(root_node_.get(), scale);
+	scale_children(scene_->get_model(), scale);
 }
 
-void Model::scale_children(Node* node, glm::vec3 scale)
+void Model::scale_children(gltf::Node* node, glm::vec3 scale)
 {
 	node->transform_.scale_ += scale;
-	for(std::unique_ptr<Node>& child_node : node->children_nodes_)
+	for(std::unique_ptr<gltf::Node>& child_node : node->children_nodes_)
 	{
 		child_node->transform_.position_ += scale;
 		scale_children(child_node.get(), scale);
 	}
-}
-
 }

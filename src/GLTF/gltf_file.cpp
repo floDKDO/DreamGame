@@ -1,6 +1,6 @@
 #include "gltf_file.h"
 #include "gltf.h"
-#include "model.h"
+#include "scene.h"
 
 #ifndef GLM_ENABLE_EXPERIMENTAL
 #define GLM_ENABLE_EXPERIMENTAL
@@ -33,7 +33,7 @@ namespace gltf
 {
 
 glTFFile::glTFFile(std::string_view path)
-	: path_(path)
+	: path_(path), gltf_kind_(get_glTFKind(path))
 {
 	open();
 	print_info();
@@ -66,13 +66,29 @@ void glTFFile::close()
 	tg3_model_free(&model_tg3_);
 }
 
+glTFFile::glTFKind glTFFile::get_glTFKind(std::string_view path) const
+{
+	if(path.find("resources/models/") != std::string_view::npos)
+	{
+		return glTFKind::MODEL;
+	}
+	else if(path.find("resources/levels/") != std::string_view::npos)
+	{
+		return glTFKind::LEVEL;
+	}
+	else
+	{
+		return glTFKind::UNKNOWN;
+	}
+}
+
 void glTFFile::print_info() const
 {
 	std::cout << "\n**** Info on the glTF file ****\n";
 	std::cout << "- General information: " << std::endl;
 	std::cout << "    - File name: " << path_ << std::endl;
 	std::cout << "    - The file contains " << model_tg3_.scenes->nodes_count << " root node(s).\n";
-	std::cout << "    - There are " << model_tg3_.nodes_count << " node(s), " << model_tg3_.meshes_count << " mesh(es), " << model_tg3_.accessors_count << " accessor(s), " << model_tg3_.buffer_views_count << " buffer view(s), " << model_tg3_.buffers_count << " buffer(s), " << model_tg3_.textures_count << " texture(s), " << model_tg3_.samplers_count << " sampler(s) and " << model_tg3_.images_count << " image(s).\n";
+	std::cout << "    - There are " << model_tg3_.scenes_count << " scene(s), " << model_tg3_.nodes_count << " node(s), " << model_tg3_.meshes_count << " mesh(es), " << model_tg3_.accessors_count << " accessor(s), " << model_tg3_.buffer_views_count << " buffer view(s), " << model_tg3_.buffers_count << " buffer(s), " << model_tg3_.textures_count << " texture(s), " << model_tg3_.samplers_count << " sampler(s) and " << model_tg3_.images_count << " image(s).\n";
 
 	std::cout << "- File content: " << std::endl;
 	std::cout << "    - Node(s) and mesh(es): " << std::endl;
@@ -80,6 +96,12 @@ void glTFFile::print_info() const
 	{
 		tg3_node node_tg3 = model_tg3_.nodes[i];
 		std::cout << "        - Node " << i << ": " << std::endl;
+
+		if(node_tg3.ext.extras != nullptr)
+		{
+			std::cout << "           .Extras: <\"" << node_tg3.ext.extras->object_data->key.data << "\" : \"" << node_tg3.ext.extras->object_data->value.string_val.data << "\">" << std::endl;
+		}
+
 		std::cout << "           .Mesh index: " << node_tg3.mesh << ", rotation: (" << node_tg3.rotation[0] << ", " << node_tg3.rotation[1] << ", " << node_tg3.rotation[2] << ", " << node_tg3.rotation[3] <<
 			"), scale: (" << node_tg3.scale[0] << ", " << node_tg3.scale[1] << ", " << node_tg3.scale[2] <<
 			"), translation: (" << node_tg3.translation[0] << ", " << node_tg3.translation[1] << ", " << node_tg3.translation[2] << ")\n";
@@ -162,7 +184,25 @@ void glTFFile::print_info() const
 	std::cout << "*********************************************************************************************\n\n";
 }
 
-std::vector<std::unique_ptr<Model>> glTFFile::get_models() const
+std::unique_ptr<Scene> glTFFile::get_scene() const
+{
+	std::vector<std::unique_ptr<Node>> root_nodes;
+	if(model_tg3_.scenes_count > 1)
+	{
+		std::cerr << "(Scenes count > 1) ************************CAS PAS ENCORE GERE************************\n";
+	}
+
+	tg3_scene scene_tg3 = model_tg3_.scenes[0];
+	for(uint32_t i = 0; i < scene_tg3.nodes_count; ++i)
+	{
+		int32_t root_node_index = scene_tg3.nodes[i];
+		tg3_node root_node_tg3 = model_tg3_.nodes[root_node_index];
+		root_nodes.push_back(std::make_unique<Node>(get_node(model_tg3_, root_node_tg3, glm::mat4(1.0f))));
+	}
+	return std::make_unique<Scene>(std::move(root_nodes), gltf_kind_ == glTFKind::MODEL ? true : false);
+}
+
+/*std::vector<std::unique_ptr<Model>> glTFFile::get_models() const
 {
 	std::vector<std::unique_ptr<Model>> models;
 	if(model_tg3_.scenes_count > 1)
@@ -179,6 +219,24 @@ std::vector<std::unique_ptr<Model>> glTFFile::get_models() const
 	}
 	return models;
 }
+
+std::vector<std::unique_ptr<Node>> glTFFile::get_root_nodes() const
+{
+	std::vector<std::unique_ptr<Node>> root_nodes;
+	if(model_tg3_.scenes_count > 1)
+	{
+		std::cerr << "(Scenes count > 1) ************************CAS PAS ENCORE GERE************************\n";
+	}
+
+	tg3_scene scene_tg3 = model_tg3_.scenes[0];
+	for(uint32_t i = 0; i < scene_tg3.nodes_count; ++i)
+	{
+		int32_t root_node_index = scene_tg3.nodes[i];
+		tg3_node root_node_tg3 = model_tg3_.nodes[root_node_index];
+		root_nodes.push_back(std::make_unique<Node>(get_node(model_tg3_, root_node_tg3, glm::mat4(1.0f))));
+	}
+	return root_nodes;
+}*/
 
 }
 

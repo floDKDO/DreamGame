@@ -6,7 +6,6 @@
 
 struct Texture
 {
-	//TODO : public/private
 	Texture()
 		: texture_id_(0), texture_unit_(0), image_path_(""),
 		  mag_filter_(0), min_filter_(0), wrap_s_(GL_REPEAT), wrap_t_(GL_REPEAT)
