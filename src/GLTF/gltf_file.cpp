@@ -32,7 +32,6 @@ std::vector<glm::vec4> get_vec4_color_attribute(const tg3_model& model_tg3, cons
 namespace gltf
 {
 
-//TODO : il faudrait ajouter un test qui s'assure que le fichier passé en argument existe
 glTFFile::glTFFile(std::string_view path)
 	: path_(path), gltf_kind_(get_glTFKind(path))
 {
@@ -55,8 +54,15 @@ void glTFFile::open()
 	{
 		for(uint32_t i = 0; i < error_stack_tg3_.count; i++)
 		{
-			std::string str = error_stack_tg3_.entries[i].message ? error_stack_tg3_.entries[i].message : "(null)";
-			std::cout << int(error_stack_tg3_.entries[i].severity) << ", " << str << std::endl;
+			tg3_error_entry error_entry_tg3 = error_stack_tg3_.entries[i];
+			std::string str = error_entry_tg3.message ? error_entry_tg3.message : "(null)";
+			std::cout << "**TG3 Error** => severity: " << int(error_entry_tg3.severity) << ", message: " << str << std::endl;
+
+			if(error_entry_tg3.code == TG3_ERR_FILE_NOT_FOUND || error_entry_tg3.code == TG3_ERR_FILE_READ)
+			{
+				std::cout << "Exiting the program because the file \"" << path_ << "\" doesn't exist or couldn't be read!\n";
+				exit(EXIT_FAILURE);
+			}
 		}
 	}
 }

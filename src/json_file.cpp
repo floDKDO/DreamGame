@@ -10,20 +10,6 @@ JSONFile::JSONFile(std::string_view gltf_json_file_path)
 {
 	open();
 	gltf_to_map_format();
-
-	for(const auto& model : map_data_["models"].items())
-	{
-		json model_value = model.value();
-
-		json translation = model_value["translation"];
-		glm::vec3 translation_vec(translation[0], translation[1], translation[2]);
-
-		json rotation = model_value["rotation"];
-		glm::quat rotation_vec(rotation[0], rotation[1], rotation[2], rotation[3]);
-
-		json scale = model_value["scale"];
-		glm::vec3 scale_vec(scale[0], scale[1], scale[2]);
-	}
 }
 
 std::vector<std::unique_ptr<Model>> JSONFile::get_models() const
