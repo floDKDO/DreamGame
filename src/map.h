@@ -1,7 +1,8 @@
 #pragma once
 
-#include "glTF/scene.h"
-#include "glTF/gltf_file.h"
+//#include "glTF/scene.h"
+//#include "glTF/gltf_file.h"
+#include "model.h"
 
 #include <memory>
 
@@ -14,5 +15,7 @@ class Map
 
 	private:
 		gltf::glTFFile gltf_file_;
-		std::unique_ptr<gltf::Scene> scene_;
+		std::vector<Model> models_;
+
+		std::unique_ptr<gltf::Scene> scene_; //TODO : à retirer
 };

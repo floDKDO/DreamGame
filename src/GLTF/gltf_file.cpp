@@ -72,9 +72,9 @@ glTFFile::glTFKind glTFFile::get_glTFKind(std::string_view path) const
 	{
 		return glTFKind::MODEL;
 	}
-	else if(path.find("resources/levels/") != std::string_view::npos)
+	else if(path.find("resources/maps/") != std::string_view::npos)
 	{
-		return glTFKind::LEVEL;
+		return glTFKind::MAP;
 	}
 	else
 	{
@@ -361,7 +361,7 @@ glm::quat get_node_rotation(const tg3_node& node_tg3)
 	{
 		rotation_quaternion = glm::quat(float(node_tg3.rotation[3]), float(node_tg3.rotation[0]), float(node_tg3.rotation[1]), float(node_tg3.rotation[2]));
 	}
-	std::cout << node_tg3.name.data <<  ", Quaternion: " << rotation_quaternion.x << ", " << rotation_quaternion.y << ", " << rotation_quaternion.z << ", " << rotation_quaternion.w << std::endl;
+	//std::cout << node_tg3.name.data <<  ", Quaternion: " << rotation_quaternion.x << ", " << rotation_quaternion.y << ", " << rotation_quaternion.z << ", " << rotation_quaternion.w << std::endl;
 	return rotation_quaternion;
 }
 

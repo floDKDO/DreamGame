@@ -18,7 +18,7 @@ class glTFFile
 		{
 			UNKNOWN,
 			MODEL,
-			LEVEL
+			MAP
 		};
 
 		explicit glTFFile(std::string_view path);

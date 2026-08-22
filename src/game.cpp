@@ -6,20 +6,26 @@
 #include "imgui/imgui_impl_opengl3.h"
 
 #include "glTF/gltf.h"
+#include "json_file.h"
 
 #include <glm/gtc/type_ptr.hpp>
 #include <iostream>
 
 //TODO : free ImGui
+//TODO : créer des constantes pour les valeurs par défaut de translation, rotation et scale
 
 Game::Game()
 	: backend_(), //window_(),
 	temp_(0.0f),  //TODO : à retirer (remplacer par la position du joueur)
 	// //TODO : à gérer player_(input_manager_),
-	camera_(input_manager_, temp_ /* //TODO : à gérer player_.model_.transform_.position_*/), running_(true), gamepad_(), test_map_("resources/levels/corridor.glb"), /*test_scene_("resources/models/corridor.gltf"),*/ gizmo_("resources/models/axis_gizmo.glb"), perspective_projection_matrix_(1.0f) //, temp_model_("resources/models/corridor.glb"), light_source_("resources/models/light_source.glb")
+	camera_(input_manager_, temp_ /* //TODO : à gérer player_.model_.transform_.position_*/), running_(true), gamepad_(), test_map_("resources/maps/corridor_v2.gltf"), /*test_scene_("resources/models/corridor.gltf"),*/ gizmo_("resources/models/axis_gizmo.glb"), perspective_projection_matrix_(1.0f) //, temp_model_("resources/models/corridor.glb"), light_source_("resources/models/light_source.glb")
 {
 	shader_programs_.insert(std::make_pair("Base", ShaderProgram("Base", {"resources/shaders/base_shader.vert", "resources/shaders/base_shader.frag"})));
 	shader_programs_.insert(std::make_pair("Phong", ShaderProgram("Phong", {"resources/shaders/base_shader.vert", "resources/shaders/phong_shader.frag"})));
+
+	///
+	JSONFile map_level("resources/maps/corridor_v2.gltf");
+	///
 }
 
 void Game::run()

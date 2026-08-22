@@ -26,7 +26,7 @@ class Scene
 		//std::string path_;
 		//std::vector<std::unique_ptr<Model>> models_;
 		std::vector<std::unique_ptr<Node>> root_nodes_;
-		bool is_model_; //if false => LEVEL
+		bool is_model_; //if false => MAP
 };
 
 }
