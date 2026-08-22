@@ -1,8 +1,18 @@
 #include "model.h"
 
+#include <iostream>
+
 Model::Model(std::string_view path)
 	: gltf_file_(path), scene_(std::move(gltf_file_.get_scene()))
 {}
+
+Model::Model(std::string_view path, Transform transform)
+	: gltf_file_(path), scene_(std::move(gltf_file_.get_scene()))
+{
+	scene_->set_model_position(transform.position_);
+	scene_->set_model_rotation(transform.rotation_quaternion_);
+	scene_->set_model_scale(transform.scale_);
+}
 
 /*Model::Model(std::unique_ptr<Node> root_node)
 	: root_node_(std::move(root_node))
@@ -16,6 +26,7 @@ void Model::draw(ShaderProgram& shader_program)
 		node.draw(shader_program);
 	}*/
 	//root_node_->draw(shader_program);
+
 	scene_->draw(shader_program);
 }
 

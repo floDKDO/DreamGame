@@ -13,7 +13,7 @@ class JSONFile
 	public:
 		explicit JSONFile(std::string_view gltf_json_file_path);
 
-		std::vector<Model> get_models() const;
+		std::vector<std::unique_ptr<Model>> get_models() const;
 
 	private:
 		void open();

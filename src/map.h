@@ -3,6 +3,7 @@
 //#include "glTF/scene.h"
 //#include "glTF/gltf_file.h"
 #include "model.h"
+#include "json_file.h"
 
 #include <memory>
 
@@ -14,8 +15,9 @@ class Map
 		void draw(ShaderProgram& shader_program);
 
 	private:
-		gltf::glTFFile gltf_file_;
-		std::vector<Model> models_;
+		//gltf::glTFFile gltf_file_;
+		JSONFile map_file_;
+		std::vector<std::unique_ptr<Model>> models_;
 
-		std::unique_ptr<gltf::Scene> scene_; //TODO : à retirer
+		//std::unique_ptr<gltf::Scene> scene_; //TODO : à retirer
 };

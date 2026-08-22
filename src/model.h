@@ -9,6 +9,7 @@ class Model
 {
 	public:
 		explicit Model(std::string_view path);
+		Model(std::string_view path, Transform transform);
 		//explicit Model(std::unique_ptr<Node> root_node);
 
 		void draw(ShaderProgram& shader_program);

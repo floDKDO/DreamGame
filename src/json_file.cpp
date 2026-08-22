@@ -26,9 +26,9 @@ JSONFile::JSONFile(std::string_view gltf_json_file_path)
 	}
 }
 
-std::vector<Model> JSONFile::get_models() const
+std::vector<std::unique_ptr<Model>> JSONFile::get_models() const
 {
-	std::vector<Model> models;
+	std::vector<std::unique_ptr<Model>> models;
 	for(const auto& model : map_data_["models"].items())
 	{
 		json model_value = model.value();
@@ -37,14 +37,19 @@ std::vector<Model> JSONFile::get_models() const
 		glm::vec3 translation_vec(translation[0], translation[1], translation[2]);
 
 		json rotation = model_value["rotation"];
-		glm::quat rotation_vec(rotation[0], rotation[1], rotation[2], rotation[3]);
+		glm::quat rotation_quat(rotation[3], rotation[0], rotation[1], rotation[2]);
 
 		json scale = model_value["scale"];
 		glm::vec3 scale_vec(scale[0], scale[1], scale[2]);
 
-		//TODO : ajouter les vec/quat dans le model
+		Transform transform;
+		transform.position_ = translation_vec;
+		transform.rotation_quaternion_ = rotation_quat;
+		transform.scale_ = scale_vec;
 
-		models.push_back(Model(model_value["modelFilename"]));
+		std::string model_filename = model_value["modelFilename"];
+
+		models.push_back(std::make_unique<Model>("resources/models/" + model_filename, transform));
 	}
 	return models;
 }
