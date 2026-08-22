@@ -24,9 +24,10 @@ void Scene::set_model_scale(glm::vec3 scale)
 	root_nodes_[0]->transform_.scale_ = scale;
 }
 
-glm::vec3 Scene::get_model_position() const //get position of first root_node_
+glm::vec3& Scene::get_model_position() const //get position of first root_node_
 {
 	//TODO : voir si je garde les tests ou je pars du principe qu'il n'y aura pas d'erreur comme c'est mon code donc mes appels
+	// de toute façon, comme je retourne une référence, le "else" est faux...
 	if(is_model_)
 	{
 		return root_nodes_[0]->transform_.position_;

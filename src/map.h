@@ -1,7 +1,5 @@
 #pragma once
 
-//#include "glTF/scene.h"
-//#include "glTF/gltf_file.h"
 #include "model.h"
 #include "json_file.h"
 
@@ -13,11 +11,9 @@ class Map
 		explicit Map(std::string_view path);
 
 		void draw(ShaderProgram& shader_program);
+		Model* get_model_by_name(std::string_view name);
 
 	private:
-		//gltf::glTFFile gltf_file_;
 		JSONFile map_file_;
 		std::vector<std::unique_ptr<Model>> models_;
-
-		//std::unique_ptr<gltf::Scene> scene_; //TODO : à retirer
 };

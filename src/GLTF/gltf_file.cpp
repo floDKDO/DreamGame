@@ -32,6 +32,7 @@ std::vector<glm::vec4> get_vec4_color_attribute(const tg3_model& model_tg3, cons
 namespace gltf
 {
 
+//TODO : il faudrait ajouter un test qui s'assure que le fichier passé en argument existe
 glTFFile::glTFFile(std::string_view path)
 	: path_(path), gltf_kind_(get_glTFKind(path))
 {
@@ -66,6 +67,7 @@ void glTFFile::close()
 	tg3_model_free(&model_tg3_);
 }
 
+//TODO : utile ??
 glTFFile::glTFKind glTFFile::get_glTFKind(std::string_view path) const
 {
 	if(path.find("resources/models/") != std::string_view::npos)
@@ -201,42 +203,6 @@ std::unique_ptr<Scene> glTFFile::get_scene() const
 	}
 	return std::make_unique<Scene>(std::move(root_nodes), gltf_kind_ == glTFKind::MODEL ? true : false);
 }
-
-/*std::vector<std::unique_ptr<Model>> glTFFile::get_models() const
-{
-	std::vector<std::unique_ptr<Model>> models;
-	if(model_tg3_.scenes_count > 1)
-	{
-		std::cerr << "(Scenes count > 1) ************************CAS PAS ENCORE GERE************************\n";
-	}
-
-	tg3_scene scene_tg3 = model_tg3_.scenes[0];
-	for(uint32_t i = 0; i < scene_tg3.nodes_count; ++i) //il y a un model par root node
-	{
-		int32_t root_node_index = scene_tg3.nodes[i];
-		tg3_node root_node_tg3 = model_tg3_.nodes[root_node_index];
-		models.push_back(std::make_unique<Model>(std::make_unique<Node>(get_node(model_tg3_, root_node_tg3, glm::mat4(1.0f)))));
-	}
-	return models;
-}
-
-std::vector<std::unique_ptr<Node>> glTFFile::get_root_nodes() const
-{
-	std::vector<std::unique_ptr<Node>> root_nodes;
-	if(model_tg3_.scenes_count > 1)
-	{
-		std::cerr << "(Scenes count > 1) ************************CAS PAS ENCORE GERE************************\n";
-	}
-
-	tg3_scene scene_tg3 = model_tg3_.scenes[0];
-	for(uint32_t i = 0; i < scene_tg3.nodes_count; ++i)
-	{
-		int32_t root_node_index = scene_tg3.nodes[i];
-		tg3_node root_node_tg3 = model_tg3_.nodes[root_node_index];
-		root_nodes.push_back(std::make_unique<Node>(get_node(model_tg3_, root_node_tg3, glm::mat4(1.0f))));
-	}
-	return root_nodes;
-}*/
 
 }
 

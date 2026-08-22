@@ -10,11 +10,10 @@ class Model
 	public:
 		explicit Model(std::string_view path);
 		Model(std::string_view path, Transform transform);
-		//explicit Model(std::unique_ptr<Node> root_node);
 
 		void draw(ShaderProgram& shader_program);
 
-		glm::vec3 get_position() const; //get position of root_node_
+		glm::vec3& get_position() const; //get position of root_node_
 		std::string get_name() const; //get name of root_node_
 
 		void set_transform(Transform transform);
@@ -30,5 +29,4 @@ class Model
 
 		gltf::glTFFile gltf_file_;
 		std::unique_ptr<gltf::Scene> scene_;
-		//std::unique_ptr<Node> root_node_;
 };

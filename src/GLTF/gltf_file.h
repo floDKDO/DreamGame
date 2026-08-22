@@ -25,8 +25,6 @@ class glTFFile
 		~glTFFile();
 
 		std::unique_ptr<Scene> get_scene() const;
-		//std::vector<std::unique_ptr<Model>> get_models() const; //TODO : à retirer
-		//std::vector<std::unique_ptr<Node>> get_root_nodes() const;
 
 	private:
 		void open();

@@ -27,14 +27,10 @@ class Game
 		std::unordered_map<std::string, ShaderProgram> shader_programs_;
 		InputManager input_manager_;
 
-		//Player player_;
-		glm::vec3 temp_; //TODO : à retirer
+		Player player_;
 		Camera camera_;
 		bool running_;
 		sdl::Gamepad gamepad_;
-		//gltf::Model temp_model_;
-		//gltf::Model light_source_;
-		//gltf::Scene test_scene_;
 		Map test_map_;
 		Model gizmo_;
 

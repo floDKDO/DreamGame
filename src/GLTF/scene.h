@@ -18,7 +18,7 @@ class Scene
 		void set_model_rotation(glm::quat rotation);
 		void set_model_scale(glm::vec3 scale);
 
-		glm::vec3 get_model_position() const; //get position of first root_node_
+		glm::vec3& get_model_position() const; //get position of first root_node_
 		std::string get_model_name() const; //get name of first root_node_
 		Node* get_model() const;
 
@@ -26,9 +26,6 @@ class Scene
 		//Model* get_model_by_name(std::string name);
 
 	private:
-		//glTFFile gltf_file_;
-		//std::string path_;
-		//std::vector<std::unique_ptr<Model>> models_;
 		std::vector<std::unique_ptr<Node>> root_nodes_;
 		bool is_model_; //if false => MAP
 };

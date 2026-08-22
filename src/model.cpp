@@ -14,10 +14,6 @@ Model::Model(std::string_view path, Transform transform)
 	scene_->set_model_scale(transform.scale_);
 }
 
-/*Model::Model(std::unique_ptr<Node> root_node)
-	: root_node_(std::move(root_node))
-{}*/
-
 void Model::draw(ShaderProgram& shader_program)
 {
 	/*for(std::pair<unsigned int, Node>& node_pair : nodes_)
@@ -30,7 +26,7 @@ void Model::draw(ShaderProgram& shader_program)
 	scene_->draw(shader_program);
 }
 
-glm::vec3 Model::get_position() const
+glm::vec3& Model::get_position() const
 {
 	return scene_->get_model_position();
 }
