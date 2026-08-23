@@ -21,80 +21,63 @@ glm::mat4 get_mat4_from_1d_matrix(const double m[16])
 	return matrix_mat4;
 }
 
-/*glm::mat4 get_transformation_matrix(double rotation[4], double scale[3], double translation[3])
+glm::mat4 get_transformation_matrix(glm::mat4 parent_matrix, glm::vec3 translation, glm::quat rotation, glm::vec3 scale)
 {
 	glm::mat4 matrix_mat4(1.0f);
-	glm::vec4 rotation_vec4(rotation[0], rotation[1], rotation[2], rotation[3]);
-	glm::vec3 scale_vec3(scale[0], scale[1], scale[2]);
-	glm::vec3 translation_vec3(translation[0], translation[1], translation[2]);
-
-	matrix_mat4 = glm::translate(matrix_mat4, translation_vec3);
-	if(rotation_vec4.x != 0.0f || rotation_vec4.y != 0.0f || rotation_vec4.z != 0.0f)
-	{
-		matrix_mat4 = glm::rotate(matrix_mat4, glm::acos(rotation_vec4.w), glm::vec3(rotation_vec4.x, rotation_vec4.y, rotation_vec4.z)); //glm::acos donne l'angle en radian donc pas besoin d'utiliser glm::radians
-	}
-	matrix_mat4 = glm::scale(matrix_mat4, scale_vec3);
-
+	matrix_mat4 *= parent_matrix; //cette multiplication doit être effectuée en première
+	matrix_mat4 = glm::translate(matrix_mat4, translation);
+	matrix_mat4 *= glm::mat4_cast(rotation);
+	matrix_mat4 = glm::scale(matrix_mat4, scale);
 	return matrix_mat4;
-}*/
+}
 
+glm::mat4 get_transformation_matrix_from_double(glm::mat4 parent_matrix, const double translation[3], const double rotation[4], const double scale[3])
+{
+	glm::vec3 translation_vec3;
+	translation_vec3.x = float(translation[0]);
+	translation_vec3.y = float(translation[1]);
+	translation_vec3.z = float(translation[2]);
+
+	glm::quat rotation_quat;
+	rotation_quat.w = float(rotation[3]);
+	rotation_quat.x = float(rotation[0]);
+	rotation_quat.y = float(rotation[1]);
+	rotation_quat.z = float(rotation[2]);
+
+	glm::vec3 scale_vec3;
+	scale_vec3.x = float(scale[0]);
+	scale_vec3.y = float(scale[1]);
+	scale_vec3.z = float(scale[2]);
+
+	return get_transformation_matrix(parent_matrix, translation_vec3, rotation_quat, scale_vec3);
+}
+
+//TODO : voir #include <glm/gtx/io.hpp> qui surcharge l'opérateur "<<"
 void print_mat4(glm::mat4 m)
 {
 	for(glm::length_t i = 0; i < 4; ++i)
 	{
 		for(glm::length_t j = 0; j < 4; ++j)
 		{
-			std::cout << m[i][j] << ", \t";
+			std::cout << m[j][i] << ", \t";
 		}
 		std::cout << std::endl;
 	}
 	std::cout << std::endl;
 }
 
-/*void print_1d_matrix(double m[16])
+void print_1d_matrix(const double m[16])
 {
-	for(glm::length_t i = 0; i < 4 * 4; i += 4)
+	for(glm::length_t i = 0; i < 4; ++i)
 	{
-		for(glm::length_t j = 0; j < 4; ++j)
+		for(glm::length_t j = 0; j < 4 * 4; j += 4)
 		{
 			std::cout << m[i + j] << ", \t";
 		}
 		std::cout << std::endl;
 	}
 	std::cout << std::endl;
-}*/
-
-/*bool is_mat4_identity(glm::mat4 m)
-{
-	glm::mat4 identity(1.0f);
-	for(glm::length_t i = 0; i < 4; ++i)
-	{
-		for(glm::length_t j = 0; j < 4; ++j)
-		{
-			if(m[i][j] != identity[i][j])
-			{
-				return false;
-			}
-		}
-	}
-	return true;
-}*/
-
-/*bool is_1d_matrix_identity(double m[16])
-{
-	glm::mat4 identity(1.0f);
-	for(glm::length_t i = 0; i < 4 * 4; i += 4)
-	{
-		for(glm::length_t j = 0; j < 4; ++j)
-		{
-			if(float(m[i + j]) != identity[i / 4][j])
-			{
-				return false;
-			}
-		}
-	}
-	return true;
-}*/
+}
 
 std::string get_target_str(int32_t target)
 {

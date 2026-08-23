@@ -1,9 +1,7 @@
 #pragma once
 
 #include "node.h"
-//#include "gltf_file.h"
 
-#include <string_view>
 #include <vector>
 
 namespace gltf
@@ -12,7 +10,7 @@ namespace gltf
 class Scene
 {
 	public:
-		explicit Scene(std::vector<std::unique_ptr<Node>> root_nodes, bool is_model);
+		explicit Scene(std::vector<std::unique_ptr<Node>> root_nodes);
 
 		void set_model_position(glm::vec3 position);
 		void set_model_rotation(glm::quat rotation);
@@ -23,11 +21,9 @@ class Scene
 		Node* get_model() const;
 
 		void draw(ShaderProgram& shader_program);
-		//Model* get_model_by_name(std::string name);
 
 	private:
 		std::vector<std::unique_ptr<Node>> root_nodes_;
-		bool is_model_; //if false => MAP
 };
 
 }

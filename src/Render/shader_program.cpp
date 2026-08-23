@@ -1,8 +1,6 @@
 #include "shader_program.h"
 #include "utils.h"
 
-#include <fstream>
-#include <sstream>
 #include <filesystem>
 #include <iostream>
 

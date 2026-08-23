@@ -30,7 +30,7 @@ std::vector<std::unique_ptr<Model>> JSONFile::get_models() const
 
 		Transform transform;
 		transform.position_ = translation_vec;
-		transform.rotation_quaternion_ = rotation_quat;
+		transform.rotation_ = rotation_quat;
 		transform.scale_ = scale_vec;
 
 		std::string model_filename = model_value["modelFilename"];

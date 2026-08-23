@@ -1,35 +1,19 @@
 #include "node.h"
 #include "gltf.h"
 
-#ifndef GLM_ENABLE_EXPERIMENTAL
-#define GLM_ENABLE_EXPERIMENTAL
-#endif
 #include <glm/gtc/type_ptr.hpp>
-//#include <glm/gtx/matrix_decompose.hpp>
-#include <glm/gtc/quaternion.hpp>
 #include <iostream>
 
 namespace gltf
 {
 
 Node::Node(std::string name, Transform transform, std::optional<Mesh> mesh)
-	: name_(name), mesh_(mesh), transform_(transform), rotation_info_({0.0f, glm::vec3(0.0f, 1.0f, 0.0f)}), parent_matrix_(1.0f)
+	: name_(name), mesh_(mesh), transform_(transform), parent_matrix_(1.0f)
 {}
 
-glm::mat4 Node::compute_model()
+glm::mat4 Node::compute_model() const
 {
-	glm::mat4 model_matrix(1.0f); //reconstruction de la matrice model à chaque frame
-	model_matrix = glm::translate(model_matrix, transform_.position_);
-
-	//std::cout << "Dans model de " << name_ << ", Quaternion: " << transform_.rotation_quaternion_.x << ", " << transform_.rotation_quaternion_.y << ", " << transform_.rotation_quaternion_.z << ", " << transform_.rotation_quaternion_.w << std::endl;
-
-	//TODO : rotation (vérifier)
-	model_matrix *= glm::mat4_cast(transform_.rotation_quaternion_);
-	//model_matrix = glm::rotate(model_matrix, rotation_info_.angle_, rotation_info_.axis_);
-	model_matrix = glm::scale(model_matrix, transform_.scale_);
-	model_matrix *= parent_matrix_;
-
-	return model_matrix;
+	return gltf::get_transformation_matrix(parent_matrix_, transform_.position_, transform_.rotation_, transform_.scale_);
 }
 
 void Node::draw(ShaderProgram& shader_program)

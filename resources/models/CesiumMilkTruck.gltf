@@ -8,38 +8,39 @@
 		{
 			"name":"Scene",
 			"nodes":[
-				0,
-				1,
-				7
+				5
 			]
 		}
 	],
 	"nodes":[
 		{
 			"mesh":0,
-			"name":"Cube",
-			"translation":[
-				1.528808355331421,
-				4.783302307128906,
-				3.0721731185913086
-			]
-		},
-		{
-			"mesh":1,
-			"name":"Cube.001",
-			"translation":[
-				1.528808355331421,
-				4.783302307128906,
-				1.0721732378005981
-			]
-		},
-		{
-			"mesh":2,
 			"name":"Wheels",
 			"rotation":[
 				0,
 				0,
-				-0.08848592638969421,
+				-0.08848593384027481,
+				0.9960774183273315
+			]
+		},
+		{
+			"children":[
+				0
+			],
+			"name":"Node",
+			"translation":[
+				1.4326698780059814,
+				0.4277220070362091,
+				0
+			]
+		},
+		{
+			"mesh":0,
+			"name":"Wheels.001",
+			"rotation":[
+				0,
+				0,
+				-0.08848593384027481,
 				0.9960774183273315
 			]
 		},
@@ -47,52 +48,31 @@
 			"children":[
 				2
 			],
-			"name":"Node",
+			"name":"Node.001",
 			"translation":[
-				1.432669997215271,
-				0.4277220368385315,
+				-1.3523298501968384,
+				0.42772188782691956,
 				0
 			]
 		},
 		{
-			"mesh":2,
-			"name":"Wheels.001",
-			"rotation":[
-				0,
-				0,
-				-0.08848592638969421,
-				0.9960774183273315
-			]
+			"children":[
+				1,
+				3
+			],
+			"mesh":1,
+			"name":"Cesium_Milk_Truck"
 		},
 		{
 			"children":[
 				4
 			],
-			"name":"Node.001",
-			"translation":[
-				-1.352329969406128,
-				0.4277220368385315,
-				0
-			]
-		},
-		{
-			"children":[
-				3,
-				5
-			],
-			"mesh":3,
-			"name":"Cesium_Milk_Truck"
-		},
-		{
-			"children":[
-				6
-			],
 			"name":"Yup2Zup",
 			"rotation":[
-				0.4999999403953552,
-				-0.5000000596046448,
-				-0.5000000596046448,
-				0.4999999403953552
+				-0.3162277638912201,
+				-0.6324554681777954,
+				0.3162277638912201,
+				0.6324557065963745
 			]
 		}
 	],
@@ -102,64 +82,36 @@
 				{
 					"sampler":0,
 					"target":{
-						"node":2,
+						"node":0,
 						"path":"rotation"
 					}
 				},
 				{
 					"sampler":1,
 					"target":{
-						"node":4,
+						"node":2,
 						"path":"rotation"
 					}
 				}
 			],
-			"name":"Wheels",
+			"name":"Wheels.002",
 			"samplers":[
 				{
-					"input":23,
+					"input":16,
 					"interpolation":"LINEAR",
-					"output":24
+					"output":17
 				},
 				{
-					"input":23,
+					"input":16,
 					"interpolation":"LINEAR",
-					"output":24
+					"output":17
 				}
 			]
 		}
 	],
 	"materials":[
 		{
-			"doubleSided":true,
-			"name":"Material.001",
-			"pbrMetallicRoughness":{
-				"baseColorFactor":[
-					0.800000011920929,
-					0.800000011920929,
-					0.800000011920929,
-					1
-				],
-				"metallicFactor":0,
-				"roughnessFactor":0.5
-			}
-		},
-		{
-			"doubleSided":true,
-			"name":"Material.002",
-			"pbrMetallicRoughness":{
-				"baseColorFactor":[
-					0.800000011920929,
-					0.800000011920929,
-					0.800000011920929,
-					1
-				],
-				"metallicFactor":0,
-				"roughnessFactor":0.5
-			}
-		},
-		{
-			"name":"wheels",
+			"name":"wheels.002",
 			"pbrMetallicRoughness":{
 				"baseColorTexture":{
 					"index":0
@@ -168,7 +120,7 @@
 			}
 		},
 		{
-			"name":"truck",
+			"name":"truck.002",
 			"pbrMetallicRoughness":{
 				"baseColorTexture":{
 					"index":1
@@ -177,7 +129,7 @@
 			}
 		},
 		{
-			"name":"glass",
+			"name":"glass.002",
 			"pbrMetallicRoughness":{
 				"baseColorFactor":[
 					0,
@@ -189,7 +141,7 @@
 			}
 		},
 		{
-			"name":"window_trim",
+			"name":"window_trim.002",
 			"pbrMetallicRoughness":{
 				"baseColorFactor":[
 					0.06400000303983688,
@@ -203,7 +155,7 @@
 	],
 	"meshes":[
 		{
-			"name":"Cube.001",
+			"name":"Wheels.002",
 			"primitives":[
 				{
 					"attributes":{
@@ -217,7 +169,7 @@
 			]
 		},
 		{
-			"name":"Cube.002",
+			"name":"Cesium_Milk_Truck.002",
 			"primitives":[
 				{
 					"attributes":{
@@ -225,54 +177,26 @@
 						"NORMAL":5,
 						"TEXCOORD_0":6
 					},
-					"indices":3,
+					"indices":7,
 					"material":1
-				}
-			]
-		},
-		{
-			"name":"Wheels",
-			"primitives":[
+				},
 				{
 					"attributes":{
-						"POSITION":7,
-						"NORMAL":8,
-						"TEXCOORD_0":9
+						"POSITION":8,
+						"NORMAL":9,
+						"TEXCOORD_0":10
 					},
-					"indices":10,
+					"indices":11,
 					"material":2
-				}
-			]
-		},
-		{
-			"name":"Cesium_Milk_Truck",
-			"primitives":[
+				},
 				{
 					"attributes":{
-						"POSITION":11,
-						"NORMAL":12,
-						"TEXCOORD_0":13
+						"POSITION":12,
+						"NORMAL":13,
+						"TEXCOORD_0":14
 					},
-					"indices":14,
+					"indices":15,
 					"material":3
-				},
-				{
-					"attributes":{
-						"POSITION":15,
-						"NORMAL":16,
-						"TEXCOORD_0":17
-					},
-					"indices":18,
-					"material":4
-				},
-				{
-					"attributes":{
-						"POSITION":19,
-						"NORMAL":20,
-						"TEXCOORD_0":21
-					},
-					"indices":22,
-					"material":5
 				}
 			]
 		}
@@ -298,68 +222,6 @@
 		{
 			"bufferView":0,
 			"componentType":5126,
-			"count":24,
-			"max":[
-				1,
-				1,
-				1
-			],
-			"min":[
-				-1,
-				-1,
-				-1
-			],
-			"type":"VEC3"
-		},
-		{
-			"bufferView":1,
-			"componentType":5126,
-			"count":24,
-			"type":"VEC3"
-		},
-		{
-			"bufferView":2,
-			"componentType":5126,
-			"count":24,
-			"type":"VEC2"
-		},
-		{
-			"bufferView":3,
-			"componentType":5123,
-			"count":36,
-			"type":"SCALAR"
-		},
-		{
-			"bufferView":4,
-			"componentType":5126,
-			"count":24,
-			"max":[
-				1,
-				1,
-				1
-			],
-			"min":[
-				-1,
-				-1,
-				-1
-			],
-			"type":"VEC3"
-		},
-		{
-			"bufferView":5,
-			"componentType":5126,
-			"count":24,
-			"type":"VEC3"
-		},
-		{
-			"bufferView":6,
-			"componentType":5126,
-			"count":24,
-			"type":"VEC2"
-		},
-		{
-			"bufferView":7,
-			"componentType":5126,
 			"count":828,
 			"max":[
 				0.4277999997138977,
@@ -374,25 +236,25 @@
 			"type":"VEC3"
 		},
 		{
-			"bufferView":8,
+			"bufferView":1,
 			"componentType":5126,
 			"count":828,
 			"type":"VEC3"
 		},
 		{
-			"bufferView":9,
+			"bufferView":2,
 			"componentType":5126,
 			"count":828,
 			"type":"VEC2"
 		},
 		{
-			"bufferView":10,
+			"bufferView":3,
 			"componentType":5123,
 			"count":2304,
 			"type":"SCALAR"
 		},
 		{
-			"bufferView":11,
+			"bufferView":4,
 			"componentType":5126,
 			"count":2366,
 			"max":[
@@ -408,25 +270,25 @@
 			"type":"VEC3"
 		},
 		{
-			"bufferView":12,
+			"bufferView":5,
 			"componentType":5126,
 			"count":2366,
 			"type":"VEC3"
 		},
 		{
-			"bufferView":13,
+			"bufferView":6,
 			"componentType":5126,
 			"count":2366,
 			"type":"VEC2"
 		},
 		{
-			"bufferView":14,
+			"bufferView":7,
 			"componentType":5123,
 			"count":5232,
 			"type":"SCALAR"
 		},
 		{
-			"bufferView":15,
+			"bufferView":8,
 			"componentType":5126,
 			"count":151,
 			"max":[
@@ -442,25 +304,25 @@
 			"type":"VEC3"
 		},
 		{
-			"bufferView":16,
+			"bufferView":9,
 			"componentType":5126,
 			"count":151,
 			"type":"VEC3"
 		},
 		{
-			"bufferView":17,
+			"bufferView":10,
 			"componentType":5126,
 			"count":151,
 			"type":"VEC2"
 		},
 		{
-			"bufferView":18,
+			"bufferView":11,
 			"componentType":5123,
 			"count":168,
 			"type":"SCALAR"
 		},
 		{
-			"bufferView":19,
+			"bufferView":12,
 			"componentType":5126,
 			"count":664,
 			"max":[
@@ -476,25 +338,25 @@
 			"type":"VEC3"
 		},
 		{
-			"bufferView":20,
+			"bufferView":13,
 			"componentType":5126,
 			"count":664,
 			"type":"VEC3"
 		},
 		{
-			"bufferView":21,
+			"bufferView":14,
 			"componentType":5126,
 			"count":664,
 			"type":"VEC2"
 		},
 		{
-			"bufferView":22,
+			"bufferView":15,
 			"componentType":5123,
 			"count":864,
 			"type":"SCALAR"
 		},
 		{
-			"bufferView":23,
+			"bufferView":16,
 			"componentType":5126,
 			"count":31,
 			"max":[
@@ -506,7 +368,7 @@
 			"type":"SCALAR"
 		},
 		{
-			"bufferView":24,
+			"bufferView":17,
 			"componentType":5126,
 			"count":31,
 			"type":"VEC4"
@@ -515,151 +377,109 @@
 	"bufferViews":[
 		{
 			"buffer":0,
-			"byteLength":288,
+			"byteLength":9936,
 			"byteOffset":0,
 			"target":34962
 		},
 		{
 			"buffer":0,
-			"byteLength":288,
-			"byteOffset":288,
-			"target":34962
-		},
-		{
-			"buffer":0,
-			"byteLength":192,
-			"byteOffset":576,
-			"target":34962
-		},
-		{
-			"buffer":0,
-			"byteLength":72,
-			"byteOffset":768,
-			"target":34963
-		},
-		{
-			"buffer":0,
-			"byteLength":288,
-			"byteOffset":840,
-			"target":34962
-		},
-		{
-			"buffer":0,
-			"byteLength":288,
-			"byteOffset":1128,
-			"target":34962
-		},
-		{
-			"buffer":0,
-			"byteLength":192,
-			"byteOffset":1416,
-			"target":34962
-		},
-		{
-			"buffer":0,
 			"byteLength":9936,
-			"byteOffset":1608,
-			"target":34962
-		},
-		{
-			"buffer":0,
-			"byteLength":9936,
-			"byteOffset":11544,
+			"byteOffset":9936,
 			"target":34962
 		},
 		{
 			"buffer":0,
 			"byteLength":6624,
-			"byteOffset":21480,
+			"byteOffset":19872,
 			"target":34962
 		},
 		{
 			"buffer":0,
 			"byteLength":4608,
-			"byteOffset":28104,
+			"byteOffset":26496,
 			"target":34963
 		},
 		{
 			"buffer":0,
 			"byteLength":28392,
-			"byteOffset":32712,
+			"byteOffset":31104,
 			"target":34962
 		},
 		{
 			"buffer":0,
 			"byteLength":28392,
-			"byteOffset":61104,
+			"byteOffset":59496,
 			"target":34962
 		},
 		{
 			"buffer":0,
 			"byteLength":18928,
-			"byteOffset":89496,
+			"byteOffset":87888,
 			"target":34962
 		},
 		{
 			"buffer":0,
 			"byteLength":10464,
-			"byteOffset":108424,
+			"byteOffset":106816,
 			"target":34963
 		},
 		{
 			"buffer":0,
 			"byteLength":1812,
-			"byteOffset":118888,
+			"byteOffset":117280,
 			"target":34962
 		},
 		{
 			"buffer":0,
 			"byteLength":1812,
-			"byteOffset":120700,
+			"byteOffset":119092,
 			"target":34962
 		},
 		{
 			"buffer":0,
 			"byteLength":1208,
-			"byteOffset":122512,
+			"byteOffset":120904,
 			"target":34962
 		},
 		{
 			"buffer":0,
 			"byteLength":336,
-			"byteOffset":123720,
+			"byteOffset":122112,
 			"target":34963
 		},
 		{
 			"buffer":0,
 			"byteLength":7968,
-			"byteOffset":124056,
+			"byteOffset":122448,
 			"target":34962
 		},
 		{
 			"buffer":0,
 			"byteLength":7968,
-			"byteOffset":132024,
+			"byteOffset":130416,
 			"target":34962
 		},
 		{
 			"buffer":0,
 			"byteLength":5312,
-			"byteOffset":139992,
+			"byteOffset":138384,
 			"target":34962
 		},
 		{
 			"buffer":0,
 			"byteLength":1728,
-			"byteOffset":145304,
+			"byteOffset":143696,
 			"target":34963
 		},
 		{
 			"buffer":0,
 			"byteLength":124,
-			"byteOffset":147032
+			"byteOffset":145424
 		},
 		{
 			"buffer":0,
 			"byteLength":496,
-			"byteOffset":147156
+			"byteOffset":145548
 		}
 	],
 	"samplers":[
@@ -670,7 +490,7 @@
 	],
 	"buffers":[
 		{
-			"byteLength":147652,
+			"byteLength":146044,
 			"uri":"CesiumMilkTruck.bin"
 		}
 	]

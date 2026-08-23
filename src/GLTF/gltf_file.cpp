@@ -2,19 +2,14 @@
 #include "gltf.h"
 #include "scene.h"
 
-#ifndef GLM_ENABLE_EXPERIMENTAL
-#define GLM_ENABLE_EXPERIMENTAL
-#endif
-#include <glm/gtx/matrix_decompose.hpp>
 #include <iostream>
 
 namespace
 {
-glm::vec3 get_scale_from_model_matrix(glm::mat4 model_matrix);
-glm::quat get_rotation_from_model_matrix(glm::mat4 model_matrix);
+
 glm::vec3 get_translation_from_model_matrix(glm::mat4 model_matrix);
-glm::vec3 get_skew_from_model_matrix(glm::mat4 model_matrix);
-glm::vec4 get_perspective_from_model_matrix(glm::mat4 model_matrix);
+glm::quat get_rotation_from_model_matrix(glm::mat4 model_matrix);
+glm::vec3 get_scale_from_model_matrix(glm::mat4 model_matrix);
 glm::vec3 get_node_position(const tg3_node& node_tg3);
 glm::quat get_node_rotation(const tg3_node& node_tg3);
 glm::vec3 get_node_scale(const tg3_node& node_tg3);
@@ -33,7 +28,7 @@ namespace gltf
 {
 
 glTFFile::glTFFile(std::string_view path)
-	: path_(path), gltf_kind_(get_glTFKind(path))
+	: path_(path)
 {
 	open();
 	print_info();
@@ -46,6 +41,12 @@ glTFFile::~glTFFile()
 
 void glTFFile::open()
 {
+	if(path_.find("resources/models/") == std::string::npos)
+	{
+		std::cout << "Error: this glTF file is not a model. Exiting!";
+		exit(EXIT_FAILURE);
+	}
+
 	tg3_parse_options options_tg3;
 	tg3_parse_options_init(&options_tg3);
 	tg3_error_stack_init(&error_stack_tg3_);
@@ -73,23 +74,6 @@ void glTFFile::close()
 	tg3_model_free(&model_tg3_);
 }
 
-//TODO : utile ??
-glTFFile::glTFKind glTFFile::get_glTFKind(std::string_view path) const
-{
-	if(path.find("resources/models/") != std::string_view::npos)
-	{
-		return glTFKind::MODEL;
-	}
-	else if(path.find("resources/maps/") != std::string_view::npos)
-	{
-		return glTFKind::MAP;
-	}
-	else
-	{
-		return glTFKind::UNKNOWN;
-	}
-}
-
 void glTFFile::print_info() const
 {
 	std::cout << "\n**** Info on the glTF file ****\n";
@@ -107,7 +91,11 @@ void glTFFile::print_info() const
 
 		if(node_tg3.ext.extras != nullptr)
 		{
-			std::cout << "           .Extras: <\"" << node_tg3.ext.extras->object_data->key.data << "\" : \"" << node_tg3.ext.extras->object_data->value.string_val.data << "\">" << std::endl;
+			const tg3_kv_pair* extras_tg3 = node_tg3.ext.extras->object_data;
+			if(extras_tg3->key.len > 0 && extras_tg3->value.string_val.len > 0)
+			{
+				std::cout << "           .Extras: <\"" << extras_tg3->key.data << "\" : \"" << extras_tg3->value.string_val.data << "\">" << std::endl;
+			}
 		}
 
 		std::cout << "           .Mesh index: " << node_tg3.mesh << ", rotation: (" << node_tg3.rotation[0] << ", " << node_tg3.rotation[1] << ", " << node_tg3.rotation[2] << ", " << node_tg3.rotation[3] <<
@@ -123,7 +111,11 @@ void glTFFile::print_info() const
 				tg3_primitive primitive_tg3 = mesh_tg3.primitives[j];
 				for(uint32_t k = 0; k < primitive_tg3.attributes_count; k++)
 				{
-					std::cout << "           .Primitive: " << primitive_tg3.attributes[k].key.data << " = " << primitive_tg3.attributes[k].value << std::endl;
+					const tg3_str_int_pair attribute_tg3 = primitive_tg3.attributes[k];
+					if(attribute_tg3.key.len > 0)
+					{
+						std::cout << "           .Primitive: " << attribute_tg3.key.data << " = " << attribute_tg3.value << std::endl;
+					}
 				}
 				std::cout << "           .Indices: " << primitive_tg3.indices << std::endl;
 			}
@@ -185,7 +177,11 @@ void glTFFile::print_info() const
 		else if(image_tg3.buffer_view != -1)
 		{
 			std::cout << "           .Buffer view = " << image_tg3.buffer_view << std::endl;
-			std::cout << "           .Mime type = " << image_tg3.mime_type.data << std::endl;
+
+			if(image_tg3.mime_type.len > 0)
+			{
+				std::cout << "           .Mime type = " << image_tg3.mime_type.data << std::endl;
+			}
 		}
 	}
 
@@ -205,9 +201,9 @@ std::unique_ptr<Scene> glTFFile::get_scene() const
 	{
 		int32_t root_node_index = scene_tg3.nodes[i];
 		tg3_node root_node_tg3 = model_tg3_.nodes[root_node_index];
-		root_nodes.push_back(std::make_unique<Node>(get_node(model_tg3_, root_node_tg3, glm::mat4(1.0f))));
+		root_nodes.push_back(std::make_unique<Node>(get_node(model_tg3_, root_node_tg3, glm::mat4(1.0f)))); //les root nodes n'ont pas de parent donc ont une matrice identitée pour leur parent_matrix
 	}
-	return std::make_unique<Scene>(std::move(root_nodes), gltf_kind_ == glTFKind::MODEL ? true : false);
+	return std::make_unique<Scene>(std::move(root_nodes));
 }
 
 }
@@ -215,59 +211,30 @@ std::unique_ptr<Scene> glTFFile::get_scene() const
 namespace
 {
 
+glm::vec3 get_translation_from_model_matrix(glm::mat4 model_matrix)
+{
+	return glm::vec3(model_matrix[3]); //4ème colonne (les 3 premiers composants) contient le vecteur de translation
+}
+
 glm::vec3 get_scale_from_model_matrix(glm::mat4 model_matrix)
 {
-	glm::vec3 scale(1.0f);
-	glm::quat orientation;
-	glm::vec3 translation(0.0f);
-	glm::vec3 skew(0.0f);
-	glm::vec4 perspective(0.0f);
-	glm::decompose(model_matrix, scale, orientation, translation, skew, perspective);
+	glm::vec3 scale;
+	scale.x = glm::length(glm::vec3(model_matrix[0])); //norme du vecteur composé des 3 composants de la première colonne
+	scale.y = glm::length(glm::vec3(model_matrix[1])); //norme du vecteur composé des 3 composants de la deuxième colonne
+	scale.z = glm::length(glm::vec3(model_matrix[2])); //norme du vecteur composé des 3 composants de la troisième colonne
 	return scale;
 }
 
 glm::quat get_rotation_from_model_matrix(glm::mat4 model_matrix)
 {
-	glm::vec3 scale(1.0f);
-	glm::quat orientation;
-	glm::vec3 translation(0.0f);
-	glm::vec3 skew(0.0f);
-	glm::vec4 perspective(0.0f);
-	glm::decompose(model_matrix, scale, orientation, translation, skew, perspective);
-	return orientation;
-}
+	glm::vec3 scale = get_scale_from_model_matrix(model_matrix);
 
-glm::vec3 get_translation_from_model_matrix(glm::mat4 model_matrix)
-{
-	glm::vec3 scale(1.0f);
-	glm::quat orientation;
-	glm::vec3 translation(0.0f);
-	glm::vec3 skew(0.0f);
-	glm::vec4 perspective(0.0f);
-	glm::decompose(model_matrix, scale, orientation, translation, skew, perspective);
-	return translation;
-}
+	glm::mat4 rotation_matrix(1.0f);
+	rotation_matrix[0] = glm::vec4(model_matrix[0] / scale.x);
+	rotation_matrix[1] = glm::vec4(model_matrix[1] / scale.y);
+	rotation_matrix[2] = glm::vec4(model_matrix[2] / scale.z);
 
-glm::vec3 get_skew_from_model_matrix(glm::mat4 model_matrix)
-{
-	glm::vec3 scale(1.0f);
-	glm::quat orientation;
-	glm::vec3 translation(0.0f);
-	glm::vec3 skew(0.0f);
-	glm::vec4 perspective(0.0f);
-	glm::decompose(model_matrix, scale, orientation, translation, skew, perspective);
-	return skew;
-}
-
-glm::vec4 get_perspective_from_model_matrix(glm::mat4 model_matrix)
-{
-	glm::vec3 scale(1.0f);
-	glm::quat orientation;
-	glm::vec3 translation(0.0f);
-	glm::vec3 skew(0.0f);
-	glm::vec4 perspective(0.0f);
-	glm::decompose(model_matrix, scale, orientation, translation, skew, perspective);
-	return perspective;
+	return glm::quat_cast(rotation_matrix);
 }
 
 template <glm::length_t L>
@@ -310,8 +277,7 @@ glm::vec3 get_node_position(const tg3_node& node_tg3)
 	glm::vec3 position(1.0f);
 	if(node_tg3.has_matrix)
 	{
-		//TODO : à vérifier
-		position = glm::vec3(node_tg3.matrix[3], node_tg3.matrix[7], node_tg3.matrix[11]);
+		position = get_translation_from_model_matrix(gltf::get_mat4_from_1d_matrix(node_tg3.matrix));
 	}
 	else
 	{
@@ -325,15 +291,12 @@ glm::quat get_node_rotation(const tg3_node& node_tg3)
 	glm::quat rotation_quaternion;
 	if(node_tg3.has_matrix)
 	{
-		//TODO
-		std::cerr << "(Rotation1) ************************CAS PAS ENCORE GERE************************\n";
 		rotation_quaternion = get_rotation_from_model_matrix(gltf::get_mat4_from_1d_matrix(node_tg3.matrix));
 	}
 	else
 	{
 		rotation_quaternion = glm::quat(float(node_tg3.rotation[3]), float(node_tg3.rotation[0]), float(node_tg3.rotation[1]), float(node_tg3.rotation[2]));
 	}
-	//std::cout << node_tg3.name.data <<  ", Quaternion: " << rotation_quaternion.x << ", " << rotation_quaternion.y << ", " << rotation_quaternion.z << ", " << rotation_quaternion.w << std::endl;
 	return rotation_quaternion;
 }
 
@@ -342,7 +305,6 @@ glm::vec3 get_node_scale(const tg3_node& node_tg3)
 	glm::vec3 scale(1.0f);
 	if(node_tg3.has_matrix)
 	{
-		//TODO : vérifier
 		scale = get_scale_from_model_matrix(gltf::get_mat4_from_1d_matrix(node_tg3.matrix));
 	}
 	else
@@ -354,7 +316,13 @@ glm::vec3 get_node_scale(const tg3_node& node_tg3)
 
 gltf::Node get_node(const tg3_model& model_tg3, const tg3_node& node_tg3, glm::mat4 parent_matrix)
 {
-	gltf::Node node(std::string(node_tg3.name.data), get_transform(node_tg3), get_mesh(model_tg3, node_tg3));
+	std::string node_name = "";
+	if(node_tg3.name.len > 0)
+	{
+		node_name = std::string(node_tg3.name.data);
+	}
+	
+	gltf::Node node(node_name, get_transform(node_tg3), get_mesh(model_tg3, node_tg3));
 	node.parent_matrix_ = parent_matrix;
 	for(uint32_t i = 0; i < node_tg3.children_count; ++i)
 	{
@@ -383,7 +351,11 @@ Vertices get_vertices(const tg3_model& model_tg3, const tg3_primitive& primitive
 	for(uint32_t i = 0; i < primitive_tg3.attributes_count; i++)
 	{
 		tg3_str_int_pair attribute_tg3 = primitive_tg3.attributes[i];
-		std::string attribute_name_str = std::string(attribute_tg3.key.data);
+		std::string attribute_name_str = "";
+		if(attribute_tg3.key.len > 0)
+		{
+			attribute_name_str = std::string(attribute_tg3.key.data);
+		}
 		tg3_accessor accessor_tg3 = model_tg3.accessors[attribute_tg3.value];
 
 		if(attribute_name_str == "POSITION") //vec3 de float
@@ -420,17 +392,9 @@ Vertices get_vertices(const tg3_model& model_tg3, const tg3_primitive& primitive
 Transform get_transform(const tg3_node& node_tg3)
 {
 	Transform transform;
-	if(bool(node_tg3.has_matrix))
-	{
-		//TODO
-		std::cerr << "(Has matrix == true) ************************CAS PAS ENCORE GERE************************\n";
-	}
-	else
-	{
-		transform.position_ = get_node_position(node_tg3);
-		transform.rotation_quaternion_ = get_node_rotation(node_tg3);
-		transform.scale_ = get_node_scale(node_tg3);
-	}
+	transform.position_ = get_node_position(node_tg3);
+	transform.rotation_ = get_node_rotation(node_tg3);
+	transform.scale_ = get_node_scale(node_tg3);
 	return transform;
 }
 
@@ -466,7 +430,12 @@ std::vector<Texture> get_textures(const tg3_model& model_tg3)
 		mesh_texture.texture_unit_ = i;
 		if(image_tg3.buffer_view == -1)
 		{
-			std::string image_str = std::string(image_tg3.uri.data);
+			std::string image_str = "";
+			if(image_tg3.uri.len > 0)
+			{
+				image_str = std::string(image_tg3.uri.data);
+			}
+
 			if(bool(tg3_is_data_uri(image_tg3.uri.data, image_tg3.uri.len)))
 			{
 				mesh_texture.image_path_ = "";
@@ -582,6 +551,5 @@ std::vector<glm::vec4> get_vec4_color_attribute(const tg3_model& model_tg3, cons
 	}
 	return vec4_vector;
 }
-
 
 }

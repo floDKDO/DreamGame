@@ -3,6 +3,7 @@
 #include <glm/mat4x4.hpp>
 #include <glm/vec3.hpp>
 #include <glm/vec4.hpp>
+#include <glm/gtc/quaternion.hpp>
 #include <string>
 #include <vector>
 
@@ -10,14 +11,10 @@ namespace gltf
 {
 
 glm::mat4 get_mat4_from_1d_matrix(const double m[16]);
-
-//TODO : inutilisées
-//glm::mat4 get_transformation_matrix(double rotation[4], double scale[3], double translation[3]);
+glm::mat4 get_transformation_matrix(glm::mat4 parent_matrix, glm::vec3 translation, glm::quat rotation, glm::vec3 scale);
+glm::mat4 get_transformation_matrix_from_double(glm::mat4 parent_matrix, const double translation[3], const double rotation[4], const double scale[3]);
 void print_mat4(glm::mat4 m);
-//void print_1d_matrix(double m[16]);
-//bool is_mat4_identity(glm::mat4 m);
-//bool is_1d_matrix_identity(double m[16]);
-
+void print_1d_matrix(const double m[16]);
 std::string get_target_str(int32_t target);
 std::string get_type_str(int32_t type);
 std::string get_component_type_str(int32_t component_type);

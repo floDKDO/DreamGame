@@ -9,6 +9,7 @@
 
 //TODO : free ImGui
 //TODO : créer des constantes pour les valeurs par défaut de translation, rotation et scale
+//TODO : voir si je renomme position en translation
 
 Game::Game()
 	: backend_(), //window_(),
