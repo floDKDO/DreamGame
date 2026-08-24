@@ -31,107 +31,45 @@ std::string Model::get_name() const
 
 void Model::add_translation(glm::vec3 position)
 {
-	translate_children(scene_->get_model(), position, true);
+	scene_->get_model()->transform_.position_ += position;
+	update_parent_matrix_of_children(scene_->get_model());
 }
 
 void Model::set_translation(glm::vec3 position)
 {
-	translate_children(scene_->get_model(), position, false);
+	scene_->get_model()->transform_.position_ = position;
+	update_parent_matrix_of_children(scene_->get_model());
 }
-
-void Model::translate_children(gltf::Node* node, glm::vec3 position, bool is_addition)
-{
-	if(is_addition)
-	{
-		node->transform_.position_ += position;
-	}
-	else
-	{
-		node->transform_.position_ = position;
-	}
-
-	for(std::unique_ptr<gltf::Node>& child_node : node->children_nodes_)
-	{
-		if(is_addition)
-		{
-			child_node->transform_.position_ += position;
-		}
-		else
-		{
-			child_node->transform_.position_ = position;
-		}
-		translate_children(child_node.get(), position, is_addition);
-	}
-}
-
-//TODO : débugger les méthodes suivantes
 
 void Model::add_rotation(glm::quat rotation)
 {
-	//rotate_children(scene_->get_model(), rotation, true);
+	scene_->get_model()->transform_.rotation_ += rotation;
+	update_parent_matrix_of_children(scene_->get_model());
 }
 
 void Model::set_rotation(glm::quat rotation)
 {
-	//rotate_children(scene_->get_model(), rotation, false);
-}
-
-void Model::rotate_children(gltf::Node* node, glm::quat rotation, bool is_addition)
-{
-	/*if(is_addition)
-	{
-		node->transform_.rotation_ += rotation;
-	}
-	else
-	{
-		node->transform_.rotation_ = rotation;
-	}
-
-	for(std::unique_ptr<gltf::Node>& child_node : node->children_nodes_)
-	{
-		if(is_addition)
-		{
-			child_node->transform_.rotation_ += rotation;
-		}
-		else
-		{
-			child_node->transform_.rotation_ = rotation;
-		}
-		rotate_children(child_node.get(), rotation, is_addition);
-	}*/
+	scene_->get_model()->transform_.rotation_ = rotation;
+	update_parent_matrix_of_children(scene_->get_model());
 }
 
 void Model::add_scale(glm::vec3 scale)
 {
-	//scale_children(scene_->get_model(), scale, true);
+	scene_->get_model()->transform_.scale_ += scale;
+	update_parent_matrix_of_children(scene_->get_model());
 }
 
 void Model::set_scale(glm::vec3 scale)
 {
-	//scale_children(scene_->get_model(), scale, false);
+	scene_->get_model()->transform_.scale_ = scale;
+	update_parent_matrix_of_children(scene_->get_model());
 }
 
-void Model::scale_children(gltf::Node* node, glm::vec3 scale, bool is_addition)
+void Model::update_parent_matrix_of_children(gltf::Node* node)
 {
-	/*if(is_addition)
-	{
-		node->transform_.scale_ += scale;
-	}
-	else
-	{
-		node->transform_.scale_ = scale;
-	}
-
 	for(std::unique_ptr<gltf::Node>& child_node : node->children_nodes_)
 	{
-		if(is_addition)
-		{
-			child_node->transform_.scale_ += scale;
-		}
-		else
-		{
-			child_node->transform_.scale_ = scale;
-		}
-		scale_children(child_node.get(), scale, is_addition);
-	}*/
+		child_node->parent_matrix_ = node->compute_model();
+		update_parent_matrix_of_children(child_node.get());
+	}
 }

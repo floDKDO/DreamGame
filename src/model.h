@@ -25,9 +25,7 @@ class Model
 		void set_scale(glm::vec3 scale);
 
 	private:
-		void translate_children(gltf::Node* node, glm::vec3 position, bool is_addition);
-		void rotate_children(gltf::Node* node, glm::quat rotation, bool is_addition);
-		void scale_children(gltf::Node* node, glm::vec3 scale, bool is_addition);
+		void update_parent_matrix_of_children(gltf::Node* node);
 
 		gltf::glTFFile gltf_file_;
 		std::unique_ptr<gltf::Scene> scene_;
