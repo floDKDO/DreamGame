@@ -14,6 +14,7 @@ class Camera
 
 		glm::vec3 get_camera_forward() const;
 		glm::vec3 get_camera_left() const;
+		glm::vec3 get_camera_up() const;
 		glm::mat4 get_view_matrix() const;
 
 		glm::vec3& target_position_;
@@ -24,7 +25,7 @@ class Camera
 		struct EulerAngles
 		{
 			EulerAngles()
-				: pitch_(30.0f), yaw_(90.0f), roll_(0.0f) //TODO : la valeur de yaw aligne la caméra dans "le bon sens" (directement en face des axes), voir si cette orientation dérange
+				: pitch_(30.0f), yaw_(0.0f), roll_(0.0f)
 			{}
 
 			static const float min_pitch_;

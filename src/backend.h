@@ -3,6 +3,7 @@
 #include "RAII_SDL3/sdl.h"
 #include "RAII_SDL3/window.h"
 
+#include <AL/alc.h>
 #include <GL/glew.h>
 
 class Backend
@@ -15,10 +16,13 @@ class Backend
 
 	private:
 		void init_imgui() const;
+		void init_openal();
 
 		sdl::SDL sdl_;
 		sdl::Window window_;
 		GLenum glew_;
+		ALCdevice* device_;
+		ALCcontext* context_;
 };
 
 void GLAPIENTRY message_callback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, [[maybe_unused]] const void* user_param);

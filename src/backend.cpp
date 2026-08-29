@@ -4,6 +4,7 @@
 #include "imgui/imgui_impl_sdl3.h"
 #include "imgui/imgui_impl_opengl3.h"
 
+#include <AL/al.h>
 #include <stb/stb_image.h>
 #include <iostream>
 
@@ -25,6 +26,7 @@ Backend::Backend()
 	glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_NOTIFICATION, 0, nullptr, GL_FALSE); //désactiver les messages de sévérité "Notification"
 
 	//init_imgui(); //TODO
+	init_openal();
 }
 
 void Backend::init_imgui() const
@@ -38,6 +40,20 @@ void Backend::init_imgui() const
 
 	ImGui_ImplSDL3_InitForOpenGL(window_.fetch(), window_.get_context());
 	ImGui_ImplOpenGL3_Init();
+}
+
+void Backend::init_openal()
+{
+	if((device_ = alcOpenDevice(nullptr)) == nullptr) //TODO : free avec alcCloseDevice
+	{
+
+	}
+	context_ = alcCreateContext(device_, nullptr); //TODO : free avec alcDestroyContext
+	if(!alcMakeContextCurrent(context_)) //TODO : free avec alcMakeContextCurrent(nullptr)
+	{
+
+	}
+	alDistanceModel(AL_LINEAR_DISTANCE_CLAMPED); //commun pour toutes les sources
 }
 
 void Backend::get_window_size(int* w, int* h) const

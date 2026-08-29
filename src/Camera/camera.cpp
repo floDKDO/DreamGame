@@ -8,15 +8,17 @@ const float Camera::EulerAngles::min_pitch_ = -25.0f;
 const float Camera::EulerAngles::max_pitch_ = 40.0f;
 
 Camera::Camera(InputManager& input_manager, glm::vec3& target_position)
-	: input_manager_(input_manager), view_matrix_(look_at(camera_position_, target_position_ + target_to_camera_offset_, glm::vec3(0.0f, 1.0f, 0.0f))),
+	: input_manager_(input_manager), 
 	target_position_(target_position), target_to_camera_offset_(0.0f, 2.5f, 0.0f),
-	camera_position_(target_position + target_to_camera_offset_), euler_angles_()
+	camera_position_(target_position + target_to_camera_offset_),
+	view_matrix_(1.0f),
+	euler_angles_()
 {}
 
 void Camera::update(float delta_time)
 {
-	view_matrix_ = look_at(camera_position_, target_position_ + target_to_camera_offset_, glm::vec3(0.0f, 1.0f, 0.0f));
 	compute_euler_angles(delta_time);
+	view_matrix_ = look_at(camera_position_, target_position_ + target_to_camera_offset_, get_camera_up());
 }
 
 glm::vec3 Camera::get_camera_forward() const
@@ -27,6 +29,11 @@ glm::vec3 Camera::get_camera_forward() const
 glm::vec3 Camera::get_camera_left() const
 {
 	return glm::vec3(-view_matrix_[0][0], -view_matrix_[1][0], -view_matrix_[2][0]);
+}
+
+glm::vec3 Camera::get_camera_up() const
+{
+	return glm::vec3(0.0f, 1.0f, 0.0f); //valeur fixe car la caméra ne permet pas le roll
 }
 
 glm::mat4 Camera::get_view_matrix() const

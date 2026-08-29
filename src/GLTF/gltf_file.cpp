@@ -31,7 +31,7 @@ glTFFile::glTFFile(std::string_view path)
 	: path_(path)
 {
 	open();
-	print_info();
+	//print_info(); //TODO
 }
 
 glTFFile::~glTFFile()

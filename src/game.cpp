@@ -1,4 +1,5 @@
 #include "game.h"
+#include "OpenAL/openal.h"
 
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_sdl3.h"
@@ -15,7 +16,7 @@ Game::Game()
 	: backend_(), //window_(),
 	player_(input_manager_),
 	camera_(input_manager_, player_.model_.get_position()), 
-	running_(true), gamepad_(), test_map_("resources/maps/corridor_v3.gltf"), 
+	running_(true), gamepad_(), test_map_("resources/maps/corridor.gltf"), 
 	gizmo_("resources/models/axis_gizmo.glb"),
 	perspective_projection_matrix_(1.0f)
 {
@@ -40,6 +41,19 @@ void Game::run()
 	base_program.use();
 	base_program.set_uniform_matrix_4fv("view_matrix_", glm::value_ptr(camera_.get_view_matrix()));
 	base_program.set_uniform_matrix_4fv("projection_matrix_", glm::value_ptr(projection_matrix));*/
+
+	audio::set_listener_position(player_.model_.get_position());
+	audio::set_listener_orientation(camera_.get_camera_forward(), camera_.get_camera_up());
+	audio::set_listener_velocity(glm::vec3(0.0f));
+	audio::create_source("test", "resources/test.wav");
+	audio::set_source_gain("test", 1.0f);
+	audio::set_source_gain("test", 1.0f);
+	audio::set_source_pitch("test", 1.0f);
+	audio::set_source_reference_distance("test", 1.0f);
+	audio::set_source_max_distance("test", 20.0f);
+	audio::set_source_rolloff_factor("test", 1.0f);
+	audio::set_source_position("test", glm::vec3(0.0f));
+	audio::play_source("test");
 
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
@@ -70,6 +84,8 @@ void Game::run()
 		update_fps_count(last_fps_refresh, frame_count_this_second);
 		last_frame = begin_current_frame;
 	}
+
+	audio::destroy_source("test");
 }
 
 void Game::handle_events()
@@ -124,6 +140,9 @@ void Game::draw()
 	player_.draw(phong_program);
 	gizmo_.draw(phong_program);
 	test_map_.draw(phong_program);
+
+	audio::set_listener_position(player_.model_.get_position());
+	audio::set_listener_orientation(camera_.get_camera_forward(), camera_.get_camera_up());
 
 	//TODO
 	////////////////////////////////////////////////////////////////////////////////////////
