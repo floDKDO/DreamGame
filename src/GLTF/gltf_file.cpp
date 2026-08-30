@@ -16,8 +16,12 @@ glm::vec3 get_node_scale(const tg3_node& node_tg3);
 gltf::Node get_node(const tg3_model& model_tg3, const tg3_node& node_tg3, glm::mat4 parent_matrix);
 uint64_t get_attributes_count(const tg3_model& model_tg3, const tg3_primitive& primitive_tg3);
 Vertices get_vertices(const tg3_model& model_tg3, const tg3_primitive& primitive_tg3);
+Vertices get_aabb_vertices(const tg3_model& model_tg3, const tg3_primitive& primitive_tg3);
 Transform get_transform(const tg3_node& node_tg3);
 std::optional<Mesh> get_mesh(const tg3_model& model_tg3, const tg3_node& node_tg3);
+glm::vec3 get_min_values(const tg3_model& model_tg3, const tg3_primitive& primitive_tg3);
+glm::vec3 get_max_values(const tg3_model& model_tg3, const tg3_primitive& primitive_tg3);
+std::optional<Mesh> get_aabb(const tg3_model& model_tg3, const tg3_node& node_tg3);
 std::vector<Texture> get_textures(const tg3_model& model_tg3);
 std::vector<GLushort> get_ebo_values(const tg3_model& model_tg3, const tg3_primitive& primitive_tg3);
 std::vector<glm::vec4> get_vec4_color_attribute(const tg3_model& model_tg3, const tg3_str_int_pair& attribute_tg3);
@@ -211,6 +215,8 @@ std::unique_ptr<Scene> glTFFile::get_scene() const
 namespace
 {
 
+//TODO : mettre les 3 méthodes suivantes autre part (utils ?)
+
 glm::vec3 get_translation_from_model_matrix(glm::mat4 model_matrix)
 {
 	return glm::vec3(model_matrix[3]); //4ème colonne (les 3 premiers composants) contient le vecteur de translation
@@ -322,7 +328,7 @@ gltf::Node get_node(const tg3_model& model_tg3, const tg3_node& node_tg3, glm::m
 		node_name = std::string(node_tg3.name.data);
 	}
 	
-	gltf::Node node(node_name, get_transform(node_tg3), get_mesh(model_tg3, node_tg3));
+	gltf::Node node(node_name, get_transform(node_tg3), get_mesh(model_tg3, node_tg3), get_aabb(model_tg3, node_tg3));
 	node.parent_matrix_ = parent_matrix;
 	for(uint32_t i = 0; i < node_tg3.children_count; ++i)
 	{
@@ -389,6 +395,27 @@ Vertices get_vertices(const tg3_model& model_tg3, const tg3_primitive& primitive
 	return vertices;
 }
 
+Vertices get_aabb_vertices(const tg3_model& model_tg3, const tg3_primitive& primitive_tg3)
+{
+	glm::vec3 min_values = get_min_values(model_tg3, primitive_tg3);
+	glm::vec3 max_values = get_max_values(model_tg3, primitive_tg3);
+	
+	std::vector<glm::vec3> position_attributes;
+	position_attributes.reserve(8);
+	position_attributes.push_back(glm::vec3(max_values.x, min_values.y, min_values.z)); //0 : bottom face, upper right
+	position_attributes.push_back(glm::vec3(min_values.x, min_values.y, min_values.z)); //1 : bottom face, upper left
+	position_attributes.push_back(glm::vec3(max_values.x, min_values.y, max_values.z)); //2 : bottom face, down right
+	position_attributes.push_back(glm::vec3(min_values.x, min_values.y, max_values.z)); //3 : bottom face, down left
+	position_attributes.push_back(glm::vec3(max_values.x, max_values.y, min_values.z)); //4 : top face, upper right
+	position_attributes.push_back(glm::vec3(min_values.x, max_values.y, min_values.z)); //5 : top face, upper left
+	position_attributes.push_back(glm::vec3(max_values.x, max_values.y, max_values.z)); //6 : top face, down right
+	position_attributes.push_back(glm::vec3(min_values.x, max_values.y, max_values.z)); //7 : top face, down left
+
+	Vertices vertices(8);
+	vertices.add_position_attributes(position_attributes);
+	return vertices;
+}
+
 Transform get_transform(const tg3_node& node_tg3)
 {
 	Transform transform;
@@ -413,6 +440,89 @@ std::optional<Mesh> get_mesh(const tg3_model& model_tg3, const tg3_node& node_tg
 		tg3_primitive primitive_tg3 = mesh_tg3.primitives[0];
 		std::vector<GLushort> ebo_values = get_ebo_values(model_tg3, primitive_tg3);
 		Vertices vertices = get_vertices(model_tg3, primitive_tg3);
+		return Mesh(ebo_values, vertices, textures, primitive_tg3.mode);
+	}
+	return std::nullopt; //cas où le node ne possède pas de mesh
+}
+
+//TODO : pas ouf car presque équivalent à get_max_values()
+glm::vec3 get_min_values(const tg3_model& model_tg3, const tg3_primitive& primitive_tg3)
+{
+	for(uint32_t i = 0; i < primitive_tg3.attributes_count; i++)
+	{
+		tg3_str_int_pair attribute_tg3 = primitive_tg3.attributes[i];
+		std::string attribute_name_str = "";
+		if(attribute_tg3.key.len > 0)
+		{
+			attribute_name_str = std::string(attribute_tg3.key.data);
+		}
+		tg3_accessor accessor_tg3 = model_tg3.accessors[attribute_tg3.value];
+
+		if(attribute_name_str == "POSITION") //vec3 de float
+		{
+			glm::vec3 min_values(0.0f);
+			if(accessor_tg3.min_values_count > 0)
+			{
+				const double* min_values_ptr = accessor_tg3.min_values;
+				min_values = glm::vec3(min_values_ptr[0], min_values_ptr[1], min_values_ptr[2]);
+			}
+			return min_values;
+		}
+	}
+}
+
+//TODO : pas ouf car presque équivalent à get_min_values()
+glm::vec3 get_max_values(const tg3_model& model_tg3, const tg3_primitive& primitive_tg3)
+{
+	for(uint32_t i = 0; i < primitive_tg3.attributes_count; i++)
+	{
+		tg3_str_int_pair attribute_tg3 = primitive_tg3.attributes[i];
+		std::string attribute_name_str = "";
+		if(attribute_tg3.key.len > 0)
+		{
+			attribute_name_str = std::string(attribute_tg3.key.data);
+		}
+		tg3_accessor accessor_tg3 = model_tg3.accessors[attribute_tg3.value];
+
+		if(attribute_name_str == "POSITION") //vec3 de float
+		{
+			glm::vec3 max_values(0.0f);
+			if(accessor_tg3.max_values_count > 0)
+			{
+				const double* max_values_ptr = accessor_tg3.max_values;
+				max_values = glm::vec3(max_values_ptr[0], max_values_ptr[1], max_values_ptr[2]);
+			}
+			return max_values;
+		}
+	}
+}
+
+std::optional<Mesh> get_aabb(const tg3_model& model_tg3, const tg3_node& node_tg3)
+{
+	if(node_tg3.mesh != -1)
+	{
+		tg3_mesh mesh_tg3 = model_tg3.meshes[node_tg3.mesh];
+
+		if(mesh_tg3.primitives_count > 1)
+		{
+			std::cerr << "(Primitives count > 1) ************************CAS PAS ENCORE GERE************************\n";
+		}
+
+		tg3_primitive primitive_tg3 = mesh_tg3.primitives[0];
+
+		Vertices vertices = get_aabb_vertices(model_tg3, primitive_tg3);
+		std::vector<GLushort> ebo_values =
+		{
+			3, 2, 7, 2, 6, 7, //face rouge
+			1, 5, 7, 1, 3, 7, //face jaune
+			0, 4, 6, 0, 2, 6, //face blanche
+			1, 0, 5, 0, 4, 5, //face orange
+			7, 5, 4, 4, 6, 7, //face verte
+			3, 1, 0, 0, 2, 3  //face bleue
+		};
+
+		std::vector<Texture> textures; //TODO : faire en sorte que Mesh ne soit pas obligé de prendre des textures en paramètre
+		
 		return Mesh(ebo_values, vertices, textures, primitive_tg3.mode);
 	}
 	return std::nullopt; //cas où le node ne possède pas de mesh

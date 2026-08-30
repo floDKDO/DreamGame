@@ -27,6 +27,8 @@ Backend::Backend()
 
 	//init_imgui(); //TODO
 	init_openal();
+
+	print_opengl_stuff();
 }
 
 void Backend::init_imgui() const
@@ -153,4 +155,44 @@ void GLAPIENTRY message_callback(GLenum source, GLenum type, GLuint id, GLenum s
 	};
 
 	std::cout << "[OpenGL " << lamda_type() << "] - " << lambda_severity() << lambda_source() << "ID: " << id << ", MESSAGE (length=" << length << "): \"" << message << "\"\n";
+}
+
+void print_opengl_stuff()
+{
+	std::cout << "OpenGL Vendor: "   << glGetString(GL_VENDOR) << std::endl;
+	std::cout << "OpenGL Renderer: " << glGetString(GL_RENDERER) << std::endl;
+	std::cout << "OpenGL Version: "  << glGetString(GL_VERSION) << std::endl;
+	std::cout << "OpenGL Shading Language Version: " << glGetString(GL_SHADING_LANGUAGE_VERSION) << std::endl;
+	std::cout << std::endl;
+
+	print_number_of_texture_units();
+}
+
+
+void print_number_of_texture_units()
+{
+	int max_combined_texture_units;
+	int max_vertex_texture_units;
+	int max_tessellation_control_texture_units;
+	int max_tessellation_evaluation_texture_units;
+	int max_geometry_texture_units;
+	int max_fragment_texture_units;
+	int max_compute_texture_units;
+
+	glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &max_combined_texture_units);
+	glGetIntegerv(GL_MAX_VERTEX_TEXTURE_IMAGE_UNITS, &max_vertex_texture_units);
+	glGetIntegerv(GL_MAX_TESS_CONTROL_TEXTURE_IMAGE_UNITS, &max_tessellation_control_texture_units);
+	glGetIntegerv(GL_MAX_TESS_EVALUATION_TEXTURE_IMAGE_UNITS, &max_tessellation_evaluation_texture_units);
+	glGetIntegerv(GL_MAX_GEOMETRY_TEXTURE_IMAGE_UNITS, &max_geometry_texture_units);
+	glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &max_fragment_texture_units);
+	glGetIntegerv(GL_MAX_COMPUTE_TEXTURE_IMAGE_UNITS, &max_compute_texture_units);
+
+	std::cout << "Max combined texture units : " << max_combined_texture_units << ", including : "
+		<< "\n  - max vertex shader texture units : " << max_vertex_texture_units
+		<< "\n  - max tessellation control shader texture units : " << max_tessellation_control_texture_units
+		<< "\n  - max tessellation evaluation shader texture units : " << max_tessellation_evaluation_texture_units
+		<< "\n  - max geometry shader texture units : " << max_geometry_texture_units
+		<< "\n  - max fragment shader texture units : " << max_fragment_texture_units
+		<< "\n  - max compute shader texture units : " << max_compute_texture_units << "\n"
+		<< std::endl;
 }

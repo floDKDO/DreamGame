@@ -13,7 +13,7 @@ namespace gltf
 class Node
 {
 	public:
-		Node(std::string name, Transform transform, std::optional<Mesh> mesh);
+		Node(std::string name, Transform transform, std::optional<Mesh> mesh, std::optional<Mesh> aabb);
 
 		void draw(ShaderProgram& shader_program);
 		void add_child(std::unique_ptr<Node> child_node);
@@ -27,6 +27,7 @@ class Node
 	private:
 		std::string name_;
 		std::optional<Mesh> mesh_;
+		std::optional<Mesh> aabb_;
 };
 
 }

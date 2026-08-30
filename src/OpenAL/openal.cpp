@@ -14,6 +14,7 @@ struct SourceInfo
 };
 std::unordered_map<std::string, SourceInfo> sources_;
 
+
 void set_listener_position(glm::vec3 position)
 {
 	alListener3f(AL_POSITION, position.x, position.y, position.z);

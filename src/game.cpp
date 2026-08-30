@@ -53,9 +53,10 @@ void Game::run()
 	audio::set_source_max_distance("test", 20.0f);
 	audio::set_source_rolloff_factor("test", 1.0f);
 	audio::set_source_position("test", glm::vec3(0.0f));
-	audio::play_source("test");
+	//audio::play_source("test");
 
-	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	//TODO : voir si je le laisse là
+	//glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 	Uint64 begin_current_frame = 0; //en ms
 	Uint64 last_frame = 0;          //en ms
