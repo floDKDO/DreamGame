@@ -6,10 +6,14 @@
 //TODO : créer un destructeur qui libère le VAO/VBO/EBO et les textures
 
 Mesh::Mesh(std::vector<GLushort> ebo_values, Vertices vertices, std::vector<Texture> textures, GLenum draw_mode)
-	: ebo_values_(ebo_values), vertices_(vertices), textures_(textures), draw_mode_(draw_mode == -1 ? GL_TRIANGLES : draw_mode)
+	: ebo_values_(ebo_values), vertices_(vertices), textures_(textures), ebo_(0), vbo_(0), vao_(0), draw_mode_(draw_mode == -1 ? GL_TRIANGLES : draw_mode)
 {
 	load_mesh();
 }
+
+Mesh::Mesh(std::vector<GLushort> ebo_values, Vertices vertices, GLenum draw_mode)
+	: Mesh(ebo_values, vertices, {}, draw_mode)
+{}
 
 void Mesh::load_vertex_attribute(GLuint vbo_binding_index, attribute::Name attribute_name)
 {
@@ -22,13 +26,13 @@ void Mesh::load_vertex_attribute(GLuint vbo_binding_index, attribute::Name attri
 void Mesh::create_ebo()
 {
 	glCreateBuffers(1, &ebo_);
-	glNamedBufferStorage(ebo_, ebo_values_.size() * sizeof(ebo_values_[0]), ebo_values_.data(), GL_DYNAMIC_STORAGE_BIT);
+	glNamedBufferStorage(ebo_, ebo_values_.size() * sizeof(ebo_values_[0]), ebo_values_.data(), GL_DYNAMIC_STORAGE_BIT); //TODO : voir pour le dernier argument
 }
 
 void Mesh::create_vbo()
 {
 	glCreateBuffers(1, &vbo_);
-	glNamedBufferStorage(vbo_, vertices_.get_vertices_number() * sizeof(Vertex), vertices_.get_vertices_data(), GL_DYNAMIC_STORAGE_BIT);
+	glNamedBufferStorage(vbo_, vertices_.get_vertices_number() * sizeof(Vertex), vertices_.get_vertices_data(), GL_DYNAMIC_STORAGE_BIT); //TODO : voir pour le dernier argument
 }
 
 void Mesh::create_vao()
@@ -50,9 +54,9 @@ void Mesh::create_vao()
 		load_vertex_attribute(vbo_binding_index, attribute::Name::NORMAL);
 	}
 
-	if(vertices_.has_texture_coordinates_attribute())
+	if(vertices_.has_texcoord_attribute())
 	{
-		load_vertex_attribute(vbo_binding_index, attribute::Name::TEXTURE_COORD);
+		load_vertex_attribute(vbo_binding_index, attribute::Name::TEXCOORD);
 	}
 
 	if(vertices_.has_color_attribute())

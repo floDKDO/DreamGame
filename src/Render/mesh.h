@@ -8,6 +8,7 @@ class Mesh
 {
 	public: 
 		Mesh(std::vector<GLushort> ebo_values, Vertices vertices, std::vector<Texture> textures, GLenum draw_mode);
+		Mesh(std::vector<GLushort> ebo_values, Vertices vertices, GLenum draw_mode);
 		void draw(ShaderProgram& shader_program);
 
 	private:

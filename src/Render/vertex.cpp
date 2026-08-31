@@ -4,25 +4,22 @@
 
 attribute::Info Vertex::get_attribute_info(attribute::Name attribute_name)
 {
-	if(attribute_name == attribute::Name::POSITION)
+	using attribute::Name;
+
+	if(attribute_name == Name::POSITION)
 	{
-		return attribute::Info{0, 3, GL_FALSE, offsetof(Vertex, position_)};
+		return attribute::Info{static_cast<std::underlying_type_t<Name>>(Name::POSITION), 3, GL_FALSE, offsetof(Vertex, position_)};
 	}
-	else if(attribute_name == attribute::Name::NORMAL)
+	else if(attribute_name == Name::NORMAL)
 	{
-		return attribute::Info{1, 3, GL_FALSE, offsetof(Vertex, normal_)};
+		return attribute::Info{static_cast<std::underlying_type_t<Name>>(Name::NORMAL), 3, GL_FALSE, offsetof(Vertex, normal_)};
 	}
-	else if(attribute_name == attribute::Name::TEXTURE_COORD)
+	else if(attribute_name == attribute::Name::TEXCOORD)
 	{
-		return attribute::Info{2, 2, GL_FALSE, offsetof(Vertex, texture_coordinates_)};
+		return attribute::Info{static_cast<std::underlying_type_t<Name>>(Name::TEXCOORD), 2, GL_FALSE, offsetof(Vertex, texcoord_)};
 	}
-	else if(attribute_name == attribute::Name::COLOR)
+	else //if(attribute_name == attribute::Name::COLOR) //if commenté pour retirer le warning "not all control paths return a value enum values" (on est assuré que le else s'exécute pour la valeur COLOR)
 	{
-		return attribute::Info{3, 4, GL_FALSE, offsetof(Vertex, color_)};
-	}
-	else
-	{
-		std::cout << "****ERROR****: Unknown attribute!\n";
-		return attribute::Info{0, 0, 0};
+		return attribute::Info{static_cast<std::underlying_type_t<Name>>(Name::COLOR), 4, GL_FALSE, offsetof(Vertex, color_)};
 	}
 }

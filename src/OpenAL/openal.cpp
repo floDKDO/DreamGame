@@ -40,6 +40,7 @@ void create_source(const std::string& model_name, std::string_view path)
 	alGenSources(1, &sources_[model_name].source_);
 	alSourcei(sources_[model_name].source_, AL_BUFFER, sources_[model_name].buffer_);
 
+	//valeurs par défaut
 	alSource3f(sources_[model_name].source_, AL_VELOCITY, 0.0f, 0.0f, 0.0f);
 	alSourcei(sources_[model_name].source_, AL_LOOPING, AL_FALSE);
 }

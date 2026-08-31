@@ -3,6 +3,7 @@
 #include <GL/glew.h>
 #include <glm/mat4x4.hpp>
 #include <glm/vec3.hpp>
+#include <glm/gtc/quaternion.hpp>
 #include <string>
 #include <string_view>
 
@@ -24,5 +25,9 @@ std::string get_string_from_file(std::string_view path);
 glm::vec3 get_camera_forward(glm::mat4 view_matrix);
 glm::vec3 get_camera_left(glm::mat4 view_matrix);
 GLfloat ieee754_to_float(uint64_t ieee754_number);
+glm::vec3 get_translation_from_model_matrix(glm::mat4 model_matrix);
+glm::vec3 get_scale_from_model_matrix(glm::mat4 model_matrix);
+glm::quat get_rotation_from_model_matrix(glm::mat4 model_matrix);
+
 
 }

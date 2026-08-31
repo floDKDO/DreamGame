@@ -48,12 +48,15 @@ void Backend::init_openal()
 {
 	if((device_ = alcOpenDevice(nullptr)) == nullptr) //TODO : free avec alcCloseDevice
 	{
-
+		std::cout << "Error: (alcOpenDevice)\n";
 	}
-	context_ = alcCreateContext(device_, nullptr); //TODO : free avec alcDestroyContext
+	if((context_ = alcCreateContext(device_, nullptr)) == nullptr) //TODO : free avec alcDestroyContext
+	{
+		std::cout << "Error: (alcCreateContext)\n";
+	}
 	if(!alcMakeContextCurrent(context_)) //TODO : free avec alcMakeContextCurrent(nullptr)
 	{
-
+		std::cout << "Error: (alcMakeContextCurrent)\n";
 	}
 	alDistanceModel(AL_LINEAR_DISTANCE_CLAMPED); //commun pour toutes les sources
 }
@@ -165,26 +168,25 @@ void print_opengl_stuff()
 	std::cout << "OpenGL Shading Language Version: " << glGetString(GL_SHADING_LANGUAGE_VERSION) << std::endl;
 	std::cout << std::endl;
 
-	print_number_of_texture_units();
-}
-
-
-void print_number_of_texture_units()
-{
 	int max_combined_texture_units;
-	int max_vertex_texture_units;
-	int max_tessellation_control_texture_units;
-	int max_tessellation_evaluation_texture_units;
-	int max_geometry_texture_units;
-	int max_fragment_texture_units;
-	int max_compute_texture_units;
-
 	glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &max_combined_texture_units);
+
+	int max_vertex_texture_units;
 	glGetIntegerv(GL_MAX_VERTEX_TEXTURE_IMAGE_UNITS, &max_vertex_texture_units);
+
+	int max_tessellation_control_texture_units;
 	glGetIntegerv(GL_MAX_TESS_CONTROL_TEXTURE_IMAGE_UNITS, &max_tessellation_control_texture_units);
+
+	int max_tessellation_evaluation_texture_units;
 	glGetIntegerv(GL_MAX_TESS_EVALUATION_TEXTURE_IMAGE_UNITS, &max_tessellation_evaluation_texture_units);
+
+	int max_geometry_texture_units;
 	glGetIntegerv(GL_MAX_GEOMETRY_TEXTURE_IMAGE_UNITS, &max_geometry_texture_units);
+
+	int max_fragment_texture_units;
 	glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &max_fragment_texture_units);
+
+	int max_compute_texture_units;
 	glGetIntegerv(GL_MAX_COMPUTE_TEXTURE_IMAGE_UNITS, &max_compute_texture_units);
 
 	std::cout << "Max combined texture units : " << max_combined_texture_units << ", including : "

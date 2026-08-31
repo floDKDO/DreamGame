@@ -14,16 +14,19 @@ Scene::Scene(std::vector<std::unique_ptr<Node>> root_nodes)
 	}
 }
 
+//TODO : inutilisée et faux car ne met pas à jour les noeuds enfants
 void Scene::set_model_position(glm::vec3 position)
 {
 	root_nodes_[0]->transform_.position_ = position;
 }
 
+//TODO : inutilisée et faux car ne met pas à jour les noeuds enfants
 void Scene::set_model_rotation(glm::quat rotation)
 {
 	root_nodes_[0]->transform_.rotation_ = rotation;
 }
 
+//TODO : inutilisée et faux car ne met pas à jour les noeuds enfants
 void Scene::set_model_scale(glm::vec3 scale)
 {
 	root_nodes_[0]->transform_.scale_ = scale;

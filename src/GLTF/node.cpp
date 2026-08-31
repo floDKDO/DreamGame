@@ -22,13 +22,13 @@ void Node::draw(ShaderProgram& shader_program)
 
 	if(mesh_.has_value())
 	{
-		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); //TODO : voir si je le laisse là
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 		mesh_->draw(shader_program);
 	}
 
 	if(aabb_.has_value())
 	{
-		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); //TODO : voir si je le laisse là
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); //affichage wireframe pour AABB
 		aabb_->draw(shader_program);
 	}
 

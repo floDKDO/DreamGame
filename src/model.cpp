@@ -9,9 +9,14 @@ Model::Model(std::string_view path)
 Model::Model(std::string_view path, Transform transform)
 	: gltf_file_(path), scene_(std::move(gltf_file_.get_scene()))
 {
-	scene_->set_model_position(transform.position_);
-	scene_->set_model_rotation(transform.rotation_);
-	scene_->set_model_scale(transform.scale_);
+	//TODO : à corriger (les méthodes commentées ne mettent pas à jour les noeuds enfants)
+
+	//scene_->set_model_position(transform.position_);
+	//scene_->set_model_rotation(transform.rotation_);
+	//scene_->set_model_scale(transform.scale_);
+	set_translation(transform.position_);
+	set_rotation(transform.rotation_);
+	set_scale(transform.scale_);
 }
 
 void Model::draw(ShaderProgram& shader_program)

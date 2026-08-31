@@ -34,5 +34,7 @@ class Game
 		Map test_map_;
 		Model gizmo_;
 
+		float fov_;
+		float near_plane_, far_plane_;
 		glm::mat4 perspective_projection_matrix_; //TODO : voir si je garde ici
 };

@@ -7,9 +7,6 @@
 namespace
 {
 
-glm::vec3 get_translation_from_model_matrix(glm::mat4 model_matrix);
-glm::quat get_rotation_from_model_matrix(glm::mat4 model_matrix);
-glm::vec3 get_scale_from_model_matrix(glm::mat4 model_matrix);
 glm::vec3 get_node_position(const tg3_node& node_tg3);
 glm::quat get_node_rotation(const tg3_node& node_tg3);
 glm::vec3 get_node_scale(const tg3_node& node_tg3);
@@ -19,12 +16,14 @@ Vertices get_vertices(const tg3_model& model_tg3, const tg3_primitive& primitive
 Vertices get_aabb_vertices(const tg3_model& model_tg3, const tg3_primitive& primitive_tg3);
 Transform get_transform(const tg3_node& node_tg3);
 std::optional<Mesh> get_mesh(const tg3_model& model_tg3, const tg3_node& node_tg3);
+std::optional<tg3_accessor> get_accessor_from_attribute(std::string_view attribute, const tg3_model& model_tg3, const tg3_primitive& primitive_tg3);
 glm::vec3 get_min_values(const tg3_model& model_tg3, const tg3_primitive& primitive_tg3);
 glm::vec3 get_max_values(const tg3_model& model_tg3, const tg3_primitive& primitive_tg3);
 std::optional<Mesh> get_aabb(const tg3_model& model_tg3, const tg3_node& node_tg3);
 std::vector<Texture> get_textures(const tg3_model& model_tg3);
 std::vector<GLushort> get_ebo_values(const tg3_model& model_tg3, const tg3_primitive& primitive_tg3);
 std::vector<glm::vec4> get_vec4_color_attribute(const tg3_model& model_tg3, const tg3_str_int_pair& attribute_tg3);
+bool has_textures(const tg3_model& model_tg3);
 
 }
 
@@ -215,34 +214,6 @@ std::unique_ptr<Scene> glTFFile::get_scene() const
 namespace
 {
 
-//TODO : mettre les 3 méthodes suivantes autre part (utils ?)
-
-glm::vec3 get_translation_from_model_matrix(glm::mat4 model_matrix)
-{
-	return glm::vec3(model_matrix[3]); //4ème colonne (les 3 premiers composants) contient le vecteur de translation
-}
-
-glm::vec3 get_scale_from_model_matrix(glm::mat4 model_matrix)
-{
-	glm::vec3 scale;
-	scale.x = glm::length(glm::vec3(model_matrix[0])); //norme du vecteur composé des 3 composants de la première colonne
-	scale.y = glm::length(glm::vec3(model_matrix[1])); //norme du vecteur composé des 3 composants de la deuxième colonne
-	scale.z = glm::length(glm::vec3(model_matrix[2])); //norme du vecteur composé des 3 composants de la troisième colonne
-	return scale;
-}
-
-glm::quat get_rotation_from_model_matrix(glm::mat4 model_matrix)
-{
-	glm::vec3 scale = get_scale_from_model_matrix(model_matrix);
-
-	glm::mat4 rotation_matrix(1.0f);
-	rotation_matrix[0] = glm::vec4(model_matrix[0] / scale.x);
-	rotation_matrix[1] = glm::vec4(model_matrix[1] / scale.y);
-	rotation_matrix[2] = glm::vec4(model_matrix[2] / scale.z);
-
-	return glm::quat_cast(rotation_matrix);
-}
-
 template <glm::length_t L>
 std::vector<glm::vec<L, float>> get_float_vec_attribute(const tg3_model& model_tg3, const tg3_str_int_pair& attribute_tg3)
 {
@@ -257,11 +228,11 @@ std::vector<glm::vec<L, float>> get_float_vec_attribute(const tg3_model& model_t
 	std::string type_str = gltf::get_type_str(accessor_tg3.type);
 
 	uint64_t stride = buffer_view_tg3.byte_stride != 0 ? buffer_view_tg3.byte_stride : sizeof(vector_type::value_type);
-	vector_type vector;
+	vector_type attribute_vector;
 
 	for(uint64_t i = buffer_view_tg3.byte_offset + accessor_tg3.byte_offset; i < buffer_view_tg3.byte_offset + buffer_view_tg3.byte_length; i += stride)
 	{
-		vector_type::value_type vector_element(0.0f);
+		vector_type::value_type attribute(0.0f);
 		for(uint64_t j = 0; j < component_type_size * vector_type::value_type::length(); j += component_type_size)
 		{
 			uint32_t attribute_ieee754 = 0; //uint32_t car un float fait 32 bits (tous les attributs contiennent des composants de type GL_FLOAT)
@@ -271,58 +242,52 @@ std::vector<glm::vec<L, float>> get_float_vec_attribute(const tg3_model& model_t
 			}
 			GLfloat attribute_float = utils::ieee754_to_float(attribute_ieee754);
 			uint64_t component = j / component_type_size;
-			vector_element[component % L] = attribute_float;
+			attribute[component % L] = attribute_float;
 		}
-		vector.push_back(vector_element);
+		attribute_vector.push_back(attribute);
 	}
-	return vector;
+	return attribute_vector;
 }
 
 glm::vec3 get_node_position(const tg3_node& node_tg3)
 {
-	glm::vec3 position(1.0f);
 	if(node_tg3.has_matrix)
 	{
-		position = get_translation_from_model_matrix(gltf::get_mat4_from_1d_matrix(node_tg3.matrix));
+		return utils::get_translation_from_model_matrix(gltf::get_mat4_from_1d_matrix(node_tg3.matrix));
 	}
 	else
 	{
-		position = glm::vec3(node_tg3.translation[0], node_tg3.translation[1], node_tg3.translation[2]);
+		return glm::vec3(node_tg3.translation[0], node_tg3.translation[1], node_tg3.translation[2]);
 	}
-	return position;
 }
 
 glm::quat get_node_rotation(const tg3_node& node_tg3)
 {
-	glm::quat rotation_quaternion;
 	if(node_tg3.has_matrix)
 	{
-		rotation_quaternion = get_rotation_from_model_matrix(gltf::get_mat4_from_1d_matrix(node_tg3.matrix));
+		return utils::get_rotation_from_model_matrix(gltf::get_mat4_from_1d_matrix(node_tg3.matrix));
 	}
 	else
 	{
-		rotation_quaternion = glm::quat(float(node_tg3.rotation[3]), float(node_tg3.rotation[0]), float(node_tg3.rotation[1]), float(node_tg3.rotation[2]));
+		return glm::quat(float(node_tg3.rotation[3]), float(node_tg3.rotation[0]), float(node_tg3.rotation[1]), float(node_tg3.rotation[2])); //ordre glTF = (x, y, z, w), ordre glm::quat = (w, x, y, z)
 	}
-	return rotation_quaternion;
 }
 
 glm::vec3 get_node_scale(const tg3_node& node_tg3)
 {
-	glm::vec3 scale(1.0f);
 	if(node_tg3.has_matrix)
 	{
-		scale = get_scale_from_model_matrix(gltf::get_mat4_from_1d_matrix(node_tg3.matrix));
+		return utils::get_scale_from_model_matrix(gltf::get_mat4_from_1d_matrix(node_tg3.matrix));
 	}
 	else
 	{
-		scale = glm::vec3(node_tg3.scale[0], node_tg3.scale[1], node_tg3.scale[2]);
+		return glm::vec3(node_tg3.scale[0], node_tg3.scale[1], node_tg3.scale[2]);
 	}
-	return scale;
 }
 
 gltf::Node get_node(const tg3_model& model_tg3, const tg3_node& node_tg3, glm::mat4 parent_matrix)
 {
-	std::string node_name = "";
+	std::string node_name;
 	if(node_tg3.name.len > 0)
 	{
 		node_name = std::string(node_tg3.name.data);
@@ -357,12 +322,11 @@ Vertices get_vertices(const tg3_model& model_tg3, const tg3_primitive& primitive
 	for(uint32_t i = 0; i < primitive_tg3.attributes_count; i++)
 	{
 		tg3_str_int_pair attribute_tg3 = primitive_tg3.attributes[i];
-		std::string attribute_name_str = "";
+		std::string attribute_name_str;
 		if(attribute_tg3.key.len > 0)
 		{
 			attribute_name_str = std::string(attribute_tg3.key.data);
 		}
-		tg3_accessor accessor_tg3 = model_tg3.accessors[attribute_tg3.value];
 
 		if(attribute_name_str == "POSITION") //vec3 de float
 		{
@@ -374,10 +338,11 @@ Vertices get_vertices(const tg3_model& model_tg3, const tg3_primitive& primitive
 		}
 		else if(attribute_name_str.find("TEXCOORD_") != std::string::npos) //vec2
 		{
-			vertices.add_texture_coordinates_attributes(get_float_vec_attribute<2>(model_tg3, attribute_tg3));
+			vertices.add_texcoord_attributes(get_float_vec_attribute<2>(model_tg3, attribute_tg3));
 		}
 		else if(attribute_name_str.find("COLOR_") != std::string::npos) //vec3 ou vec4
 		{
+			tg3_accessor accessor_tg3 = model_tg3.accessors[attribute_tg3.value];
 			if(gltf::get_type_str(accessor_tg3.type) == "VEC3")
 			{
 				vertices.add_color_attributes(gltf::vec3_to_vec4_colors(get_float_vec_attribute<3>(model_tg3, attribute_tg3)));
@@ -399,9 +364,10 @@ Vertices get_aabb_vertices(const tg3_model& model_tg3, const tg3_primitive& prim
 {
 	glm::vec3 min_values = get_min_values(model_tg3, primitive_tg3);
 	glm::vec3 max_values = get_max_values(model_tg3, primitive_tg3);
-	
+	std::size_t vertices_number = 8;
+
 	std::vector<glm::vec3> position_attributes;
-	position_attributes.reserve(8);
+	position_attributes.reserve(vertices_number);
 	position_attributes.push_back(glm::vec3(max_values.x, min_values.y, min_values.z)); //0 : bottom face, upper right
 	position_attributes.push_back(glm::vec3(min_values.x, min_values.y, min_values.z)); //1 : bottom face, upper left
 	position_attributes.push_back(glm::vec3(max_values.x, min_values.y, max_values.z)); //2 : bottom face, down right
@@ -411,7 +377,7 @@ Vertices get_aabb_vertices(const tg3_model& model_tg3, const tg3_primitive& prim
 	position_attributes.push_back(glm::vec3(max_values.x, max_values.y, max_values.z)); //6 : top face, down right
 	position_attributes.push_back(glm::vec3(min_values.x, max_values.y, max_values.z)); //7 : top face, down left
 
-	Vertices vertices(8);
+	Vertices vertices(vertices_number);
 	vertices.add_position_attributes(position_attributes);
 	return vertices;
 }
@@ -429,9 +395,7 @@ std::optional<Mesh> get_mesh(const tg3_model& model_tg3, const tg3_node& node_tg
 {
 	if(node_tg3.mesh != -1)
 	{
-		std::vector<Texture> textures = get_textures(model_tg3);
 		tg3_mesh mesh_tg3 = model_tg3.meshes[node_tg3.mesh];
-
 		if(mesh_tg3.primitives_count > 1)
 		{
 			std::cerr << "(Primitives count > 1) ************************CAS PAS ENCORE GERE************************\n";
@@ -440,61 +404,68 @@ std::optional<Mesh> get_mesh(const tg3_model& model_tg3, const tg3_node& node_tg
 		tg3_primitive primitive_tg3 = mesh_tg3.primitives[0];
 		std::vector<GLushort> ebo_values = get_ebo_values(model_tg3, primitive_tg3);
 		Vertices vertices = get_vertices(model_tg3, primitive_tg3);
-		return Mesh(ebo_values, vertices, textures, primitive_tg3.mode);
+		if(has_textures(model_tg3))
+		{
+			std::vector<Texture> textures = get_textures(model_tg3);
+			return Mesh(ebo_values, vertices, textures, primitive_tg3.mode);
+		}
+		else
+		{
+			return Mesh(ebo_values, vertices, primitive_tg3.mode);
+		}
 	}
 	return std::nullopt; //cas où le node ne possède pas de mesh
 }
 
-//TODO : pas ouf car presque équivalent à get_max_values()
-glm::vec3 get_min_values(const tg3_model& model_tg3, const tg3_primitive& primitive_tg3)
+std::optional<tg3_accessor> get_accessor_from_attribute(std::string_view attribute, const tg3_model& model_tg3, const tg3_primitive& primitive_tg3)
 {
+	if(attribute != "POSITION" && attribute != "NORMAL"
+	&& attribute.find("TEXCOORD_") != std::string_view::npos
+	&& attribute.find("COLOR_") != std::string_view::npos)
+	{
+		std::cout << "Unknown accessor...\n";
+		return std::nullopt;
+	}
+
 	for(uint32_t i = 0; i < primitive_tg3.attributes_count; i++)
 	{
 		tg3_str_int_pair attribute_tg3 = primitive_tg3.attributes[i];
-		std::string attribute_name_str = "";
+		std::string attribute_name_str;
 		if(attribute_tg3.key.len > 0)
 		{
 			attribute_name_str = std::string(attribute_tg3.key.data);
 		}
-		tg3_accessor accessor_tg3 = model_tg3.accessors[attribute_tg3.value];
 
-		if(attribute_name_str == "POSITION") //vec3 de float
+		if(attribute_name_str == attribute)
 		{
-			glm::vec3 min_values(0.0f);
-			if(accessor_tg3.min_values_count > 0)
-			{
-				const double* min_values_ptr = accessor_tg3.min_values;
-				min_values = glm::vec3(min_values_ptr[0], min_values_ptr[1], min_values_ptr[2]);
-			}
-			return min_values;
+			return model_tg3.accessors[attribute_tg3.value];
 		}
 	}
+	return std::nullopt;
 }
 
-//TODO : pas ouf car presque équivalent à get_min_values()
+glm::vec3 get_min_values(const tg3_model& model_tg3, const tg3_primitive& primitive_tg3)
+{
+	tg3_accessor accessor_tg3 = get_accessor_from_attribute("POSITION", model_tg3, primitive_tg3).value(); //je suis assuré que la méthode retourne quelque chose car "POSITION" est un attribut qui existe donc osef de tester l'optional
+	glm::vec3 min_values(0.0f);
+	if(accessor_tg3.min_values_count > 0)
+	{
+		const double* min_values_ptr = accessor_tg3.min_values;
+		min_values = glm::vec3(min_values_ptr[0], min_values_ptr[1], min_values_ptr[2]);
+	}
+	return min_values;
+}
+
 glm::vec3 get_max_values(const tg3_model& model_tg3, const tg3_primitive& primitive_tg3)
 {
-	for(uint32_t i = 0; i < primitive_tg3.attributes_count; i++)
+	tg3_accessor accessor_tg3 = get_accessor_from_attribute("POSITION", model_tg3, primitive_tg3).value(); //je suis assuré que la méthode retourne quelque chose car "POSITION" est un attribut qui existe donc osef de tester l'optional
+	glm::vec3 max_values(0.0f);
+	if(accessor_tg3.max_values_count > 0)
 	{
-		tg3_str_int_pair attribute_tg3 = primitive_tg3.attributes[i];
-		std::string attribute_name_str = "";
-		if(attribute_tg3.key.len > 0)
-		{
-			attribute_name_str = std::string(attribute_tg3.key.data);
-		}
-		tg3_accessor accessor_tg3 = model_tg3.accessors[attribute_tg3.value];
-
-		if(attribute_name_str == "POSITION") //vec3 de float
-		{
-			glm::vec3 max_values(0.0f);
-			if(accessor_tg3.max_values_count > 0)
-			{
-				const double* max_values_ptr = accessor_tg3.max_values;
-				max_values = glm::vec3(max_values_ptr[0], max_values_ptr[1], max_values_ptr[2]);
-			}
-			return max_values;
-		}
+		const double* max_values_ptr = accessor_tg3.max_values;
+		max_values = glm::vec3(max_values_ptr[0], max_values_ptr[1], max_values_ptr[2]);
 	}
+	return max_values;
 }
 
 std::optional<Mesh> get_aabb(const tg3_model& model_tg3, const tg3_node& node_tg3)
@@ -502,16 +473,14 @@ std::optional<Mesh> get_aabb(const tg3_model& model_tg3, const tg3_node& node_tg
 	if(node_tg3.mesh != -1)
 	{
 		tg3_mesh mesh_tg3 = model_tg3.meshes[node_tg3.mesh];
-
 		if(mesh_tg3.primitives_count > 1)
 		{
 			std::cerr << "(Primitives count > 1) ************************CAS PAS ENCORE GERE************************\n";
 		}
 
 		tg3_primitive primitive_tg3 = mesh_tg3.primitives[0];
-
 		Vertices vertices = get_aabb_vertices(model_tg3, primitive_tg3);
-		std::vector<GLushort> ebo_values =
+		std::vector<GLushort> ebo_values = //rubix cube avec la face verte au-dessus et la face rouge face à nous
 		{
 			3, 2, 7, 2, 6, 7, //face rouge
 			1, 5, 7, 1, 3, 7, //face jaune
@@ -520,10 +489,15 @@ std::optional<Mesh> get_aabb(const tg3_model& model_tg3, const tg3_node& node_tg
 			7, 5, 4, 4, 6, 7, //face verte
 			3, 1, 0, 0, 2, 3  //face bleue
 		};
-
-		std::vector<Texture> textures; //TODO : faire en sorte que Mesh ne soit pas obligé de prendre des textures en paramètre
-		
-		return Mesh(ebo_values, vertices, textures, primitive_tg3.mode);
+		if(has_textures(model_tg3))
+		{
+			std::vector<Texture> textures = get_textures(model_tg3);
+			return Mesh(ebo_values, vertices, textures, primitive_tg3.mode);
+		}
+		else
+		{
+			return Mesh(ebo_values, vertices, primitive_tg3.mode);
+		}
 	}
 	return std::nullopt; //cas où le node ne possède pas de mesh
 }
@@ -533,20 +507,21 @@ std::vector<Texture> get_textures(const tg3_model& model_tg3)
 	std::vector<Texture> textures;
 	for(uint32_t i = 0; i < model_tg3.textures_count; ++i)
 	{
-		Texture mesh_texture;
 		tg3_texture texture_tg3 = model_tg3.textures[i];
 		tg3_image image_tg3 = model_tg3.images[texture_tg3.source];
 
+		Texture mesh_texture;
 		mesh_texture.texture_unit_ = i;
+
 		if(image_tg3.buffer_view == -1)
 		{
-			std::string image_str = "";
+			std::string image_str;
 			if(image_tg3.uri.len > 0)
 			{
 				image_str = std::string(image_tg3.uri.data);
 			}
 
-			if(bool(tg3_is_data_uri(image_tg3.uri.data, image_tg3.uri.len)))
+			if(tg3_is_data_uri(image_tg3.uri.data, image_tg3.uri.len))
 			{
 				mesh_texture.image_path_ = "";
 				//std::string image_data_base64 = image_str.substr(image_str.find(',') + 1); //+1 pour ne pas prendre la virgule
@@ -604,7 +579,7 @@ std::vector<glm::vec4> get_vec4_color_attribute(const tg3_model& model_tg3, cons
 {
 	tg3_accessor accessor_tg3 = model_tg3.accessors[attribute_tg3.value];
 	std::string component_type_str = gltf::get_component_type_str(accessor_tg3.component_type);
-	std::vector<glm::vec4> vec4_vector;
+	std::vector<glm::vec4> vec4_colors;
 
 	if(component_type_str == "GL_FLOAT")
 	{
@@ -620,7 +595,7 @@ std::vector<glm::vec4> get_vec4_color_attribute(const tg3_model& model_tg3, cons
 		{
 			for(uint64_t i = buffer_view_tg3.byte_offset + accessor_tg3.byte_offset; i < buffer_view_tg3.byte_offset + buffer_view_tg3.byte_length; i += 4 * sizeof(GLubyte)) //car sizeof(glm::vec4) != 4 * sizeof(sizeof(GLubyte))
 			{
-				glm::vec4 vec4(0.0f, 0.0f, 0.0f, 0.0f);
+				glm::vec4 vec4_color(0.0f);
 				for(uint64_t j = 0; j < component_type_size * glm::vec4::length(); j += component_type_size)
 				{
 					uint8_t attribute_u8 = 0; //uint8_t car un unsigned short fait 8 bits
@@ -628,18 +603,18 @@ std::vector<glm::vec4> get_vec4_color_attribute(const tg3_model& model_tg3, cons
 					{
 						attribute_u8 |= uint8_t(buffer_tg3.data.data[i + j + k] << k * 8); //8 pour convertir octets en bits
 					}
-					GLfloat attribute_float = GLfloat(attribute_u8) / std::numeric_limits<GLubyte>::max(); //normaliser la valeur de l'attribut
+					GLfloat attribute_float = GLfloat(attribute_u8) / std::numeric_limits<GLubyte>::max(); //normalisation de la valeur de l'attribut
 					uint64_t component = j / component_type_size;
-					vec4[component % 4] = attribute_float;
+					vec4_color[component % 4] = attribute_float;
 				}
-				vec4_vector.push_back(vec4);
+				vec4_colors.push_back(vec4_color);
 			}
 		}
 		else if(component_type_str == "GL_UNSIGNED_SHORT")
 		{
 			for(uint64_t i = buffer_view_tg3.byte_offset + accessor_tg3.byte_offset; i < buffer_view_tg3.byte_offset + buffer_view_tg3.byte_length; i += 4 * sizeof(GLushort)) //car sizeof(glm::vec4) != 4 * sizeof(sizeof(GLushort))
 			{
-				glm::vec4 vec4(0.0f, 0.0f, 0.0f, 0.0f);
+				glm::vec4 vec4_color(0.0f);
 				for(uint64_t j = 0; j < component_type_size * glm::vec4::length(); j += component_type_size)
 				{
 					uint16_t attribute_u16 = 0; //uint16_t car un unsigned short fait 16 bits
@@ -647,11 +622,11 @@ std::vector<glm::vec4> get_vec4_color_attribute(const tg3_model& model_tg3, cons
 					{
 						attribute_u16 |= uint16_t(buffer_tg3.data.data[i + j + k] << k * 8); //8 pour convertir octets en bits
 					}
-					GLfloat attribute_float = GLfloat(attribute_u16) / std::numeric_limits<GLushort>::max(); //normaliser la valeur de l'attribut
+					GLfloat attribute_float = GLfloat(attribute_u16) / std::numeric_limits<GLushort>::max(); //normalisation de la valeur de l'attribut
 					uint64_t component = j / component_type_size;
-					vec4[component % 4] = attribute_float;
+					vec4_color[component % 4] = attribute_float;
 				}
-				vec4_vector.push_back(vec4);
+				vec4_colors.push_back(vec4_color);
 			}
 		}
 		else
@@ -659,7 +634,12 @@ std::vector<glm::vec4> get_vec4_color_attribute(const tg3_model& model_tg3, cons
 			std::cout << "****ERROR****: Unhandled type!\n";
 		}
 	}
-	return vec4_vector;
+	return vec4_colors;
+}
+
+bool has_textures(const tg3_model& model_tg3)
+{
+	return model_tg3.textures_count > 0;
 }
 
 }

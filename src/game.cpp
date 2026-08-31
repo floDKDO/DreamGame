@@ -18,7 +18,7 @@ Game::Game()
 	camera_(input_manager_, player_.model_.get_position()), 
 	running_(true), gamepad_(), test_map_("resources/maps/corridor.gltf"), 
 	gizmo_("resources/models/axis_gizmo.glb"),
-	perspective_projection_matrix_(1.0f)
+	fov_(glm::radians(45.0f)), near_plane_(0.1f), far_plane_(100.0f), perspective_projection_matrix_(1.0f)
 {
 	shader_programs_.insert(std::make_pair("Base", ShaderProgram("Base", {"resources/shaders/base_shader.vert", "resources/shaders/base_shader.frag"})));
 	shader_programs_.insert(std::make_pair("Phong", ShaderProgram("Phong", {"resources/shaders/base_shader.vert", "resources/shaders/phong_shader.frag"})));
@@ -28,7 +28,7 @@ void Game::run()
 {
 	int w, h;
 	backend_.get_window_size(&w, &h);
-	perspective_projection_matrix_ = glm::perspective(glm::radians(45.0f), float(w) / float(h), 0.1f, 100.0f); //TODO : hardcodé et voir si je garde ces valeurs
+	perspective_projection_matrix_ = glm::perspective(fov_, float(w) / float(h), near_plane_, far_plane_);
 
 	ShaderProgram& phong_program = shader_programs_.at("Phong");
 	phong_program.use();
@@ -42,21 +42,19 @@ void Game::run()
 	base_program.set_uniform_matrix_4fv("view_matrix_", glm::value_ptr(camera_.get_view_matrix()));
 	base_program.set_uniform_matrix_4fv("projection_matrix_", glm::value_ptr(projection_matrix));*/
 
+	std::string temp_model_name("test"); //ici, "test" serait le nom du modèle
 	audio::set_listener_position(player_.model_.get_position());
 	audio::set_listener_orientation(camera_.get_camera_forward(), camera_.get_camera_up());
 	audio::set_listener_velocity(glm::vec3(0.0f));
-	audio::create_source("test", "resources/test.wav");
-	audio::set_source_gain("test", 1.0f);
-	audio::set_source_gain("test", 1.0f);
-	audio::set_source_pitch("test", 1.0f);
-	audio::set_source_reference_distance("test", 1.0f);
-	audio::set_source_max_distance("test", 20.0f);
-	audio::set_source_rolloff_factor("test", 1.0f);
-	audio::set_source_position("test", glm::vec3(0.0f));
-	//audio::play_source("test");
-
-	//TODO : voir si je le laisse là
-	//glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	audio::create_source(temp_model_name, "resources/test.wav"); 
+	audio::set_source_gain(temp_model_name, 1.0f);
+	audio::set_source_gain(temp_model_name, 1.0f);
+	audio::set_source_pitch(temp_model_name, 1.0f);
+	audio::set_source_reference_distance(temp_model_name, 1.0f);
+	audio::set_source_max_distance(temp_model_name, 20.0f);
+	audio::set_source_rolloff_factor(temp_model_name, 1.0f);
+	audio::set_source_position(temp_model_name, glm::vec3(0.0f));
+	//audio::play_source(temp_model_name);
 
 	Uint64 begin_current_frame = 0; //en ms
 	Uint64 last_frame = 0;          //en ms
@@ -86,7 +84,7 @@ void Game::run()
 		last_frame = begin_current_frame;
 	}
 
-	audio::destroy_source("test");
+	audio::destroy_source(temp_model_name);
 }
 
 void Game::handle_events()

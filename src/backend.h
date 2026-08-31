@@ -27,4 +27,3 @@ class Backend
 
 void GLAPIENTRY message_callback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, [[maybe_unused]] const void* user_param);
 void print_opengl_stuff();
-void print_number_of_texture_units();
