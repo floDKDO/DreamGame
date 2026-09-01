@@ -1,11 +1,11 @@
 #pragma once
 
 #include "RAII_SDL3/window.h"
-#include "backend.h"
-#include "model.h"
-#include "map.h"
+#include "Backend/backend.h"
+#include "Render/model.h"
+#include "Map/map.h"
 #include "Camera/camera.h"
-#include "player.h"
+#include "Player/player.h"
 #include "Input/input_manager.h"
 
 class Game

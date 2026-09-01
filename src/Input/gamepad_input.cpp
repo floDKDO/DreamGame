@@ -134,7 +134,7 @@ void GamepadInput::handle_events(const SDL_Event& e)
 	}
 }
 
-void GamepadInput::update(float delta_time)
+void GamepadInput::update([[maybe_unused]] float delta_time)
 {
 	//std::cout << "(GAMEPAD) => x: " << input_info_.x_movement_intensity_ << ", y: " << input_info_.y_movement_intensity_ << ", rotation_x: " << input_info_.x_rotation_intensity_ << ", rotation_y: " << input_info_.y_rotation_intensity_ << std::endl;
 }

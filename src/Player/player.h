@@ -1,6 +1,6 @@
 #pragma once
 
-#include "model.h"
+#include "Render/model.h"
 #include "Render/shader_program.h"
 #include "Input/input_manager.h"
 

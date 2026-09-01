@@ -1,8 +1,8 @@
 #pragma once
 
 #include "Render/mesh.h"
-#include "utils.h"
-#include "transform.h"
+#include "Common/utils.h"
+#include "Common/transform.h"
 
 #include <optional>
 #include <memory>

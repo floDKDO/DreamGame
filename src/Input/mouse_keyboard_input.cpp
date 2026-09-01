@@ -64,7 +64,7 @@ void MouseKeyboardInput::handle_events(const SDL_Event& e)
 	}
 }
 
-void MouseKeyboardInput::update(float delta_time)
+void MouseKeyboardInput::update([[maybe_unused]] float delta_time)
 {
 	//std::cout << "(MOUSE KEYBOARD) => x: " << input_info_.x_movement_intensity_ << ", y: " << input_info_.y_movement_intensity_  << ", rotation_x: " << input_info_.x_rotation_intensity_ << ", rotation_y: " << input_info_.y_rotation_intensity_ << std::endl;
 

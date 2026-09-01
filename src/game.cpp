@@ -46,7 +46,7 @@ void Game::run()
 	audio::set_listener_position(player_.model_.get_position());
 	audio::set_listener_orientation(camera_.get_camera_forward(), camera_.get_camera_up());
 	audio::set_listener_velocity(glm::vec3(0.0f));
-	audio::create_source(temp_model_name, "resources/test.wav"); 
+	audio::create_source(temp_model_name, "resources/audio/test.wav"); 
 	audio::set_source_gain(temp_model_name, 1.0f);
 	audio::set_source_gain(temp_model_name, 1.0f);
 	audio::set_source_pitch(temp_model_name, 1.0f);

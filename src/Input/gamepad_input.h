@@ -9,7 +9,7 @@ class GamepadInput
 		GamepadInput();
 
 		void handle_events(const SDL_Event& e);
-		void update(float delta_time);
+		void update([[maybe_unused]] float delta_time);
 		input::Info get_input_info() const;
 
 	private:

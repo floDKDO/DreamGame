@@ -18,7 +18,6 @@ void Scene::set_model_translation(glm::vec3 position)
 {
 	root_nodes_[0]->transform_.position_ = position;
 	update_parent_matrix_of_children(get_model());
-
 }
 
 void Scene::add_model_translation(glm::vec3 position)
