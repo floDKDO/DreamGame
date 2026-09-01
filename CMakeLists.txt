@@ -54,14 +54,14 @@ target_compile_options(${PROJECT_NAME} PUBLIC /W4 /external:anglebrackets /exter
 target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_17) # C++17
 
 add_definitions(-DGLEW_STATIC)
-target_link_directories(${PROJECT_NAME} PUBLIC "lib/glew/lib/Release/x64")
+target_link_directories(${PROJECT_NAME} PUBLIC "${CMAKE_SOURCE_DIR}/third_party/glew/lib/Release/x64")
 
 add_library(nlohmann_json INTERFACE)
 
 target_include_directories(${PROJECT_NAME} PUBLIC 
   "src"
-  "lib/glew/include"
-  "lib/glm"
+  "${CMAKE_SOURCE_DIR}/third_party/glew/include"
+  "${CMAKE_SOURCE_DIR}/third_party/glm"
   "third_party"
   ${CMAKE_SOURCE_DIR}/third_party/nlohmann_json
 )
