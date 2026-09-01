@@ -25,8 +25,6 @@ class Model
 		void set_scale(glm::vec3 scale);
 
 	private:
-		void update_parent_matrix_of_children(gltf::Node* node);
-
 		gltf::glTFFile gltf_file_;
 		std::unique_ptr<gltf::Scene> scene_;
 };

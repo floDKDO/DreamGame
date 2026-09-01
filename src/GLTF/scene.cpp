@@ -14,22 +14,50 @@ Scene::Scene(std::vector<std::unique_ptr<Node>> root_nodes)
 	}
 }
 
-//TODO : inutilisée et faux car ne met pas à jour les noeuds enfants
-void Scene::set_model_position(glm::vec3 position)
+void Scene::set_model_translation(glm::vec3 position)
 {
 	root_nodes_[0]->transform_.position_ = position;
+	update_parent_matrix_of_children(get_model());
+
 }
 
-//TODO : inutilisée et faux car ne met pas à jour les noeuds enfants
+void Scene::add_model_translation(glm::vec3 position)
+{
+	root_nodes_[0]->transform_.position_ += position;
+	update_parent_matrix_of_children(get_model());
+}
+
 void Scene::set_model_rotation(glm::quat rotation)
 {
 	root_nodes_[0]->transform_.rotation_ = rotation;
+	update_parent_matrix_of_children(get_model());
 }
 
-//TODO : inutilisée et faux car ne met pas à jour les noeuds enfants
+void Scene::add_model_rotation(glm::quat rotation)
+{
+	root_nodes_[0]->transform_.rotation_ += rotation;
+	update_parent_matrix_of_children(get_model());
+}
+
 void Scene::set_model_scale(glm::vec3 scale)
 {
 	root_nodes_[0]->transform_.scale_ = scale;
+	update_parent_matrix_of_children(get_model());
+}
+
+void Scene::add_model_scale(glm::vec3 scale)
+{
+	root_nodes_[0]->transform_.scale_ += scale;
+	update_parent_matrix_of_children(get_model());
+}
+
+void Scene::update_parent_matrix_of_children(gltf::Node* node)
+{
+	for(std::unique_ptr<gltf::Node>& child_node : node->children_nodes_)
+	{
+		child_node->parent_matrix_ = node->compute_model();
+		update_parent_matrix_of_children(child_node.get());
+	}
 }
 
 glm::vec3& Scene::get_model_position() const //get position of first root_node_
