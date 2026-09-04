@@ -10,6 +10,39 @@ uniform sampler2D texture_sampler0_;
 uniform vec3 view_position_;
 uniform vec3 light_position_;
 
+vec4 get_light_intensity(float square_size, float light_height)
+{
+	vec3 max_square = vec3(light_position_ + (square_size / 2));
+	vec3 min_square = vec3(light_position_ - (square_size / 2));
+
+	float x_intensity = 0.0f; 
+	if(world_position_.x > light_position_.x)
+	{
+		x_intensity = (1.0f - ((world_position_.x - min_square.x) / (max_square.x - min_square.x)));
+	}
+	else
+	{
+		x_intensity = ((world_position_.x - min_square.x) / (max_square.x - min_square.x));
+	}
+
+	float z_intensity = 0.0f; 
+	if(world_position_.z > light_position_.z)
+	{
+		z_intensity = (1.0f - ((world_position_.z - min_square.z) / (max_square.z - min_square.z)));
+	}
+	else
+	{
+		z_intensity = ((world_position_.z - min_square.z) / (max_square.z - min_square.z));
+	}
+
+	float final_intensity = (x_intensity + z_intensity) / 2.0f;
+	if(world_position_.y > light_position_.y + light_height)
+	{
+		final_intensity = 0.0f;
+	}
+	return vec4(vec3(final_intensity), 1.0f);
+}
+
 void main()
 {
 	float ambient_strength = 0.1f;
@@ -18,6 +51,7 @@ void main()
 	vec3 normalized_normal = normalize(normal_);
 
 	//diffuse
+	vec4 light_intensity = get_light_intensity(12.0f, 3.0f);
 	vec3 light_direction = normalize(light_position_ - world_position_);
 	float diff = max(dot(normalized_normal, light_direction), 0.0f);
 	vec3 diffuse = diff * light_color;
@@ -34,5 +68,5 @@ void main()
 
 	//out_color_ = texture(texture_sampler0_, text_coord_);
 	//out_color_ = color_;
-	out_color_ = result;
+	out_color_ = result + light_intensity;
 }

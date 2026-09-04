@@ -94,7 +94,7 @@ void Game::handle_events()
 	{
 		switch(e.type)
 		{
-			case SDL_EVENT_WINDOW_RESIZED:
+			case SDL_EVENT_WINDOW_RESIZED: //TODO : devrait être géré avec la fenêtre
 				glViewport(0, 0, e.window.data1, e.window.data2);
 				break;
 
