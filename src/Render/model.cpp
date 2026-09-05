@@ -29,6 +29,11 @@ std::string Model::get_name() const
 	return scene_->get_model_name();
 }
 
+gltf::Scene* Model::get_scene() const
+{
+	return scene_.get();
+}
+
 void Model::add_translation(glm::vec3 position)
 {
 	scene_->add_model_translation(position);

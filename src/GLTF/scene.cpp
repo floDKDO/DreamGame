@@ -74,6 +74,11 @@ Node* Scene::get_model() const
 	return root_nodes_[0].get();
 }
 
+const std::unique_ptr<Node>& Scene::get_node() const
+{
+	return root_nodes_[0];
+}
+
 void Scene::draw(ShaderProgram& shader_program)
 {
 	root_nodes_[0]->draw(shader_program);

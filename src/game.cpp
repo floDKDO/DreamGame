@@ -163,10 +163,53 @@ void Game::update_fps_count(Uint64& last_fps_refresh, unsigned int& frame_count_
 	}
 }
 
+void detect_collision(const std::unique_ptr<gltf::Node>& node, const Player& player)
+{
+	const Model& player_model = player.model_;
+
+	glm::vec3 min_values_model = node->get_min_values_aabb();
+	glm::vec3 max_values_model = node->get_max_values_aabb();
+
+	glm::vec3 min_values_player = player_model.get_scene()->get_model()->get_min_values_aabb();
+	glm::vec3 max_values_player = player_model.get_scene()->get_model()->get_max_values_aabb();
+
+	glm::vec3 position_model = node->parent_matrix_ * glm::vec4(node->transform_.position_, 1.0f);
+	glm::vec3 position_player = player_model.get_position();
+
+	min_values_model += position_model;
+	max_values_model += position_model;
+	min_values_player += position_player;
+	max_values_player += position_player;
+
+	if(min_values_model.x <= max_values_player.x
+	&& max_values_model.x >= min_values_player.x
+	&& min_values_model.y <= max_values_player.y
+	&& max_values_model.y >= min_values_player.y
+	&& min_values_model.z <= max_values_player.z
+	&& max_values_model.z >= min_values_player.z)
+	{
+		std::cout << std::endl;
+		std::cout << "Collision between " << node->get_name() << " and player!\n";
+		std::cout << "Infos => model: position(" << position_model.x << ", " << position_model.y << ", " << position_model.z << "), min(" << min_values_model.x << ", " << min_values_model.y << ", " << min_values_model.z << "), max(" << max_values_model.x << ", " << max_values_model.y << ", " << max_values_model.z << ")\n";
+		std::cout << "Infos => player: position(" << position_player.x << ", " << position_player.y << ", " << position_player.z << "), min(" << min_values_player.x << ", " << min_values_player.y << ", " << min_values_player.z << "), max(" << max_values_player.x << ", " << max_values_player.y << ", " << max_values_player.z << ")\n";
+		std::cout << std::endl;
+	}
+
+	for(const std::unique_ptr<gltf::Node>& node : node->children_nodes_)
+	{
+		detect_collision(node, player);
+	}
+}
+
 void Game::update(float delta_time)
 {
 	camera_.update(delta_time);
 	player_.update(delta_time, camera_.get_camera_forward(), camera_.get_camera_left());
 	gamepad_.check(1000); //tester une fois par seconde
 	input_manager_.update(delta_time);
+
+	for(const std::unique_ptr<Model>& model : test_map_.models_)
+	{
+		detect_collision(model->get_scene()->get_node(), player_);
+	}
 }

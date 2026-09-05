@@ -15,5 +15,8 @@ class Map
 
 	private:
 		JSONFile map_file_;
-		std::vector<std::unique_ptr<Model>> models_;
+
+	public:
+		std::vector<std::unique_ptr<Model>> models_; //TODO : remettre en private
+		
 };

@@ -1,6 +1,7 @@
 #include "gltf_file.h"
 #include "gltf.h"
 #include "scene.h"
+#include "aabb.h"
 
 #include <iostream>
 
@@ -19,7 +20,7 @@ std::optional<Mesh> get_mesh(const tg3_model& model_tg3, const tg3_node& node_tg
 std::optional<tg3_accessor> get_accessor_from_attribute(std::string_view attribute, const tg3_model& model_tg3, const tg3_primitive& primitive_tg3);
 glm::vec3 get_min_values(const tg3_model& model_tg3, const tg3_primitive& primitive_tg3);
 glm::vec3 get_max_values(const tg3_model& model_tg3, const tg3_primitive& primitive_tg3);
-std::optional<Mesh> get_aabb(const tg3_model& model_tg3, const tg3_node& node_tg3);
+std::optional<AABB> get_aabb(const tg3_model& model_tg3, const tg3_node& node_tg3);
 std::vector<Texture> get_textures(const tg3_model& model_tg3);
 std::vector<GLushort> get_ebo_values(const tg3_model& model_tg3, const tg3_primitive& primitive_tg3);
 std::vector<glm::vec4> get_vec4_color_attribute(const tg3_model& model_tg3, const tg3_str_int_pair& attribute_tg3);
@@ -468,7 +469,7 @@ glm::vec3 get_max_values(const tg3_model& model_tg3, const tg3_primitive& primit
 	return max_values;
 }
 
-std::optional<Mesh> get_aabb(const tg3_model& model_tg3, const tg3_node& node_tg3)
+std::optional<AABB> get_aabb(const tg3_model& model_tg3, const tg3_node& node_tg3)
 {
 	if(node_tg3.mesh != -1)
 	{
@@ -489,14 +490,16 @@ std::optional<Mesh> get_aabb(const tg3_model& model_tg3, const tg3_node& node_tg
 			7, 5, 4, 4, 6, 7, //face verte
 			3, 1, 0, 0, 2, 3  //face bleue
 		};
+		glm::vec3 min_values = get_min_values(model_tg3, primitive_tg3);
+		glm::vec3 max_values = get_max_values(model_tg3, primitive_tg3);
 		if(has_textures(model_tg3))
 		{
 			std::vector<Texture> textures = get_textures(model_tg3);
-			return Mesh(ebo_values, vertices, textures, primitive_tg3.mode);
+			return AABB(min_values, max_values, ebo_values, vertices, textures, primitive_tg3.mode);
 		}
 		else
 		{
-			return Mesh(ebo_values, vertices, primitive_tg3.mode);
+			return AABB(min_values, max_values, ebo_values, vertices, primitive_tg3.mode);
 		}
 	}
 	return std::nullopt; //cas où le node ne possède pas de mesh

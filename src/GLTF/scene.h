@@ -23,6 +23,7 @@ class Scene
 		glm::vec3& get_model_position() const; //get position of first root_node_
 		std::string get_model_name() const; //get name of first root_node_
 		Node* get_model() const;
+		const std::unique_ptr<Node>& get_node() const;
 
 		void draw(ShaderProgram& shader_program);
 

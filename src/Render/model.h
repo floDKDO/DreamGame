@@ -15,6 +15,7 @@ class Model
 
 		glm::vec3& get_position() const; //get position of root_node_
 		std::string get_name() const; //get name of root_node_
+		gltf::Scene* get_scene() const;
 
 		void add_translation(glm::vec3 position);
 		void add_rotation(glm::quat rotation);
