@@ -39,8 +39,50 @@ void Model::add_translation(glm::vec3 position)
 	scene_->add_model_translation(position);
 }
 
+void Model::add_translation_x(float x)
+{
+	glm::vec3 position(0.0f);
+	position.x += x;
+	scene_->add_model_translation(position);
+}
+
+void Model::add_translation_y(float y)
+{
+	glm::vec3 position(0.0f);
+	position.y += y;
+	scene_->add_model_translation(position);
+}
+
+void Model::add_translation_z(float z)
+{
+	glm::vec3 position(0.0f);
+	position.z += z;
+	scene_->add_model_translation(position);
+}
+
 void Model::set_translation(glm::vec3 position)
 {
+	scene_->set_model_translation(position);
+}
+
+void Model::set_translation_x(float x)
+{
+	glm::vec3 position = scene_->get_model_position();
+	position.x = x;
+	scene_->set_model_translation(position);
+}
+
+void Model::set_translation_y(float y)
+{
+	glm::vec3 position = scene_->get_model_position();
+	position.y = y;
+	scene_->set_model_translation(position);
+}
+
+void Model::set_translation_z(float z)
+{
+	glm::vec3 position = scene_->get_model_position();
+	position.z = z;
 	scene_->set_model_translation(position);
 }
 
