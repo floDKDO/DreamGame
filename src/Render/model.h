@@ -26,10 +26,6 @@ class Model
 		void add_scale(glm::vec3 scale);
 
 		void set_translation(glm::vec3 position);
-		void set_translation_x(float x);
-		void set_translation_y(float y);
-		void set_translation_z(float z);
-
 		void set_rotation(glm::quat rotation);
 		void set_scale(glm::vec3 scale);
 

@@ -2,6 +2,8 @@
 
 #include "Render/mesh.h"
 
+#include <vector>
+
 class AABB
 {
 	public:
@@ -10,6 +12,7 @@ class AABB
 		void draw(ShaderProgram& shader_program);
 		glm::vec3 get_min_values() const;
 		glm::vec3 get_max_values() const;
+		std::vector<glm::vec3> get_corners() const;
 
 	private:
 		Mesh mesh_;

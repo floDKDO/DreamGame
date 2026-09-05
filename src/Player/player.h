@@ -12,7 +12,6 @@ class Player
 		void draw(ShaderProgram& shader_program);
 		void update(float delta_time, glm::vec3 camera_forward, glm::vec3 camera_left);
 
-		glm::vec3 last_position_;
 		Model model_;
 
 	private:

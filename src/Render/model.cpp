@@ -65,27 +65,6 @@ void Model::set_translation(glm::vec3 position)
 	scene_->set_model_translation(position);
 }
 
-void Model::set_translation_x(float x)
-{
-	glm::vec3 position = scene_->get_model_position();
-	position.x = x;
-	scene_->set_model_translation(position);
-}
-
-void Model::set_translation_y(float y)
-{
-	glm::vec3 position = scene_->get_model_position();
-	position.y = y;
-	scene_->set_model_translation(position);
-}
-
-void Model::set_translation_z(float z)
-{
-	glm::vec3 position = scene_->get_model_position();
-	position.z = z;
-	scene_->set_model_translation(position);
-}
-
 void Model::add_rotation(glm::quat rotation)
 {
 	scene_->add_model_rotation(rotation);

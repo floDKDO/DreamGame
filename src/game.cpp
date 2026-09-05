@@ -173,7 +173,7 @@ void detect_collision(const std::unique_ptr<gltf::Node>& node, Player& player)
 	glm::vec3 min_values_player = player_model.get_scene()->get_model()->get_min_values_aabb();
 	glm::vec3 max_values_player = player_model.get_scene()->get_model()->get_max_values_aabb();
 
-	glm::vec3 position_model = node->parent_matrix_ * glm::vec4(node->transform_.position_, 1.0f);
+	glm::vec3 position_model = glm::vec3(node->parent_matrix_ * glm::vec4(node->transform_.position_, 1.0f));
 	glm::vec3 position_player = player_model.get_position();
 
 	min_values_model += position_model;
@@ -181,12 +181,12 @@ void detect_collision(const std::unique_ptr<gltf::Node>& node, Player& player)
 	min_values_player += position_player;
 	max_values_player += position_player;
 
-	float overlap_x = std::min(max_values_player.x, max_values_model.x) - std::max(min_values_player.x, min_values_model.x);
+	float overlap_x = std::min(max_values_player.x, max_values_model.x) - std::max(min_values_player.x, min_values_model.x); //la valeur obtenue représente de combien en x le joueur est entré dans le modèle
 	float overlap_y = std::min(max_values_player.y, max_values_model.y) - std::max(min_values_player.y, min_values_model.y);
 	float overlap_z = std::min(max_values_player.z, max_values_model.z) - std::max(min_values_player.z, min_values_model.z);
 
-	glm::vec3 player_center = (min_values_player + max_values_player) * 0.5f;
-	glm::vec3 model_center = (min_values_model + max_values_model) * 0.5f;
+	glm::vec3 player_center = (min_values_player + max_values_player) * 0.5f; //la valeur est différente de position_player car l'origine dans le modèle n'est pas centrée en Y
+	glm::vec3 model_center = (min_values_model + max_values_model) * 0.5f; //idem, peut être différente de position_model
 
 	if(min_values_model.x <= max_values_player.x && max_values_model.x >= min_values_player.x
 	&& min_values_model.y <= max_values_player.y && max_values_model.y >= min_values_player.y
@@ -194,11 +194,11 @@ void detect_collision(const std::unique_ptr<gltf::Node>& node, Player& player)
 	{
 		//std::cout << std::endl;
 		//std::cout << "Collision between " << node->get_name() << " and player!\n";
-		//player.model_.set_translation(player.last_position_);
 		//std::cout << "Infos => model: position(" << position_model.x << ", " << position_model.y << ", " << position_model.z << "), min(" << min_values_model.x << ", " << min_values_model.y << ", " << min_values_model.z << "), max(" << max_values_model.x << ", " << max_values_model.y << ", " << max_values_model.z << ")\n";
 		//std::cout << "Infos => player: position(" << position_player.x << ", " << position_player.y << ", " << position_player.z << "), min(" << min_values_player.x << ", " << min_values_player.y << ", " << min_values_player.z << "), max(" << max_values_player.x << ", " << max_values_player.y << ", " << max_values_player.z << ")\n";
 		//std::cout << std::endl;
 
+		//on cherche le plus petit overlap car on veut déplacer le joueur de la plus petite distance possible pour qu'il ne soit plus en collision avec le modèle
 		if(overlap_x < overlap_y && overlap_x < overlap_z)
 		{
 			if(player_center.x < model_center.x)
@@ -234,9 +234,9 @@ void detect_collision(const std::unique_ptr<gltf::Node>& node, Player& player)
 		}
 	}
 
-	for(const std::unique_ptr<gltf::Node>& node : node->children_nodes_)
+	for(const std::unique_ptr<gltf::Node>& child_node : node->children_nodes_)
 	{
-		detect_collision(node, player);
+		detect_collision(child_node, player);
 	}
 }
 
