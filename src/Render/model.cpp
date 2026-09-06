@@ -16,71 +16,65 @@ Model::Model(std::string_view path, Transform transform)
 
 void Model::draw(ShaderProgram& shader_program)
 {
-	root_node_->draw(shader_program);
+	root_node_.draw(shader_program);
 }
 
-glm::vec3& Model::get_position() const
+const glm::vec3& Model::get_position() const
 {
-	return root_node_->transform_.position_;
+	return root_node_.get_position();
 }
 
 std::string Model::get_name() const
 {
-	return root_node_->get_name();
+	return root_node_.get_name();
 }
 
-gltf::Node* Model::get_root_node() const
+gltf::Node& Model::get_root_node()
 {
-	return root_node_.get();
+	return root_node_;
 }
 
 void Model::add_translation(glm::vec3 position)
 {
-	root_node_->add_model_translation(position);
+	root_node_.add_translation(position);
 }
 
 void Model::add_translation_x(float x)
 {
-	glm::vec3 position(0.0f);
-	position.x += x;
-	root_node_->add_model_translation(position);
+	root_node_.add_translation_x(x);
 }
 
 void Model::add_translation_y(float y)
 {
-	glm::vec3 position(0.0f);
-	position.y += y;
-	root_node_->add_model_translation(position);
+	root_node_.add_translation_y(y);
 }
 
 void Model::add_translation_z(float z)
 {
-	glm::vec3 position(0.0f);
-	position.z += z;
-	root_node_->add_model_translation(position);
+	root_node_.add_translation_z(z);
 }
 
 void Model::set_translation(glm::vec3 position)
 {
-	root_node_->set_model_translation(position);
+	root_node_.set_translation(position);
 }
 
 void Model::add_rotation(glm::quat rotation)
 {
-	root_node_->add_model_rotation(rotation);
+	root_node_.add_rotation(rotation);
 }
 
 void Model::set_rotation(glm::quat rotation)
 {
-	root_node_->set_model_rotation(rotation);
+	root_node_.set_rotation(rotation);
 }
 
 void Model::add_scale(glm::vec3 scale)
 {
-	root_node_->add_model_scale(scale);
+	root_node_.add_scale(scale);
 }
 
 void Model::set_scale(glm::vec3 scale)
 {
-	root_node_->set_model_scale(scale);
+	root_node_.set_scale(scale);
 }

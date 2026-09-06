@@ -192,7 +192,7 @@ void glTFFile::print_info() const
 	std::cout << "*********************************************************************************************\n\n";
 }
 
-std::unique_ptr<Node> glTFFile::get_root_node() const
+Node glTFFile::get_root_node() const
 {
 	if(model_tg3_.scenes_count > 1)
 	{
@@ -202,7 +202,7 @@ std::unique_ptr<Node> glTFFile::get_root_node() const
 	tg3_scene scene_tg3 = model_tg3_.scenes[0];
 	int32_t root_node_index = scene_tg3.nodes[0];
 	tg3_node root_node_tg3 = model_tg3_.nodes[root_node_index];
-	return std::make_unique<Node>(get_node(model_tg3_, root_node_tg3, glm::mat4(1.0f))); //les root nodes n'ont pas de parent donc ont une matrice identitée pour leur parent_matrix
+	return get_node(model_tg3_, root_node_tg3, glm::mat4(1.0f)); //les root nodes n'ont pas de parent donc ont une matrice identitée pour leur parent_matrix
 }
 
 }
@@ -289,11 +289,10 @@ gltf::Node get_node(const tg3_model& model_tg3, const tg3_node& node_tg3, glm::m
 		node_name = std::string(node_tg3.name.data);
 	}
 	
-	gltf::Node node(node_name, get_transform(node_tg3), get_mesh(model_tg3, node_tg3), get_aabb(model_tg3, node_tg3));
-	node.parent_matrix_ = parent_matrix;
+	gltf::Node node(node_name, get_transform(node_tg3), parent_matrix, get_mesh(model_tg3, node_tg3), get_aabb(model_tg3, node_tg3));
 	for(uint32_t i = 0; i < node_tg3.children_count; ++i)
 	{
-		node.add_child(std::make_unique<gltf::Node>(get_node(model_tg3, model_tg3.nodes[node_tg3.children[i]], node.compute_model())));
+		node.add_child(get_node(model_tg3, model_tg3.nodes[node_tg3.children[i]], node.compute_model()));
 	}
 	return node;
 }

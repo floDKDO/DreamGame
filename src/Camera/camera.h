@@ -8,7 +8,7 @@
 class Camera
 {
 	public:
-		Camera(InputManager& input_manager, glm::vec3& target_position);
+		Camera(InputManager& input_manager, const glm::vec3& target_position);
 
 		void update(float delta_time);
 
@@ -17,7 +17,7 @@ class Camera
 		glm::vec3 get_camera_up() const;
 		glm::mat4 get_view_matrix() const;
 
-		glm::vec3& target_position_;
+		const glm::vec3& target_position_;
 		glm::vec3 target_to_camera_offset_;
 		glm::vec3 camera_position_;
 

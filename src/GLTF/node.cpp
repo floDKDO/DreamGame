@@ -7,13 +7,18 @@
 namespace gltf
 {
 
-Node::Node(std::string name, Transform transform, std::optional<Mesh> mesh, std::optional<AABB> aabb)
-	: name_(name), mesh_(mesh), aabb_(aabb), transform_(transform), parent_matrix_(1.0f)
+Node::Node(std::string name, Transform transform, glm::mat4 parent_matrix, std::optional<Mesh> mesh, std::optional<AABB> aabb)
+	: name_(name), mesh_(mesh), aabb_(aabb), transform_(transform), parent_matrix_(parent_matrix)
 {}
 
 glm::mat4 Node::compute_model() const
 {
 	return gltf::get_transformation_matrix(parent_matrix_, transform_.position_, transform_.rotation_, transform_.scale_);
+}
+
+glm::mat4 Node::get_parent_matrix() const
+{
+	return parent_matrix_;
 }
 
 void Node::draw(ShaderProgram& shader_program)
@@ -32,60 +37,81 @@ void Node::draw(ShaderProgram& shader_program)
 		aabb_->draw(shader_program);
 	}
 
-	for(std::unique_ptr<Node>& children_node : children_nodes_)
+	for(Node& children_node : children_nodes_)
 	{
-		children_node->draw(shader_program);
+		children_node.draw(shader_program);
 	}
 }
 
-void Node::set_model_translation(glm::vec3 position)
+void Node::set_translation(glm::vec3 position)
 {
 	transform_.position_ = position;
-	update_parent_matrix_of_children(this);
+	update_parent_matrix_of_children(*this);
 }
 
-void Node::add_model_translation(glm::vec3 position)
+void Node::add_translation(glm::vec3 position)
 {
 	transform_.position_ += position;
-	update_parent_matrix_of_children(this);
+	update_parent_matrix_of_children(*this);
 }
 
-void Node::set_model_rotation(glm::quat rotation)
+void Node::add_translation_x(float x)
+{
+	glm::vec3 position(0.0f);
+	position.x += x;
+	add_translation(position);
+}
+
+void Node::add_translation_y(float y)
+{
+	glm::vec3 position(0.0f);
+	position.y += y;
+	add_translation(position);
+}
+
+void Node::add_translation_z(float z)
+{
+	glm::vec3 position(0.0f);
+	position.z += z;
+	add_translation(position);
+}
+
+void Node::set_rotation(glm::quat rotation)
 {
 	transform_.rotation_ = rotation;
-	update_parent_matrix_of_children(this);
+	update_parent_matrix_of_children(*this);
 }
 
-void Node::add_model_rotation(glm::quat rotation)
+void Node::add_rotation(glm::quat rotation)
 {
 	transform_.rotation_ += rotation;
-	update_parent_matrix_of_children(this);
+	update_parent_matrix_of_children(*this);
 }
 
-void Node::set_model_scale(glm::vec3 scale)
+void Node::set_scale(glm::vec3 scale)
 {
 	transform_.scale_ = scale;
-	update_parent_matrix_of_children(this);
+	update_parent_matrix_of_children(*this);
 }
 
-void Node::add_model_scale(glm::vec3 scale)
+void Node::add_scale(glm::vec3 scale)
 {
 	transform_.scale_ += scale;
-	update_parent_matrix_of_children(this);
+	update_parent_matrix_of_children(*this);
 }
 
-void Node::update_parent_matrix_of_children(gltf::Node* node)
+void Node::update_parent_matrix_of_children(Node& node)
 {
-	for(std::unique_ptr<gltf::Node>& child_node : node->children_nodes_)
+	for(Node& child_node : node.children_nodes_)
 	{
-		child_node->parent_matrix_ = node->compute_model();
-		update_parent_matrix_of_children(child_node.get());
+		child_node.parent_matrix_ = node.compute_model();
+		update_parent_matrix_of_children(child_node);
 	}
 }
 
-void Node::add_child(std::unique_ptr<Node> child_node)
+void Node::add_child(Node child_node)
 {
-	children_nodes_.push_back(std::move(child_node));
+	children_nodes_.push_back(child_node);
 }
 
 std::string Node::get_name() const
@@ -153,6 +179,11 @@ glm::vec3 Node::get_max_values_aabb() const
 		}
 	}
 	return max_value;
+}
+
+const glm::vec3& Node::get_position() const
+{
+	return transform_.position_;
 }
 
 }

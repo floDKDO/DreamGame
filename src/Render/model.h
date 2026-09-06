@@ -13,9 +13,9 @@ class Model
 
 		void draw(ShaderProgram& shader_program);
 
-		glm::vec3& get_position() const; //get position of root_node_
+		const glm::vec3& get_position() const; //retourne une référence car la position est utilisée en tant que membre (const ref) dans la classe Camera
 		std::string get_name() const; //get name of root_node_
-		gltf::Node* get_root_node() const;
+		gltf::Node& get_root_node();
 
 		void add_translation(glm::vec3 position);
 		void add_translation_x(float x);
@@ -31,5 +31,5 @@ class Model
 
 	private:
 		gltf::glTFFile gltf_file_;
-		std::unique_ptr<gltf::Node> root_node_;
+		gltf::Node root_node_;
 };

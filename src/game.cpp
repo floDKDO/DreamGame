@@ -163,18 +163,16 @@ void Game::update_fps_count(Uint64& last_fps_refresh, unsigned int& frame_count_
 	}
 }
 
-void detect_collision(const gltf::Node* node, Player& player)
+void detect_collision(const gltf::Node& node, gltf::Node& player_node)
 {
-	const Model& player_model = player.model_;
-
-	glm::vec3 min_values_model = node->get_min_values_aabb();
-	glm::vec3 max_values_model = node->get_max_values_aabb();
+	glm::vec3 min_values_model = node.get_min_values_aabb();
+	glm::vec3 max_values_model = node.get_max_values_aabb();
 	
-	glm::vec3 min_values_player = player_model.get_root_node()->get_min_values_aabb();
-	glm::vec3 max_values_player = player_model.get_root_node()->get_max_values_aabb();
+	glm::vec3 min_values_player = player_node.get_min_values_aabb();
+	glm::vec3 max_values_player = player_node.get_max_values_aabb();
 
-	glm::vec3 position_model = glm::vec3(node->parent_matrix_ * glm::vec4(node->transform_.position_, 1.0f));
-	glm::vec3 position_player = player_model.get_position();
+	glm::vec3 position_model = glm::vec3(node.get_parent_matrix() * glm::vec4(node.get_position(), 1.0f));
+	glm::vec3 position_player = player_node.get_position();
 
 	min_values_model += position_model;
 	max_values_model += position_model;
@@ -203,40 +201,40 @@ void detect_collision(const gltf::Node* node, Player& player)
 		{
 			if(player_center.x < model_center.x)
 			{
-				player.model_.add_translation_x(-overlap_x);
+				player_node.add_translation_x(-overlap_x);
 			}
 			else
 			{
-				player.model_.add_translation_x(overlap_x);
+				player_node.add_translation_x(overlap_x);
 			}
 		}
 		else if(overlap_y < overlap_z)
 		{
 			if(player_center.y < model_center.y)
 			{
-				player.model_.add_translation_y(-overlap_y);
+				player_node.add_translation_y(-overlap_y);
 			}
 			else
 			{
-				player.model_.add_translation_y(overlap_y);
+				player_node.add_translation_y(overlap_y);
 			}
 		}
 		else
 		{
 			if(player_center.z < model_center.z)
 			{
-				player.model_.add_translation_z(-overlap_z);
+				player_node.add_translation_z(-overlap_z);
 			}
 			else
 			{
-				player.model_.add_translation_z(overlap_z);
+				player_node.add_translation_z(overlap_z);
 			}
 		}
 	}
 
-	for(const std::unique_ptr<gltf::Node>& child_node : node->children_nodes_)
+	for(const gltf::Node& child_node : node.children_nodes_)
 	{
-		detect_collision(child_node.get(), player);
+		detect_collision(child_node, player_node);
 	}
 }
 
@@ -249,6 +247,6 @@ void Game::update(float delta_time)
 
 	for(const std::unique_ptr<Model>& model : test_map_.models_)
 	{
-		detect_collision(model->get_root_node(), player_);
+		detect_collision(model->get_root_node(), player_.model_.get_root_node());
 	}
 }
