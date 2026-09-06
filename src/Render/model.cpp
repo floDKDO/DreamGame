@@ -3,11 +3,11 @@
 #include <iostream>
 
 Model::Model(std::string_view path)
-	: gltf_file_(path), scene_(std::move(gltf_file_.get_scene()))
+	: gltf_file_(path), root_node_(std::move(gltf_file_.get_root_node()))
 {}
 
 Model::Model(std::string_view path, Transform transform)
-	: gltf_file_(path), scene_(std::move(gltf_file_.get_scene()))
+	: gltf_file_(path), root_node_(std::move(gltf_file_.get_root_node()))
 {
 	set_translation(transform.position_);
 	set_rotation(transform.rotation_);
@@ -16,71 +16,71 @@ Model::Model(std::string_view path, Transform transform)
 
 void Model::draw(ShaderProgram& shader_program)
 {
-	scene_->draw(shader_program);
+	root_node_->draw(shader_program);
 }
 
 glm::vec3& Model::get_position() const
 {
-	return scene_->get_model_position();
+	return root_node_->transform_.position_;
 }
 
 std::string Model::get_name() const
 {
-	return scene_->get_model_name();
+	return root_node_->get_name();
 }
 
-gltf::Scene* Model::get_scene() const
+gltf::Node* Model::get_root_node() const
 {
-	return scene_.get();
+	return root_node_.get();
 }
 
 void Model::add_translation(glm::vec3 position)
 {
-	scene_->add_model_translation(position);
+	root_node_->add_model_translation(position);
 }
 
 void Model::add_translation_x(float x)
 {
 	glm::vec3 position(0.0f);
 	position.x += x;
-	scene_->add_model_translation(position);
+	root_node_->add_model_translation(position);
 }
 
 void Model::add_translation_y(float y)
 {
 	glm::vec3 position(0.0f);
 	position.y += y;
-	scene_->add_model_translation(position);
+	root_node_->add_model_translation(position);
 }
 
 void Model::add_translation_z(float z)
 {
 	glm::vec3 position(0.0f);
 	position.z += z;
-	scene_->add_model_translation(position);
+	root_node_->add_model_translation(position);
 }
 
 void Model::set_translation(glm::vec3 position)
 {
-	scene_->set_model_translation(position);
+	root_node_->set_model_translation(position);
 }
 
 void Model::add_rotation(glm::quat rotation)
 {
-	scene_->add_model_rotation(rotation);
+	root_node_->add_model_rotation(rotation);
 }
 
 void Model::set_rotation(glm::quat rotation)
 {
-	scene_->set_model_rotation(rotation);
+	root_node_->set_model_rotation(rotation);
 }
 
 void Model::add_scale(glm::vec3 scale)
 {
-	scene_->add_model_scale(scale);
+	root_node_->add_model_scale(scale);
 }
 
 void Model::set_scale(glm::vec3 scale)
 {
-	scene_->set_model_scale(scale);
+	root_node_->set_model_scale(scale);
 }

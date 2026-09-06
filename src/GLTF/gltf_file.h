@@ -8,7 +8,7 @@
 namespace gltf
 {
 
-class Scene;
+class Node;
 
 class glTFFile
 {
@@ -16,7 +16,7 @@ class glTFFile
 		explicit glTFFile(std::string_view path);
 		~glTFFile();
 
-		std::unique_ptr<Scene> get_scene() const;
+		std::unique_ptr<Node> get_root_node() const;
 
 	private:
 		void open();

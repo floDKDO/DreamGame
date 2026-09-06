@@ -1,6 +1,6 @@
 #pragma once
 
-#include "glTF/scene.h"
+#include "glTF/node.h"
 #include "glTF/gltf_file.h"
 
 #include <memory>
@@ -15,7 +15,7 @@ class Model
 
 		glm::vec3& get_position() const; //get position of root_node_
 		std::string get_name() const; //get name of root_node_
-		gltf::Scene* get_scene() const;
+		gltf::Node* get_root_node() const;
 
 		void add_translation(glm::vec3 position);
 		void add_translation_x(float x);
@@ -31,5 +31,5 @@ class Model
 
 	private:
 		gltf::glTFFile gltf_file_;
-		std::unique_ptr<gltf::Scene> scene_;
+		std::unique_ptr<gltf::Node> root_node_;
 };

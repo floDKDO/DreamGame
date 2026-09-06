@@ -1,6 +1,6 @@
 #include "gltf_file.h"
 #include "gltf.h"
-#include "scene.h"
+#include "node.h"
 #include "aabb.h"
 
 #include <iostream>
@@ -192,22 +192,17 @@ void glTFFile::print_info() const
 	std::cout << "*********************************************************************************************\n\n";
 }
 
-std::unique_ptr<Scene> glTFFile::get_scene() const
+std::unique_ptr<Node> glTFFile::get_root_node() const
 {
-	std::vector<std::unique_ptr<Node>> root_nodes;
 	if(model_tg3_.scenes_count > 1)
 	{
 		std::cerr << "(Scenes count > 1) ************************CAS PAS ENCORE GERE************************\n";
 	}
 
 	tg3_scene scene_tg3 = model_tg3_.scenes[0];
-	for(uint32_t i = 0; i < scene_tg3.nodes_count; ++i)
-	{
-		int32_t root_node_index = scene_tg3.nodes[i];
-		tg3_node root_node_tg3 = model_tg3_.nodes[root_node_index];
-		root_nodes.push_back(std::make_unique<Node>(get_node(model_tg3_, root_node_tg3, glm::mat4(1.0f)))); //les root nodes n'ont pas de parent donc ont une matrice identitée pour leur parent_matrix
-	}
-	return std::make_unique<Scene>(std::move(root_nodes));
+	int32_t root_node_index = scene_tg3.nodes[0];
+	tg3_node root_node_tg3 = model_tg3_.nodes[root_node_index];
+	return std::make_unique<Node>(get_node(model_tg3_, root_node_tg3, glm::mat4(1.0f))); //les root nodes n'ont pas de parent donc ont une matrice identitée pour leur parent_matrix
 }
 
 }

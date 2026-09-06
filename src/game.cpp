@@ -163,15 +163,15 @@ void Game::update_fps_count(Uint64& last_fps_refresh, unsigned int& frame_count_
 	}
 }
 
-void detect_collision(const std::unique_ptr<gltf::Node>& node, Player& player)
+void detect_collision(const gltf::Node* node, Player& player)
 {
 	const Model& player_model = player.model_;
 
 	glm::vec3 min_values_model = node->get_min_values_aabb();
 	glm::vec3 max_values_model = node->get_max_values_aabb();
-
-	glm::vec3 min_values_player = player_model.get_scene()->get_model()->get_min_values_aabb();
-	glm::vec3 max_values_player = player_model.get_scene()->get_model()->get_max_values_aabb();
+	
+	glm::vec3 min_values_player = player_model.get_root_node()->get_min_values_aabb();
+	glm::vec3 max_values_player = player_model.get_root_node()->get_max_values_aabb();
 
 	glm::vec3 position_model = glm::vec3(node->parent_matrix_ * glm::vec4(node->transform_.position_, 1.0f));
 	glm::vec3 position_player = player_model.get_position();
@@ -236,7 +236,7 @@ void detect_collision(const std::unique_ptr<gltf::Node>& node, Player& player)
 
 	for(const std::unique_ptr<gltf::Node>& child_node : node->children_nodes_)
 	{
-		detect_collision(child_node, player);
+		detect_collision(child_node.get(), player);
 	}
 }
 
@@ -249,6 +249,6 @@ void Game::update(float delta_time)
 
 	for(const std::unique_ptr<Model>& model : test_map_.models_)
 	{
-		detect_collision(model->get_scene()->get_node(), player_);
+		detect_collision(model->get_root_node(), player_);
 	}
 }

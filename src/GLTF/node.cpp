@@ -38,6 +38,51 @@ void Node::draw(ShaderProgram& shader_program)
 	}
 }
 
+void Node::set_model_translation(glm::vec3 position)
+{
+	transform_.position_ = position;
+	update_parent_matrix_of_children(this);
+}
+
+void Node::add_model_translation(glm::vec3 position)
+{
+	transform_.position_ += position;
+	update_parent_matrix_of_children(this);
+}
+
+void Node::set_model_rotation(glm::quat rotation)
+{
+	transform_.rotation_ = rotation;
+	update_parent_matrix_of_children(this);
+}
+
+void Node::add_model_rotation(glm::quat rotation)
+{
+	transform_.rotation_ += rotation;
+	update_parent_matrix_of_children(this);
+}
+
+void Node::set_model_scale(glm::vec3 scale)
+{
+	transform_.scale_ = scale;
+	update_parent_matrix_of_children(this);
+}
+
+void Node::add_model_scale(glm::vec3 scale)
+{
+	transform_.scale_ += scale;
+	update_parent_matrix_of_children(this);
+}
+
+void Node::update_parent_matrix_of_children(gltf::Node* node)
+{
+	for(std::unique_ptr<gltf::Node>& child_node : node->children_nodes_)
+	{
+		child_node->parent_matrix_ = node->compute_model();
+		update_parent_matrix_of_children(child_node.get());
+	}
+}
+
 void Node::add_child(std::unique_ptr<Node> child_node)
 {
 	children_nodes_.push_back(std::move(child_node));
