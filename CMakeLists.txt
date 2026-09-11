@@ -27,7 +27,7 @@ file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS
 	${TINYGLTF_DIR}/*.c ${TINYGLTF_DIR}/*.h
 )
 
-add_executable(${PROJECT_NAME} ${SOURCES})
+add_executable(${PROJECT_NAME} ${SOURCES} "src/Logging/logging.h" "src/Logging/logging.cpp")
 
 add_custom_command(
  TARGET  ${PROJECT_NAME} POST_BUILD

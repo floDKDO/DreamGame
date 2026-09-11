@@ -2,6 +2,7 @@
 #include "gltf.h"
 #include "node.h"
 #include "aabb.h"
+#include "Logging/logging.h"
 
 #include <iostream>
 
@@ -35,7 +36,7 @@ glTFFile::glTFFile(std::string_view path)
 	: path_(path)
 {
 	open();
-	//print_info(); //TODO
+	print_info(); //TODO
 }
 
 glTFFile::~glTFFile()
@@ -47,7 +48,7 @@ void glTFFile::open()
 {
 	if(path_.find("resources/models/") == std::string::npos)
 	{
-		std::cout << "Error: this glTF file is not a model. Exiting!";
+		logging::log("This glTF file is not a model. Exiting!", logging::Severity::CRITICAL);
 		exit(EXIT_FAILURE);
 	}
 
@@ -61,11 +62,11 @@ void glTFFile::open()
 		{
 			tg3_error_entry error_entry_tg3 = error_stack_tg3_.entries[i];
 			std::string str = error_entry_tg3.message ? error_entry_tg3.message : "(null)";
-			std::cout << "**TG3 Error** => severity: " << int(error_entry_tg3.severity) << ", message: " << str << std::endl;
+			logging::log("**TG3 Error** => severity: " + std::to_string(int(error_entry_tg3.severity)) + ", message: " + str, logging::Severity::CRITICAL);
 
 			if(error_entry_tg3.code == TG3_ERR_FILE_NOT_FOUND || error_entry_tg3.code == TG3_ERR_FILE_READ)
 			{
-				std::cout << "Exiting the program because the file \"" << path_ << "\" doesn't exist or couldn't be read!\n";
+				logging::log("Exiting the program because the file \"" + path_ + "\" does not exist or could not be read!", logging::Severity::CRITICAL);
 				exit(EXIT_FAILURE);
 			}
 		}
@@ -80,36 +81,42 @@ void glTFFile::close()
 
 void glTFFile::print_info() const
 {
-	std::cout << "\n**** Info on the glTF file ****\n";
-	std::cout << "- General information: " << std::endl;
-	std::cout << "    - File name: " << path_ << std::endl;
-	std::cout << "    - The file contains " << model_tg3_.scenes->nodes_count << " root node(s).\n";
-	std::cout << "    - There are " << model_tg3_.scenes_count << " scene(s), " << model_tg3_.nodes_count << " node(s), " << model_tg3_.meshes_count << " mesh(es), " << model_tg3_.accessors_count << " accessor(s), " << model_tg3_.buffer_views_count << " buffer view(s), " << model_tg3_.buffers_count << " buffer(s), " << model_tg3_.textures_count << " texture(s), " << model_tg3_.samplers_count << " sampler(s) and " << model_tg3_.images_count << " image(s).\n";
+	std::cout << std::endl;
+	logging::log("**** Info on the glTF file ****", logging::Severity::DEBUG);
+	logging::log("- General information: ", logging::Severity::DEBUG);
 
-	std::cout << "- File content: " << std::endl;
-	std::cout << "    - Node(s) and mesh(es): " << std::endl;
+	logging::log("    - File name: " + path_, logging::Severity::DEBUG);
+	logging::log("    - The file contains " + std::to_string(model_tg3_.scenes->nodes_count) + " root node(s).", logging::Severity::DEBUG);
+	logging::log("    - There are " + std::to_string(model_tg3_.scenes_count) + " scene(s), " + std::to_string(model_tg3_.nodes_count) + " node(s), "
+		+ std::to_string(model_tg3_.meshes_count) + " mesh(es), " + std::to_string(model_tg3_.accessors_count) + " accessor(s), " 
+		+ std::to_string(model_tg3_.buffer_views_count) + " buffer view(s), " + std::to_string(model_tg3_.buffers_count) + " buffer(s), "
+		+ std::to_string(model_tg3_.textures_count) + " texture(s), " + std::to_string(model_tg3_.samplers_count) + " sampler(s) and " + std::to_string(model_tg3_.images_count) + " image(s).", logging::Severity::DEBUG);
+
+	logging::log("- File content: ", logging::Severity::DEBUG);
+	logging::log("    - Node(s) and mesh(es): ", logging::Severity::DEBUG);
 	for(uint32_t i = 0; i < model_tg3_.nodes_count; ++i)
 	{
 		tg3_node node_tg3 = model_tg3_.nodes[i];
-		std::cout << "        - Node " << i << ": " << std::endl;
+		logging::log("        - Node " + std::to_string(i) + ": ", logging::Severity::DEBUG);
 
 		if(node_tg3.ext.extras != nullptr)
 		{
 			const tg3_kv_pair* extras_tg3 = node_tg3.ext.extras->object_data;
 			if(extras_tg3->key.len > 0 && extras_tg3->value.string_val.len > 0)
 			{
-				std::cout << "           .Extras: <\"" << extras_tg3->key.data << "\" : \"" << extras_tg3->value.string_val.data << "\">" << std::endl;
+				logging::log("           .Extras: <\"" + std::string(extras_tg3->key.data) + "\": \"" + std::string(extras_tg3->value.string_val.data) + "\">", logging::Severity::DEBUG);
 			}
 		}
 
-		std::cout << "           .Mesh index: " << node_tg3.mesh << ", rotation: (" << node_tg3.rotation[0] << ", " << node_tg3.rotation[1] << ", " << node_tg3.rotation[2] << ", " << node_tg3.rotation[3] <<
-			"), scale: (" << node_tg3.scale[0] << ", " << node_tg3.scale[1] << ", " << node_tg3.scale[2] <<
-			"), translation: (" << node_tg3.translation[0] << ", " << node_tg3.translation[1] << ", " << node_tg3.translation[2] << ")\n";
+		logging::log("           .Mesh index: " + std::to_string(node_tg3.mesh) + ", rotation: (" + std::to_string(node_tg3.rotation[0]) + ", " + std::to_string(node_tg3.rotation[1]) 
+			+ ", " + std::to_string(node_tg3.rotation[2]) + ", " + std::to_string(node_tg3.rotation[3]) + "), scale: (" + std::to_string(node_tg3.scale[0]) + ", " + std::to_string(node_tg3.scale[1])
+			+ ", " + std::to_string(node_tg3.scale[2]) + "), translation: (" + std::to_string(node_tg3.translation[0]) + ", " + std::to_string(node_tg3.translation[1])
+			+ ", " + std::to_string(node_tg3.translation[2]) + ")", logging::Severity::DEBUG);
 
 		if(node_tg3.mesh != -1)
 		{
 			tg3_mesh mesh_tg3 = model_tg3_.meshes[node_tg3.mesh];
-			std::cout << "        - Mesh " << model_tg3_.nodes->mesh << ": " << std::endl;
+			logging::log("        - Mesh " + std::to_string(model_tg3_.nodes->mesh) + ": ", logging::Severity::DEBUG);
 			for(uint32_t j = 0; j < mesh_tg3.primitives_count; ++j)
 			{
 				tg3_primitive primitive_tg3 = mesh_tg3.primitives[j];
@@ -118,85 +125,88 @@ void glTFFile::print_info() const
 					const tg3_str_int_pair attribute_tg3 = primitive_tg3.attributes[k];
 					if(attribute_tg3.key.len > 0)
 					{
-						std::cout << "           .Primitive: " << attribute_tg3.key.data << " = " << attribute_tg3.value << std::endl;
+						logging::log("           .Primitive: " + std::string(attribute_tg3.key.data) + " = " + std::to_string(attribute_tg3.value), logging::Severity::DEBUG);
 					}
 				}
-				std::cout << "           .Indices: " << primitive_tg3.indices << std::endl;
+				logging::log("           .Indices: " + std::to_string(primitive_tg3.indices), logging::Severity::DEBUG);
 			}
 		}
 	}
 
-	std::cout << "    - Accessor(s): " << std::endl;
+	logging::log("    - Accessor(s): ", logging::Severity::DEBUG);
 	for(uint32_t i = 0; i < model_tg3_.accessors_count; ++i)
 	{
 		tg3_accessor accessor_tg3 = model_tg3_.accessors[i];
-		std::cout << "        - Accessor " << i << ": " << std::endl;
-		std::cout << "           .Buffer view (index = " << accessor_tg3.buffer_view << ", offset = " << accessor_tg3.byte_offset << ")\n";
-		std::cout << "           .Type = " << gltf::get_type_str(accessor_tg3.type) << ", count = " << accessor_tg3.count << ", component type = " << gltf::get_component_type_str(accessor_tg3.component_type) << std::endl;
+		logging::log("        - Accessor " + std::to_string(i) + ": ", logging::Severity::DEBUG);
+		logging::log("           .Buffer view (index = " + std::to_string(accessor_tg3.buffer_view) + ", offset = " + std::to_string(accessor_tg3.byte_offset) + ")", logging::Severity::DEBUG);
+		logging::log("           .Type = " + gltf::get_type_str(accessor_tg3.type) + ", count = " + std::to_string(accessor_tg3.count) + ", component type = " 
+			+ gltf::get_component_type_str(accessor_tg3.component_type), logging::Severity::DEBUG);
 	}
 
-	std::cout << "    - Buffer view(s): " << std::endl;
+	logging::log("    - Buffer view(s): ", logging::Severity::DEBUG);
 	for(uint32_t i = 0; i < model_tg3_.buffer_views_count; ++i)
 	{
 		tg3_buffer_view buffer_view_tg3 = model_tg3_.buffer_views[i];
-		std::cout << "        - Buffer view " << i << ": " << std::endl;
-		std::cout << "           .Buffer indice = " << buffer_view_tg3.buffer << std::endl;
-		std::cout << "           .Length = " << buffer_view_tg3.byte_length << ", offset = " << buffer_view_tg3.byte_offset << ", target = " << gltf::get_target_str(buffer_view_tg3.target) << std::endl;
+		logging::log("        - Buffer view " + std::to_string(i) + ": ", logging::Severity::DEBUG);
+		logging::log("           .Buffer indice = " + std::to_string(buffer_view_tg3.buffer), logging::Severity::DEBUG);
+		logging::log("           .Length = " + std::to_string(buffer_view_tg3.byte_length) + ", offset = " + std::to_string(buffer_view_tg3.byte_offset) + ", target = " 
+			+ gltf::get_target_str(buffer_view_tg3.target), logging::Severity::DEBUG);
 	}
 
-	std::cout << "    - Buffer(s): " << std::endl;
+	logging::log("    - Buffer(s): ", logging::Severity::DEBUG);
 	for(uint32_t i = 0; i < model_tg3_.buffers_count; ++i)
 	{
 		tg3_buffer buffer_tg3 = model_tg3_.buffers[i];
-		std::cout << "        - Buffer " << i << ": " << std::endl;
-		std::cout << "           .Length = " << buffer_tg3.data.count << std::endl;
+		logging::log("        - Buffer " + std::to_string(i) + ": ", logging::Severity::DEBUG);
+		logging::log("           .Length = " + std::to_string(buffer_tg3.data.count), logging::Severity::DEBUG);
 	}
 
-	std::cout << "    - Texture(s): " << std::endl;
+	logging::log("    - Texture(s): ", logging::Severity::DEBUG);
 	for(uint32_t i = 0; i < model_tg3_.textures_count; ++i)
 	{
 		tg3_texture texture_tg3 = model_tg3_.textures[i];
-		std::cout << "        - Texture " << i << ": " << std::endl;
-		std::cout << "           .Source = " << texture_tg3.source << ", sampler = " << texture_tg3.sampler << std::endl;
+		logging::log("        - Texture " + std::to_string(i) + ": ", logging::Severity::DEBUG);
+		logging::log("           .Source = " + std::to_string(texture_tg3.source) + ", sampler = " + std::to_string(texture_tg3.sampler), logging::Severity::DEBUG);
 	}
 
-	std::cout << "    - Sampler(s): " << std::endl;
+	logging::log("    - Sampler(s): ", logging::Severity::DEBUG);
 	for(uint32_t i = 0; i < model_tg3_.samplers_count; ++i)
 	{
 		tg3_sampler sampler_tg3 = model_tg3_.samplers[i];
-		std::cout << "        - Sampler " << i << ": " << std::endl;
-		std::cout << "           .MagFilter = " << gltf::get_filter_str(sampler_tg3.mag_filter) << ", minFilter = " << gltf::get_filter_str(sampler_tg3.min_filter)
-			<< ", wrapS = " << gltf::get_wrap_str(sampler_tg3.wrap_s) << ", wrapT = " << gltf::get_wrap_str(sampler_tg3.wrap_t) << std::endl;
+		logging::log("        - Sampler " + std::to_string(i) + ": ", logging::Severity::DEBUG);
+		logging::log("           .MagFilter = " + gltf::get_filter_str(sampler_tg3.mag_filter) + ", minFilter = " + gltf::get_filter_str(sampler_tg3.min_filter)
+			+ ", wrapS = " + gltf::get_wrap_str(sampler_tg3.wrap_s) + ", wrapT = " + gltf::get_wrap_str(sampler_tg3.wrap_t), logging::Severity::DEBUG);
 	}
 
-	std::cout << "    - Image(s): " << std::endl;
+	logging::log("    - Image(s): ", logging::Severity::DEBUG);
 	for(uint32_t i = 0; i < model_tg3_.images_count; ++i)
 	{
 		tg3_image image_tg3 = model_tg3_.images[i];
-		std::cout << "        - Image " << i << ": " << std::endl;
+		logging::log("        - Image " + std::to_string(i) + ": ", logging::Severity::DEBUG);
 		if(image_tg3.uri.len > 0)
 		{
-			std::cout << "           .URI " << "(Data URI: " << std::boolalpha << bool(tg3_is_data_uri(image_tg3.uri.data, image_tg3.uri.len)) << std::noboolalpha << ") = " << image_tg3.uri.data << std::endl;
+			logging::log("           .URI (Data URI: " + utils::get_string_from_bool(bool(tg3_is_data_uri(image_tg3.uri.data, image_tg3.uri.len))) + ") = " + std::string(image_tg3.uri.data), logging::Severity::DEBUG);
 		}
 		else if(image_tg3.buffer_view != -1)
 		{
-			std::cout << "           .Buffer view = " << image_tg3.buffer_view << std::endl;
-
+			logging::log("           .Buffer view = " + std::to_string(image_tg3.buffer_view) + ": ", logging::Severity::DEBUG);
 			if(image_tg3.mime_type.len > 0)
 			{
-				std::cout << "           .Mime type = " << image_tg3.mime_type.data << std::endl;
+				logging::log("           .Mime type = " + std::string(image_tg3.mime_type.data) + ": ", logging::Severity::DEBUG);
 			}
 		}
 	}
 
-	std::cout << "*********************************************************************************************\n\n";
+	logging::log("*********************************************************************************************", logging::Severity::DEBUG);
+	std::cout << std::endl;
+	std::cout << std::endl;
 }
 
 Node glTFFile::get_root_node() const
 {
 	if(model_tg3_.scenes_count > 1)
 	{
-		std::cerr << "(Scenes count > 1) ************************CAS PAS ENCORE GERE************************\n";
+		logging::log("Number of scenes > 1 not handled", logging::Severity::WARNING);
 	}
 
 	tg3_scene scene_tg3 = model_tg3_.scenes[0];
@@ -349,7 +359,7 @@ Vertices get_vertices(const tg3_model& model_tg3, const tg3_primitive& primitive
 		}
 		else
 		{
-			std::cout << "****ERROR****: Unknown attribute name!\n";
+			logging::log("In get_vertices(), the requested attribute does not exist!", logging::Severity::WARNING);
 		}
 	}
 	return vertices;
@@ -393,7 +403,7 @@ std::optional<Mesh> get_mesh(const tg3_model& model_tg3, const tg3_node& node_tg
 		tg3_mesh mesh_tg3 = model_tg3.meshes[node_tg3.mesh];
 		if(mesh_tg3.primitives_count > 1)
 		{
-			std::cerr << "(Primitives count > 1) ************************CAS PAS ENCORE GERE************************\n";
+			logging::log("Number of primitives > 1 not handled", logging::Severity::WARNING);
 		}
 
 		tg3_primitive primitive_tg3 = mesh_tg3.primitives[0];
@@ -409,6 +419,7 @@ std::optional<Mesh> get_mesh(const tg3_model& model_tg3, const tg3_node& node_tg
 			return Mesh(ebo_values, vertices, primitive_tg3.mode);
 		}
 	}
+	logging::log("get_mesh() returned std::nullopt (the node " + std::string(node_tg3.name.data) + " does not have a mesh)", logging::Severity::NOTICE);
 	return std::nullopt; //cas où le node ne possède pas de mesh
 }
 
@@ -418,7 +429,7 @@ std::optional<tg3_accessor> get_accessor_from_attribute(std::string_view attribu
 	&& attribute.find("TEXCOORD_") != std::string_view::npos
 	&& attribute.find("COLOR_") != std::string_view::npos)
 	{
-		std::cout << "Unknown accessor...\n";
+		logging::log("get_accessor_from_attribute() returned std::nullopt!", logging::Severity::CRITICAL);
 		return std::nullopt;
 	}
 
@@ -436,6 +447,7 @@ std::optional<tg3_accessor> get_accessor_from_attribute(std::string_view attribu
 			return model_tg3.accessors[attribute_tg3.value];
 		}
 	}
+	logging::log("get_accessor_from_attribute() returned std::nullopt!", logging::Severity::WARNING);
 	return std::nullopt;
 }
 
@@ -470,7 +482,7 @@ std::optional<AABB> get_aabb(const tg3_model& model_tg3, const tg3_node& node_tg
 		tg3_mesh mesh_tg3 = model_tg3.meshes[node_tg3.mesh];
 		if(mesh_tg3.primitives_count > 1)
 		{
-			std::cerr << "(Primitives count > 1) ************************CAS PAS ENCORE GERE************************\n";
+			logging::log("Number of primitives > 1 not handled", logging::Severity::WARNING);
 		}
 
 		tg3_primitive primitive_tg3 = mesh_tg3.primitives[0];
@@ -496,6 +508,7 @@ std::optional<AABB> get_aabb(const tg3_model& model_tg3, const tg3_node& node_tg
 			return AABB(min_values, max_values, ebo_values, vertices, primitive_tg3.mode);
 		}
 	}
+	logging::log("get_aabb() returned std::nullopt (the node " + std::string(node_tg3.name.data) + " does not have a aabb)", logging::Severity::NOTICE);
 	return std::nullopt; //cas où le node ne possède pas de mesh
 }
 
@@ -522,7 +535,7 @@ std::vector<Texture> get_textures(const tg3_model& model_tg3)
 			{
 				mesh_texture.image_path_ = "";
 				//std::string image_data_base64 = image_str.substr(image_str.find(',') + 1); //+1 pour ne pas prendre la virgule
-				std::cout << "****ERROR****: Embedded glTF not handled for now!\n";
+				logging::log("Embedded glTF not handled for now!", logging::Severity::WARNING);
 			}
 			else
 			{
@@ -628,7 +641,7 @@ std::vector<glm::vec4> get_vec4_color_attribute(const tg3_model& model_tg3, cons
 		}
 		else
 		{
-			std::cout << "****ERROR****: Unhandled type!\n";
+			logging::log("In get_vec4_color_attribute(), the requested type does not exist!", logging::Severity::WARNING);
 		}
 	}
 	return vec4_colors;

@@ -1,5 +1,6 @@
 #include "shader_program.h"
 #include "Common/utils.h"
+#include "Logging/logging.h"
 
 #include <filesystem>
 #include <iostream>
@@ -76,7 +77,7 @@ void ShaderProgram::create_shader(GLenum shader_type, std::string_view shader_pa
 	{
 		GLchar info_log[info_log_size_];
 		glGetShaderInfoLog(shader, info_log_size_, nullptr, info_log);
-		std::cerr << "Error: (Shader) " << info_log << std::endl;
+		logging::log("Shader error: " + std::string(info_log), logging::Severity::WARNING);
 	}
 }
 
@@ -94,7 +95,7 @@ void ShaderProgram::link() const
 	{
 		GLchar info_log[info_log_size_];
 		glGetProgramInfoLog(shader_program_, info_log_size_, nullptr, info_log);
-		std::cerr << "Error: (program shader) " << info_log << std::endl;
+		logging::log("Shader linker error: " + std::string(info_log), logging::Severity::WARNING);
 	}
 
 	for(GLuint shader : shaders_)
@@ -116,7 +117,7 @@ void ShaderProgram::insert_uniform(const GLchar* name)
 		GLint location;
 		if((location = glGetUniformLocation(shader_program_, name)) == -1)
 		{
-			std::cerr << "Error: the requested uniform variable (" << name << ") does not exist!\n";
+			logging::log("The requested uniform variable (" + std::string(name) + ") does not exist!", logging::Severity::WARNING);
 		}
 		uniforms_.insert({name_str, location});
 	}

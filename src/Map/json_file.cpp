@@ -1,4 +1,5 @@
 #include "json_file.h"
+#include "Logging/logging.h"
 
 #include <fstream>
 #include <filesystem>
@@ -113,7 +114,7 @@ void JSONFile::gltf_to_map_format()
 		j += 1;
 	}
 
-	//std::cout << map_data_.dump(2) << std::endl;
+	//logging::log(map_data_.dump(2), logging::Severity::DEBUG);
 
 	//std::string output_filename = path.stem().string() + ".map";
 	//std::ofstream output_file(output_filename);

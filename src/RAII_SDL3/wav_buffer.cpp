@@ -1,4 +1,5 @@
 #include "RAII_SDL3/wav_buffer.h"
+#include "Logging/logging.h"
 
 #include <AL/al.h>
 #include <iostream>
@@ -66,7 +67,7 @@ int WAVBuffer::get_format() const //format de OpenAL
 			{
 				format = 0;
 			}
-			std::cout << "Warning: Unhandled audio format!\n";
+			logging::log("Unhandled audio format!", logging::Severity::WARNING);
 			break;
 	}
 

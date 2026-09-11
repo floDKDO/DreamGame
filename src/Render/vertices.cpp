@@ -1,5 +1,7 @@
 #include "vertices.h"
+#include "Logging/logging.h"
 
+#include <string>
 #include <iostream>
 
 Vertices::Vertices(uint64_t number)
@@ -56,10 +58,10 @@ void Vertices::print() const
 {
 	for(const Vertex& v : vertices_)
 	{
-		std::cout << "Position : (.x: " << v.position_.x << ", .y: " << v.position_.y << ", .z: " << v.position_.z << ")\n";
-		std::cout << "Normal : (.x: " << v.normal_.x << ", .y: " << v.normal_.y << ", .z: " << v.normal_.z << ")\n";
-		std::cout << "Texture coordinates : (.x: " << v.texcoord_.x << ", .y: " << v.texcoord_.y << ")\n";
-		std::cout << "Color : (.x: " << v.color_.x << ", .y: " << v.color_.y << ", .z: " << v.color_.z << ")\n";
+		logging::log("Position: (.x: " + std::to_string(v.position_.x) + ", .y: " + std::to_string(v.position_.y) + ", .z: " + std::to_string(v.position_.z) + ")", logging::Severity::DEBUG);
+		logging::log("Normal: (.x: " + std::to_string(v.normal_.x) + ", .y: " + std::to_string(v.normal_.y) + ", .z: " + std::to_string(v.normal_.z) + ")", logging::Severity::DEBUG);
+		logging::log("Texture coordinates: (.x: " + std::to_string(v.texcoord_.x) + ", .y: " + std::to_string(v.texcoord_.y) + ")", logging::Severity::DEBUG);
+		logging::log("Color: (.x: " + std::to_string(v.color_.x) + ", .y: " + std::to_string(v.color_.y) + ", .z: " + std::to_string(v.color_.z) + ")", logging::Severity::DEBUG);
 	}
 	std::cout << std::endl;
 }

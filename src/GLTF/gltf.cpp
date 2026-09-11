@@ -1,4 +1,5 @@
 #include "gltf.h"
+#include "Logging/logging.h"
 
 #include <GL/glew.h>
 #include <tinygltf/tiny_gltf_v3.h>
@@ -94,6 +95,7 @@ std::string get_target_str(int32_t target)
 
 		default:
 			target_str = "****ERROR****: Unknown target!";
+			logging::log("In get_target_str(), the requested target does not exist!", logging::Severity::WARNING);
 			break;
 	}
 	return target_str;
@@ -134,6 +136,7 @@ std::string get_type_str(int32_t type)
 
 		default:
 			type_str = "****ERROR****: Unknown type!";
+			logging::log("In get_type_str(), the requested type does not exist!", logging::Severity::WARNING);
 			break;
 	}
 	return type_str;
@@ -170,6 +173,7 @@ std::string get_component_type_str(int32_t component_type)
 
 		default:
 			component_type_str = "****ERROR****: Unknown component type!\n";
+			logging::log("In get_component_type_str(), the requested component type does not exist!", logging::Severity::WARNING);
 			break;
 	}
 	return component_type_str;
@@ -205,8 +209,8 @@ std::size_t get_component_type_size(int32_t component_type)
 			break;
 
 		default:
-			std::cout << "****ERROR****: Unknown component type size!\n";
 			component_type_size = 0;
+			logging::log("In get_component_type_size(), the requested component type does not exist!", logging::Severity::WARNING);
 			break;
 	}
 	return component_type_size;
@@ -243,6 +247,7 @@ std::string get_filter_str(int32_t filter)
 
 		default:
 			filter_str = "****ERROR****: Unknown filter!";
+			logging::log("In get_filter_str(), the requested filter does not exist!", logging::Severity::WARNING);
 			break;
 	}
 	return filter_str;
@@ -267,6 +272,7 @@ std::string get_wrap_str(int32_t wrap)
 
 		default:
 			wrap_str = "****ERROR****: Unknown wrap!";
+			logging::log("In get_wrap_str(), the requested wrap does not exist!", logging::Severity::WARNING);
 			break;
 	}
 	return wrap_str;

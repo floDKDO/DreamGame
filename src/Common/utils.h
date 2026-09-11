@@ -21,6 +21,8 @@ double lerp(Arithmetic1 a, Arithmetic2 b, Arithmetic3 t) //TODO : à terme, rempl
 	return a_d + t_d * (b_d - a_d);
 }
 
+std::string get_string_from_bool(bool b);
+std::string get_string_from_unsigned_char_ptr(const unsigned char* ptr);
 std::string get_string_from_file(std::string_view path);
 glm::vec3 get_camera_forward(glm::mat4 view_matrix);
 glm::vec3 get_camera_left(glm::mat4 view_matrix);

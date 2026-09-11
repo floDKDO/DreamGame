@@ -7,6 +7,7 @@
 #include "Camera/camera.h"
 #include "Player/player.h"
 #include "Input/input_manager.h"
+#include "Logging/logging.h"
 
 class Game
 {

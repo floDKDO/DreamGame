@@ -1,4 +1,5 @@
 #include "mesh.h"
+#include "Logging/logging.h"
 
 #include <stb/stb_image.h>
 #include <iostream>
@@ -85,7 +86,7 @@ void Mesh::create_textures()
 		{
 			if((pixels = stbi_load(t.image_path_.c_str(), &width, &height, &channels, desired_channels)) == nullptr) //4 pour que ça crashe pas pour une image RGB uniquement (ex : .jpg)
 			{
-				std::cerr << "Error (stbi_load)\n";
+				logging::log("stbi_load() returned nullptr", logging::Severity::CRITICAL);
 				exit(EXIT_FAILURE);
 			}
 		}
@@ -93,7 +94,7 @@ void Mesh::create_textures()
 		{
 			if((pixels = stbi_load_from_memory(t.image_data_.data(), int(t.image_data_.size()), &width, &height, &channels, desired_channels)) == nullptr) //4 pour que ça crashe pas pour une image RGB uniquement (ex : .jpg)
 			{
-				std::cerr << "Error (stbi_load)\n";
+				logging::log("stbi_load_from_memory() returned nullptr", logging::Severity::CRITICAL);
 				exit(EXIT_FAILURE);
 			}
 		}

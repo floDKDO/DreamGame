@@ -3,6 +3,7 @@
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_sdl3.h"
 #include "imgui/imgui_impl_opengl3.h"
+#include "Logging/logging.h"
 
 #include <AL/al.h>
 #include <stb/stb_image.h>
@@ -11,6 +12,8 @@
 Backend::Backend()
 	: sdl_(), window_(), glew_(glewInit())
 {
+	logging::create(logging::Severity::CRITICAL);
+
 	int w, h;
 	window_.get_size(&w, &h);
 	glViewport(0, 0, w, h);
@@ -48,15 +51,15 @@ void Backend::init_openal()
 {
 	if((device_ = alcOpenDevice(nullptr)) == nullptr) //TODO : free avec alcCloseDevice
 	{
-		std::cout << "Error: (alcOpenDevice)\n";
+		logging::log("alcOpenDevice() returned nullptr!", logging::Severity::CRITICAL);
 	}
 	if((context_ = alcCreateContext(device_, nullptr)) == nullptr) //TODO : free avec alcDestroyContext
 	{
-		std::cout << "Error: (alcCreateContext)\n";
+		logging::log("alcCreateContext() returned nullptr!", logging::Severity::CRITICAL);
 	}
 	if(!alcMakeContextCurrent(context_)) //TODO : free avec alcMakeContextCurrent(nullptr)
 	{
-		std::cout << "Error: (alcMakeContextCurrent)\n";
+		logging::log("alcMakeContextCurrent() returned an error!", logging::Severity::CRITICAL);
 	}
 	alDistanceModel(AL_LINEAR_DISTANCE_CLAMPED); //commun pour toutes les sources
 }
@@ -157,15 +160,15 @@ void GLAPIENTRY message_callback(GLenum source, GLenum type, GLuint id, GLenum s
 		}
 	};
 
-	std::cout << "[OpenGL " << lamda_type() << "] - " << lambda_severity() << lambda_source() << "ID: " << id << ", MESSAGE (length=" << length << "): \"" << message << "\"\n";
+	logging::log("[OpenGL " + lamda_type() + "] - " + lambda_severity() + lambda_source() + "ID: " + std::to_string(id) + ", MESSAGE (length=" + std::to_string(length) + "): \"" + message + "\"", logging::Severity::DEBUG);
 }
 
 void print_opengl_stuff()
 {
-	std::cout << "OpenGL Vendor: "   << glGetString(GL_VENDOR) << std::endl;
-	std::cout << "OpenGL Renderer: " << glGetString(GL_RENDERER) << std::endl;
-	std::cout << "OpenGL Version: "  << glGetString(GL_VERSION) << std::endl;
-	std::cout << "OpenGL Shading Language Version: " << glGetString(GL_SHADING_LANGUAGE_VERSION) << std::endl;
+	logging::log("OpenGL Vendor: " + utils::get_string_from_unsigned_char_ptr(glGetString(GL_VENDOR)), logging::Severity::DEBUG);
+	logging::log("OpenGL Renderer: " + utils::get_string_from_unsigned_char_ptr(glGetString(GL_RENDERER)), logging::Severity::DEBUG);
+	logging::log("OpenGL Version: " + utils::get_string_from_unsigned_char_ptr(glGetString(GL_VERSION)), logging::Severity::DEBUG);
+	logging::log("OpenGL Shading Language Version: " + utils::get_string_from_unsigned_char_ptr(glGetString(GL_SHADING_LANGUAGE_VERSION)), logging::Severity::DEBUG);
 	std::cout << std::endl;
 
 	int max_combined_texture_units;
@@ -189,12 +192,12 @@ void print_opengl_stuff()
 	int max_compute_texture_units;
 	glGetIntegerv(GL_MAX_COMPUTE_TEXTURE_IMAGE_UNITS, &max_compute_texture_units);
 
-	std::cout << "Max combined texture units : " << max_combined_texture_units << ", including : "
-		<< "\n  - max vertex shader texture units : " << max_vertex_texture_units
-		<< "\n  - max tessellation control shader texture units : " << max_tessellation_control_texture_units
-		<< "\n  - max tessellation evaluation shader texture units : " << max_tessellation_evaluation_texture_units
-		<< "\n  - max geometry shader texture units : " << max_geometry_texture_units
-		<< "\n  - max fragment shader texture units : " << max_fragment_texture_units
-		<< "\n  - max compute shader texture units : " << max_compute_texture_units << "\n"
-		<< std::endl;
+	logging::log("Max combined texture units: " + std::to_string(max_combined_texture_units) + ", including: "
+		 + "\n  - max vertex shader texture units: " + std::to_string(max_vertex_texture_units)
+		 + "\n  - max tessellation control shader texture units: " + std::to_string(max_tessellation_control_texture_units)
+		 + "\n  - max tessellation evaluation shader texture units: " + std::to_string(max_tessellation_evaluation_texture_units)
+		 + "\n  - max geometry shader texture units: " + std::to_string(max_geometry_texture_units)
+		 + "\n  - max fragment shader texture units: " + std::to_string(max_fragment_texture_units)
+		 + "\n  - max compute shader texture units: " + std::to_string(max_compute_texture_units), logging::Severity::DEBUG);
+	std::cout << std::endl;
 }

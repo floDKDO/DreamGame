@@ -5,6 +5,7 @@
 #include "imgui/imgui_impl_sdl3.h"
 #include "imgui/imgui_impl_opengl3.h"
 
+#include <SDL3_ttf/SDL_ttf.h>
 #include <glm/gtc/type_ptr.hpp>
 #include <iostream>
 
@@ -15,7 +16,7 @@
 Game::Game()
 	: backend_(), //window_(),
 	player_(input_manager_),
-	camera_(input_manager_, player_.model_.get_position()), 
+	camera_(input_manager_, player_.model_->get_position()), 
 	running_(true), gamepad_(), test_map_("resources/maps/corridor.gltf"), 
 	gizmo_("resources/models/axis_gizmo.glb"),
 	fov_(glm::radians(45.0f)), near_plane_(0.1f), far_plane_(100.0f), perspective_projection_matrix_(1.0f)
@@ -43,7 +44,7 @@ void Game::run()
 	base_program.set_uniform_matrix_4fv("projection_matrix_", glm::value_ptr(projection_matrix));*/
 
 	std::string temp_model_name("test"); //ici, "test" serait le nom du modèle
-	audio::set_listener_position(player_.model_.get_position());
+	audio::set_listener_position(player_.model_->get_position());
 	audio::set_listener_orientation(camera_.get_camera_forward(), camera_.get_camera_up());
 	audio::set_listener_velocity(glm::vec3(0.0f));
 	audio::create_source(temp_model_name, "resources/audio/test.wav"); 
@@ -140,7 +141,7 @@ void Game::draw()
 	gizmo_.draw(phong_program);
 	test_map_.draw(phong_program);
 
-	audio::set_listener_position(player_.model_.get_position());
+	audio::set_listener_position(player_.model_->get_position());
 	audio::set_listener_orientation(camera_.get_camera_forward(), camera_.get_camera_up());
 
 	//TODO
@@ -247,6 +248,6 @@ void Game::update(float delta_time)
 
 	for(const std::unique_ptr<Model>& model : test_map_.models_)
 	{
-		detect_collision(model->get_root_node(), player_.model_.get_root_node());
+		detect_collision(model->get_root_node(), player_.model_->get_root_node());
 	}
 }

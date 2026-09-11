@@ -1,4 +1,5 @@
 #include "utils.h"
+#include "Logging/logging.h"
 
 #include <fstream>
 #include <sstream>
@@ -7,13 +8,28 @@
 namespace utils
 {
 
+std::string get_string_from_bool(bool b)
+{
+	return b ? "true" : "false";
+}
+
+std::string get_string_from_unsigned_char_ptr(const unsigned char* ptr)
+{
+	std::string string;
+	for(std::size_t i = 0; ptr[i] != '\0'; ++i)
+	{
+		string += ptr[i];
+	}
+	return string;
+}
+
 std::string get_string_from_file(std::string_view path)
 {
 	std::string path_str = std::string(path);
 	std::ifstream file(path_str);
 	if(!file.is_open())
 	{
-		std::cerr << "Error: unable to open the requested file (" << path << ")!\n";
+		logging::log("In get_string_from_file(), the requested file was not found!", logging::Severity::WARNING);
 	}
 
 	std::stringstream stream;

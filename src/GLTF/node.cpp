@@ -1,5 +1,6 @@
 #include "node.h"
 #include "gltf.h"
+#include "Logging/logging.h"
 
 #include <glm/gtc/type_ptr.hpp>
 #include <iostream>
@@ -123,7 +124,7 @@ glm::vec3 Node::get_min_values_aabb() const
 {
 	if(!aabb_.has_value())
 	{
-		//std::cout << "NO AABB for node " << name_ << "!\n";
+		logging::log("The node " + name_ + " does not have a AABB", logging::Severity::NOTICE);
 		return glm::vec3(0.0f);
 	}
 
@@ -154,7 +155,7 @@ glm::vec3 Node::get_max_values_aabb() const
 {
 	if(!aabb_.has_value())
 	{
-		//std::cout << "NO AABB for node " << name_ << "!\n";
+		logging::log("The node " + name_ + " does not have a AABB", logging::Severity::NOTICE);
 		return glm::vec3(0.0f);
 	}
 
