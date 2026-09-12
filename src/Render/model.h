@@ -11,11 +11,11 @@ class Model
 		explicit Model(std::string_view path);
 		Model(std::string_view path, Transform transform);
 
-		void draw(ShaderProgram& shader_program);
+		void draw();
 
 		const glm::vec3& get_position() const; //retourne une référence car la position est utilisée en tant que membre (const ref) dans la classe Camera
 		std::string get_name() const; //get name of root_node_
-		gltf::Node& get_root_node();
+		gltf::Node& get_root_node(); //TODO : à terme, retourner une const ref
 
 		void add_translation(glm::vec3 position);
 		void add_translation_x(float x);

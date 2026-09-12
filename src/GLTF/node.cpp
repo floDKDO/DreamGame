@@ -1,6 +1,7 @@
 #include "node.h"
 #include "gltf.h"
 #include "Logging/logging.h"
+#include "gl_resource_manager.h"
 
 #include <glm/gtc/type_ptr.hpp>
 #include <iostream>
@@ -22,25 +23,25 @@ glm::mat4 Node::get_parent_matrix() const
 	return parent_matrix_;
 }
 
-void Node::draw(ShaderProgram& shader_program)
+void Node::draw()
 {
-	shader_program.set_uniform_matrix_4fv("model_matrix_", glm::value_ptr(compute_model()));
+	resource::set_uniform_matrix_4fv("model_matrix_", glm::value_ptr(compute_model()));
 
 	if(mesh_.has_value())
 	{
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-		mesh_->draw(shader_program);
+		mesh_->draw();
 	}
 
 	if(aabb_.has_value())
 	{
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); //affichage wireframe pour AABB
-		aabb_->draw(shader_program);
+		aabb_->draw();
 	}
 
 	for(Node& children_node : children_nodes_)
 	{
-		children_node.draw(shader_program);
+		children_node.draw();
 	}
 }
 

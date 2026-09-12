@@ -6,9 +6,9 @@ Player::Player(InputManager& input_manager)
 	: model_(std::make_unique<Model>("resources/models/player.glb")), input_manager_(input_manager)
 {}
 
-void Player::draw(ShaderProgram& shader_program)
+void Player::draw()
 {
-	model_->draw(shader_program);
+	model_->draw();
 }
 
 void Player::update(float delta_time, glm::vec3 camera_forward, glm::vec3 camera_left)

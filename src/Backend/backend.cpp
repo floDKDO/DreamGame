@@ -3,6 +3,7 @@
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_sdl3.h"
 #include "imgui/imgui_impl_opengl3.h"
+#include "gl_resource_manager.h"
 #include "Logging/logging.h"
 
 #include <AL/al.h>
@@ -13,6 +14,9 @@ Backend::Backend()
 	: sdl_(), window_(), glew_(glewInit())
 {
 	logging::create(logging::Severity::CRITICAL);
+
+	resource::add_shader("Phong", {"resources/shaders/phong_shader.vert", "resources/shaders/phong_shader.frag"});
+	resource::bind_shader("Phong");
 
 	int w, h;
 	window_.get_size(&w, &h);

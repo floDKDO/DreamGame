@@ -1,5 +1,6 @@
 #include "game.h"
 #include "OpenAL/openal.h"
+#include "gl_resource_manager.h"
 
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_sdl3.h"
@@ -19,28 +20,13 @@ Game::Game()
 	running_(true), gamepad_(), test_map_("resources/maps/corridor.gltf"), 
 	gizmo_("resources/models/axis_gizmo.glb"),
 	fov_(glm::radians(45.0f)), near_plane_(0.1f), far_plane_(100.0f), perspective_projection_matrix_(1.0f)
-{
-	shader_programs_.insert(std::make_pair("Base", ShaderProgram("Base", {"resources/shaders/base_shader.vert", "resources/shaders/base_shader.frag"})));
-	shader_programs_.insert(std::make_pair("Phong", ShaderProgram("Phong", {"resources/shaders/base_shader.vert", "resources/shaders/phong_shader.frag"})));
-}
+{}
 
 void Game::run()
 {
 	int w, h;
 	backend_.get_window_size(&w, &h);
 	perspective_projection_matrix_ = glm::perspective(fov_, float(w) / float(h), near_plane_, far_plane_);
-
-	ShaderProgram& phong_program = shader_programs_.at("Phong");
-	phong_program.use();
-	phong_program.set_uniform_1i("texture_sampler0_", 0);
-	phong_program.set_uniform_matrix_4fv("view_matrix_", glm::value_ptr(camera_.get_view_matrix()));
-	phong_program.set_uniform_matrix_4fv("projection_matrix_", glm::value_ptr(perspective_projection_matrix_));
-
-	//TODO
-	/*ShaderProgram& base_program = shader_programs_.at("Base");
-	base_program.use();
-	base_program.set_uniform_matrix_4fv("view_matrix_", glm::value_ptr(camera_.get_view_matrix()));
-	base_program.set_uniform_matrix_4fv("projection_matrix_", glm::value_ptr(projection_matrix));*/
 
 	std::string temp_model_name("test"); //ici, "test" serait le nom du modèle
 	audio::set_listener_position(player_.model_->get_position());
@@ -122,20 +108,12 @@ void Game::draw()
 	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	//TODO : à gérer
-	//ShaderProgram& base_program = shader_programs_.at("Base");
-	//base_program.use();
-	//base_program.set_uniform_matrix_4fv("view_matrix_", glm::value_ptr(camera_.get_view_matrix()));
+	//resource::set_uniform_1i("texture_sampler0_", 0);
+	resource::set_uniform_matrix_4fv("projection_matrix_", glm::value_ptr(perspective_projection_matrix_));
 
-	ShaderProgram& phong_program = shader_programs_.at("Phong");
-	phong_program.use();
-	phong_program.set_uniform_matrix_4fv("view_matrix_", glm::value_ptr(camera_.get_view_matrix()));
-	phong_program.set_uniform_3f("view_position_", camera_.camera_position_);
-	phong_program.set_uniform_3f("light_position_", test_map_.get_model_by_name("Light source")->get_position());
-
-	player_.draw(phong_program);
-	gizmo_.draw(phong_program);
-	test_map_.draw(phong_program);
+	player_.draw();
+	gizmo_.draw();
+	test_map_.draw();
 
 	audio::set_listener_position(player_.model_->get_position());
 	audio::set_listener_orientation(camera_.get_camera_forward(), camera_.get_camera_up());

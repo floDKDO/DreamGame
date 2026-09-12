@@ -1,4 +1,5 @@
 #include "camera.h"
+#include "gl_resource_manager.h"
 
 #include <glm/gtc/type_ptr.hpp>
 #include <algorithm>
@@ -19,6 +20,8 @@ void Camera::update(float delta_time)
 {
 	compute_euler_angles(delta_time);
 	view_matrix_ = look_at(camera_position_, target_position_ + target_to_camera_offset_, get_camera_up());
+	resource::set_uniform_matrix_4fv("view_matrix_", glm::value_ptr(view_matrix_));
+	resource::set_uniform_3f("view_position_", camera_position_);
 }
 
 glm::vec3 Camera::get_camera_forward() const

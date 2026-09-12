@@ -25,7 +25,6 @@ class Game
 		Backend backend_;
 
 		//sdl::Window window_;
-		std::unordered_map<std::string, ShaderProgram> shader_programs_;
 		InputManager input_manager_;
 
 		Player player_;

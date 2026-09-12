@@ -8,10 +8,10 @@
 
 using json = nlohmann::json;
 
-class JSONFile
+class MapFile
 {
 	public:
-		explicit JSONFile(std::string_view gltf_json_file_path);
+		explicit MapFile(std::string_view map_file_path);
 
 		std::vector<std::unique_ptr<Model>> get_models() const;
 
@@ -19,7 +19,7 @@ class JSONFile
 		void open();
 		void gltf_to_map_format();
 
-		std::string gltf_json_file_path_;
+		std::string map_file_path_;
 		json gltf_data_;
 		json map_data_;
 };

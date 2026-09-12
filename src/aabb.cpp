@@ -8,9 +8,9 @@ AABB::AABB(glm::vec3 min_values, glm::vec3 max_values, std::vector<GLushort> ebo
 	: AABB(min_values, max_values, ebo_values, vertices, {}, draw_mode)
 {}
 
-void AABB::draw(ShaderProgram& shader_program)
+void AABB::draw()
 {
-	mesh_.draw(shader_program);
+	mesh_.draw();
 }
 
 glm::vec3 AABB::get_min_values() const

@@ -126,7 +126,7 @@ void Mesh::load_mesh()
 	create_textures();
 }
 
-void Mesh::draw(ShaderProgram& shader_program) //TODO : paramètre inutile 
+void Mesh::draw()
 {
 	glBindVertexArray(vao_);
 	glDrawElements(draw_mode_, GLsizei(ebo_values_.size()), GL_UNSIGNED_SHORT, 0);

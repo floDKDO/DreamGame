@@ -15,7 +15,7 @@ class Node
 	public:
 		Node(std::string name, Transform transform, glm::mat4 parent_matrix, std::optional<Mesh> mesh, std::optional<AABB> aabb);
 
-		void draw(ShaderProgram& shader_program);
+		void draw();
 		void add_child(Node child_node);
 		glm::mat4 compute_model() const;
 		glm::mat4 get_parent_matrix() const;

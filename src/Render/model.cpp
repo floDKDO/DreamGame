@@ -1,4 +1,5 @@
 #include "model.h"
+#include "gl_resource_manager.h"
 
 #include <iostream>
 
@@ -14,9 +15,13 @@ Model::Model(std::string_view path, Transform transform)
 	set_scale(transform.scale_);
 }
 
-void Model::draw(ShaderProgram& shader_program)
+void Model::draw()
 {
-	root_node_.draw(shader_program);
+	if(get_name() == "Light source")
+	{
+		resource::set_uniform_3f("light_position_", get_position());
+	}
+	root_node_.draw();
 }
 
 const glm::vec3& Model::get_position() const

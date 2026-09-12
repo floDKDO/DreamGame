@@ -9,7 +9,7 @@ class Player
 	public:
 		explicit Player(InputManager& input_manager);
 
-		void draw(ShaderProgram& shader_program);
+		void draw();
 		void update(float delta_time, glm::vec3 camera_forward, glm::vec3 camera_left);
 
 		std::unique_ptr<Model> model_;

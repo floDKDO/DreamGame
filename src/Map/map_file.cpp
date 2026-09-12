@@ -1,4 +1,4 @@
-#include "json_file.h"
+#include "map_file.h"
 #include "Logging/logging.h"
 
 #include <fstream>
@@ -6,14 +6,14 @@
 #include <iostream>
 
 
-JSONFile::JSONFile(std::string_view gltf_json_file_path)
-	: gltf_json_file_path_(gltf_json_file_path)
+MapFile::MapFile(std::string_view map_file_path)
+	: map_file_path_(map_file_path)
 {
 	open();
 	gltf_to_map_format();
 }
 
-std::vector<std::unique_ptr<Model>> JSONFile::get_models() const
+std::vector<std::unique_ptr<Model>> MapFile::get_models() const
 {
 	std::vector<std::unique_ptr<Model>> models;
 	for(const auto& model : map_data_["models"].items())
@@ -41,9 +41,9 @@ std::vector<std::unique_ptr<Model>> JSONFile::get_models() const
 	return models;
 }
 
-void JSONFile::open()
+void MapFile::open()
 {
-	std::filesystem::path path(gltf_json_file_path_);
+	std::filesystem::path path(map_file_path_);
 	std::ifstream input_file(path);
 
 	if(input_file.is_open())
@@ -58,7 +58,7 @@ void JSONFile::open()
 	input_file.close();
 }
 
-void JSONFile::gltf_to_map_format()
+void MapFile::gltf_to_map_format()
 {
 	//copie des indices des root nodes dans un std::vector
 	std::vector<int> root_node_indexes;

@@ -6,7 +6,7 @@ in vec3 normal_;
 in vec3 world_position_;
 out vec4 out_color_;
 
-uniform sampler2D texture_sampler0_;
+//uniform sampler2D texture_sampler0_;
 uniform vec3 view_position_;
 uniform vec3 light_position_;
 
