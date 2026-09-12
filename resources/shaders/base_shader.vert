@@ -16,9 +16,9 @@ uniform mat4 projection_matrix_;
 
 void main()
 {
-	gl_Position = projection_matrix_ * view_matrix_ * model_matrix_ * vec4(position_attribute_, 1.0f);
+	gl_Position = projection_matrix_ * view_matrix_ * model_matrix_ * vec4(position_attribute_, 1.0);
 	color_ = color_attribute_;
 	texcoord_ = texcoord_attribute_;
 	normal_ = mat3(transpose(inverse(model_matrix_))) * normal_attribute_;
-	world_position_ = vec3(model_matrix_ * vec4(position_attribute_, 1.0f));
+	world_position_ = vec3(model_matrix_ * vec4(position_attribute_, 1.0));
 }

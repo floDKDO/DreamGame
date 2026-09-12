@@ -9,7 +9,6 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <iostream>
 
-//TODO : free ImGui
 //TODO : créer des constantes pour les valeurs par défaut de translation, rotation et scale
 //TODO : voir si je renomme position en translation
 
@@ -95,10 +94,6 @@ void Game::handle_events()
 	{
 		switch(e.type)
 		{
-			case SDL_EVENT_WINDOW_RESIZED: //TODO : devrait être géré avec la fenêtre
-				glViewport(0, 0, e.window.data1, e.window.data2);
-				break;
-
 			case SDL_EVENT_KEY_DOWN:
 				if(e.key.key == SDLK_ESCAPE)
 				{
@@ -113,6 +108,7 @@ void Game::handle_events()
 			default:
 				break;
 		}
+		backend_.handle_events(e);
 		input_manager_.handle_events(e);
 
 		////////////////////////////////////////////////////////////////////////////////////////

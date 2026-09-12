@@ -9,7 +9,7 @@ namespace sdl
 class WAVBuffer
 {
 	public:
-		WAVBuffer(std::string_view path);
+		explicit WAVBuffer(std::string_view path);
 		WAVBuffer(const WAVBuffer& wav_buffer) = delete;
 		WAVBuffer(WAVBuffer&& wav_buffer) = delete;
 		WAVBuffer& operator=(const WAVBuffer& wav_buffer) = delete;

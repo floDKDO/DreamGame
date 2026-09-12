@@ -16,7 +16,7 @@ std::string get_string_from_bool(bool b)
 std::string get_string_from_unsigned_char_ptr(const unsigned char* ptr)
 {
 	std::string string;
-	for(std::size_t i = 0; ptr[i] != '\0'; ++i)
+	for(std::size_t i = 0ULL; ptr[i] != '\0'; ++i)
 	{
 		string += ptr[i];
 	}

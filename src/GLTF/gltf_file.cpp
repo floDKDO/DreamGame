@@ -36,7 +36,7 @@ glTFFile::glTFFile(std::string_view path)
 	: path_(path)
 {
 	open();
-	print_info(); //TODO
+	//print_info(); //TODO
 }
 
 glTFFile::~glTFFile()
@@ -369,7 +369,7 @@ Vertices get_aabb_vertices(const tg3_model& model_tg3, const tg3_primitive& prim
 {
 	glm::vec3 min_values = get_min_values(model_tg3, primitive_tg3);
 	glm::vec3 max_values = get_max_values(model_tg3, primitive_tg3);
-	std::size_t vertices_number = 8;
+	std::size_t vertices_number = 8ULL;
 
 	std::vector<glm::vec3> position_attributes;
 	position_attributes.reserve(vertices_number);

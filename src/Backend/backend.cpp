@@ -34,6 +34,20 @@ Backend::Backend()
 	print_opengl_stuff();
 }
 
+Backend::~Backend()
+{
+	destroy_openal();
+	//destroy_imgui();
+}
+
+void Backend::handle_events(const SDL_Event& e)
+{
+	if(e.type == SDL_EVENT_WINDOW_RESIZED)
+	{
+		glViewport(0, 0, e.window.data1, e.window.data2);
+	}
+}
+
 void Backend::init_imgui() const
 {
 	IMGUI_CHECKVERSION();
@@ -47,21 +61,41 @@ void Backend::init_imgui() const
 	ImGui_ImplOpenGL3_Init();
 }
 
+void Backend::destroy_imgui() const
+{
+	ImGui_ImplOpenGL3_Shutdown();
+	ImGui_ImplSDL3_Shutdown();
+	ImGui::DestroyContext();
+}
+
 void Backend::init_openal()
 {
-	if((device_ = alcOpenDevice(nullptr)) == nullptr) //TODO : free avec alcCloseDevice
+	if((device_ = alcOpenDevice(nullptr)) == nullptr)
 	{
 		logging::log("alcOpenDevice() returned nullptr!", logging::Severity::CRITICAL);
 	}
-	if((context_ = alcCreateContext(device_, nullptr)) == nullptr) //TODO : free avec alcDestroyContext
+	if((context_ = alcCreateContext(device_, nullptr)) == nullptr)
 	{
 		logging::log("alcCreateContext() returned nullptr!", logging::Severity::CRITICAL);
 	}
-	if(!alcMakeContextCurrent(context_)) //TODO : free avec alcMakeContextCurrent(nullptr)
+	if(!alcMakeContextCurrent(context_))
 	{
 		logging::log("alcMakeContextCurrent() returned an error!", logging::Severity::CRITICAL);
 	}
 	alDistanceModel(AL_LINEAR_DISTANCE_CLAMPED); //commun pour toutes les sources
+}
+
+void Backend::destroy_openal()
+{
+	if(!alcMakeContextCurrent(nullptr))
+	{
+		logging::log("alcMakeContextCurrent() returned an error!", logging::Severity::CRITICAL);
+	}
+	alcDestroyContext(context_);
+	if(!alcCloseDevice(device_))
+	{
+		logging::log("alcCloseDevice() returned an error!", logging::Severity::CRITICAL);
+	}
 }
 
 void Backend::get_window_size(int* w, int* h) const

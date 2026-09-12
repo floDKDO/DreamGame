@@ -24,17 +24,13 @@ class Camera
 	private:
 		struct EulerAngles
 		{
-			EulerAngles()
-				: pitch_(30.0f), yaw_(0.0f), roll_(0.0f)
-			{}
-
 			static const float min_pitch_;
 			static const float max_pitch_;
 
 			//valeur des angles en degrés
-			float pitch_;
-			float yaw_;
-			float roll_; //inutilisé pour l'instant
+			float pitch_ = 30.0f;
+			float yaw_ = 0.0f;
+			float roll_ = 0.0f; //inutilisé pour l'instant
 		};
 
 		glm::mat4 look_at(glm::vec3 camera_position, glm::vec3 camera_target_position, glm::vec3 up_vector) const;

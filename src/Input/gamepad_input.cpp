@@ -85,9 +85,9 @@ void GamepadInput::handle_events(const SDL_Event& e)
 		case SDL_EVENT_GAMEPAD_AXIS_MOTION:
 			if(e.gaxis.axis == SDL_GAMEPAD_AXIS_LEFTY)
 			{
-				if(std::abs(e.gaxis.value) > sdl::Gamepad::joystick_deadzone_)
+				if(std::abs(e.gaxis.value) > input::joystick_deadzone_)
 				{
-					set_direction_joystick(e.gaxis.value, sdl::Gamepad::JoystickAxis::Y_AXIS);
+					set_direction_joystick(e.gaxis.value, input::JoystickAxis::Y_AXIS);
 				}
 				else if(is_movement_from_joystick_)
 				{
@@ -96,9 +96,9 @@ void GamepadInput::handle_events(const SDL_Event& e)
 			}
 			if(e.gaxis.axis == SDL_GAMEPAD_AXIS_LEFTX)
 			{
-				if(std::abs(e.gaxis.value) > sdl::Gamepad::joystick_deadzone_)
+				if(std::abs(e.gaxis.value) > input::joystick_deadzone_)
 				{
-					set_direction_joystick(e.gaxis.value, sdl::Gamepad::JoystickAxis::X_AXIS);
+					set_direction_joystick(e.gaxis.value, input::JoystickAxis::X_AXIS);
 				}
 				else if(is_movement_from_joystick_)
 				{
@@ -107,9 +107,9 @@ void GamepadInput::handle_events(const SDL_Event& e)
 			}
 			if(e.gaxis.axis == SDL_GAMEPAD_AXIS_RIGHTX)
 			{
-				if(std::abs(e.gaxis.value) > sdl::Gamepad::joystick_deadzone_)
+				if(std::abs(e.gaxis.value) > input::joystick_deadzone_)
 				{
-					set_rotation_joystick(e.gaxis.value, sdl::Gamepad::JoystickAxis::X_AXIS);
+					set_rotation_joystick(e.gaxis.value, input::JoystickAxis::X_AXIS);
 				}
 				else
 				{
@@ -118,9 +118,9 @@ void GamepadInput::handle_events(const SDL_Event& e)
 			}
 			if(e.gaxis.axis == SDL_GAMEPAD_AXIS_RIGHTY)
 			{
-				if(std::abs(e.gaxis.value) > sdl::Gamepad::joystick_deadzone_)
+				if(std::abs(e.gaxis.value) > input::joystick_deadzone_)
 				{
-					set_rotation_joystick(e.gaxis.value, sdl::Gamepad::JoystickAxis::Y_AXIS);
+					set_rotation_joystick(e.gaxis.value, input::JoystickAxis::Y_AXIS);
 				}
 				else
 				{
@@ -144,26 +144,26 @@ input::Info GamepadInput::get_input_info() const
 	return input_info_;
 }
 
-void GamepadInput::set_direction_joystick(Sint16 axis_value, sdl::Gamepad::JoystickAxis joystick_axis)
+void GamepadInput::set_direction_joystick(Sint16 axis_value, input::JoystickAxis joystick_axis)
 {
-	if(joystick_axis == sdl::Gamepad::JoystickAxis::X_AXIS)
+	if(joystick_axis == input::JoystickAxis::X_AXIS)
 	{
 		input_info_.x_movement_intensity_ = float(axis_value) / SDL_JOYSTICK_AXIS_MAX;
 	}
-	else if(joystick_axis == sdl::Gamepad::JoystickAxis::Y_AXIS)
+	else if(joystick_axis == input::JoystickAxis::Y_AXIS)
 	{
 		input_info_.y_movement_intensity_ = -(float(axis_value) / SDL_JOYSTICK_AXIS_MAX);
 	}
 	is_movement_from_joystick_ = true;
 }
 
-void GamepadInput::set_rotation_joystick(Sint16 axis_value, sdl::Gamepad::JoystickAxis joystick_axis)
+void GamepadInput::set_rotation_joystick(Sint16 axis_value, input::JoystickAxis joystick_axis)
 {
-	if(joystick_axis == sdl::Gamepad::JoystickAxis::X_AXIS)
+	if(joystick_axis == input::JoystickAxis::X_AXIS)
 	{
 		input_info_.x_rotation_intensity_ = float(axis_value) / SDL_JOYSTICK_AXIS_MAX;
 	}
-	else if(joystick_axis == sdl::Gamepad::JoystickAxis::Y_AXIS)
+	else if(joystick_axis == input::JoystickAxis::Y_AXIS)
 	{
 		input_info_.y_rotation_intensity_ = float(axis_value) / SDL_JOYSTICK_AXIS_MAX;
 	}

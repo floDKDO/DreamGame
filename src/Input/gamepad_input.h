@@ -15,8 +15,8 @@ class GamepadInput
 	private:
 		void set_pad_direction_active(input::Direction direction);
 		void set_pad_direction_inactive(input::Direction direction);
-		void set_direction_joystick(Sint16 axis_value, sdl::Gamepad::JoystickAxis joystick_axis);
-		void set_rotation_joystick(Sint16 axis_value, sdl::Gamepad::JoystickAxis joystick_axis);
+		void set_direction_joystick(Sint16 axis_value, input::JoystickAxis joystick_axis);
+		void set_rotation_joystick(Sint16 axis_value, input::JoystickAxis joystick_axis);
 
 		input::Info input_info_;
 		bool is_movement_from_joystick_;

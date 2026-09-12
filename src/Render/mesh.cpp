@@ -4,8 +4,6 @@
 #include <stb/stb_image.h>
 #include <iostream>
 
-//TODO : créer un destructeur qui libère le VAO/VBO/EBO et les textures
-
 Mesh::Mesh(std::vector<GLushort> ebo_values, Vertices vertices, std::vector<Texture> textures, GLenum draw_mode)
 	: ebo_values_(ebo_values), vertices_(vertices), textures_(textures), ebo_(0), vbo_(0), vao_(0), draw_mode_(draw_mode == -1 ? GL_TRIANGLES : draw_mode)
 {
@@ -66,6 +64,13 @@ void Mesh::create_vao()
 	}
 }
 
+void Mesh::destroy_all_buffers() const
+{
+	glDeleteBuffers(1, &ebo_);
+	glDeleteBuffers(1, &vbo_);
+	glDeleteBuffers(1, &vao_);
+}
+
 void Mesh::create_textures()
 {
 	int desired_channels = 4;
@@ -105,6 +110,14 @@ void Mesh::create_textures()
 	}
 }
 
+void Mesh::destroy_textures() const
+{
+	for(const Texture& t : textures_)
+	{
+		glDeleteTextures(1, &t.texture_id_);
+	}
+}
+
 void Mesh::load_mesh()
 {
 	create_ebo();
@@ -118,4 +131,10 @@ void Mesh::draw(ShaderProgram& shader_program) //TODO : paramètre inutile
 	glBindVertexArray(vao_);
 	glDrawElements(draw_mode_, GLsizei(ebo_values_.size()), GL_UNSIGNED_SHORT, 0);
 	//glBindVertexArray(0); //= unbind, commenté car provoque des erreurs
+}
+
+void Mesh::destroy() //TODO : appeler cette méthode
+{
+	destroy_all_buffers();
+	destroy_textures();
 }

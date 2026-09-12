@@ -4,6 +4,7 @@
 #include <glm/vec2.hpp>
 #include <glm/vec3.hpp>
 #include <glm/vec4.hpp>
+#include <iostream>
 
 namespace attribute
 {
@@ -28,18 +29,10 @@ struct Info
 
 struct Vertex
 {
-	Vertex()
-		: position_(0.0f), normal_(0.0f), texcoord_(0.0f), color_(0.0f, 0.0f, 0.0f, 1.0f)
-	{}
-
-	Vertex(glm::vec3 position, glm::vec3 normal, glm::vec2 texcoord, glm::vec4 color)
-		: position_(position), normal_(normal), texcoord_(texcoord), color_(color)
-	{}
-
 	static attribute::Info get_attribute_info(attribute::Name attribute_name);
 
-	glm::vec3 position_;
-	glm::vec3 normal_;
-	glm::vec2 texcoord_;
-	glm::vec4 color_;
+	glm::vec3 position_ = glm::vec3(0.0f);
+	glm::vec3 normal_ = glm::vec3(0.0f);
+	glm::vec2 texcoord_ = glm::vec2(0.0f);
+	glm::vec4 color_ = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
 };

@@ -10,7 +10,7 @@ Vertices::Vertices(uint64_t number)
 
 void Vertices::add_position_attributes(std::vector<glm::vec3> position_vector)
 {
-	for(std::size_t i = 0; i < vertices_.size(); ++i)
+	for(std::size_t i = 0ULL; i < vertices_.size(); ++i)
 	{
 		vertices_[i].position_ = position_vector[i];
 	}
@@ -19,7 +19,7 @@ void Vertices::add_position_attributes(std::vector<glm::vec3> position_vector)
 
 void Vertices::add_normal_attributes(std::vector<glm::vec3> normal_vector)
 {
-	for(std::size_t i = 0; i < vertices_.size(); ++i)
+	for(std::size_t i = 0ULL; i < vertices_.size(); ++i)
 	{
 		vertices_[i].normal_ = normal_vector[i];
 	}
@@ -28,7 +28,7 @@ void Vertices::add_normal_attributes(std::vector<glm::vec3> normal_vector)
 
 void Vertices::add_texcoord_attributes(std::vector<glm::vec2> texcoord_vector)
 {
-	for(std::size_t i = 0; i < vertices_.size(); ++i)
+	for(std::size_t i = 0ULL; i < vertices_.size(); ++i)
 	{
 		vertices_[i].texcoord_ = texcoord_vector[i];
 	}
@@ -37,7 +37,7 @@ void Vertices::add_texcoord_attributes(std::vector<glm::vec2> texcoord_vector)
 
 void Vertices::add_color_attributes(std::vector<glm::vec4> color_vector)
 {
-	for(std::size_t i = 0; i < vertices_.size(); ++i)
+	for(std::size_t i = 0ULL; i < vertices_.size(); ++i)
 	{
 		vertices_[i].color_ = color_vector[i];
 	}

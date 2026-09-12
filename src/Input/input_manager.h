@@ -13,16 +13,10 @@ class InputManager
 		input::Info get_input_info() const;
 
 	private:
-		enum class ActiveInput
-		{
-			MOUSE_KEYBOARD,
-			GAMEPAD
-		};
-
 		bool is_input_active(input::Info input_info) const;
 
-		ActiveInput active_input_;
-		input::Info active_input_info_;
+		input::ActiveDevice active_device_;
+		input::Info input_info_;
 		MouseKeyboardInput mouse_keyboard_input_;
 		GamepadInput gamepad_input_;
 };

@@ -10,13 +10,21 @@ class Backend
 {
 	public:
 		Backend();
+		~Backend();
+		Backend(const Backend& backend) = delete;
+		Backend(Backend&& backend) = delete;
+		Backend& operator=(const Backend& backend) = delete;
+		Backend& operator=(Backend&& backend) = delete;
 
 		void get_window_size(int* w, int* h) const;
 		void swap_window_buffers() const;
+		void handle_events(const SDL_Event& e);
 
 	private:
 		void init_imgui() const;
+		void destroy_imgui() const;
 		void init_openal();
+		void destroy_openal();
 
 		sdl::SDL sdl_;
 		sdl::Window window_;

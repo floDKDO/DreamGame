@@ -5,8 +5,6 @@
 namespace sdl
 {
 
-const float Gamepad::joystick_deadzone_ = SDL_JOYSTICK_AXIS_MAX * 0.1f; //10% of the max value
-
 Gamepad::Gamepad() //SDL_OpenGamepad
 	: gamepad_(nullptr), last_check_time_(0), current_check_time_(0)
 {

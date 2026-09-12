@@ -3,11 +3,11 @@
 #include <iostream>
 
 Model::Model(std::string_view path)
-	: gltf_file_(path), root_node_(std::move(gltf_file_.get_root_node()))
+	: gltf_file_(path), root_node_(gltf_file_.get_root_node())
 {}
 
 Model::Model(std::string_view path, Transform transform)
-	: gltf_file_(path), root_node_(std::move(gltf_file_.get_root_node()))
+	: gltf_file_(path), root_node_(gltf_file_.get_root_node())
 {
 	set_translation(transform.position_);
 	set_rotation(transform.rotation_);
