@@ -1,16 +1,29 @@
 #pragma once
 
 #include "Render/shader_program.h"
+#include "Render/mesh.h"
 
 #include <string_view>
 
 namespace resource
 {
 
+//TODO : devrait sûrement être placé autre part
+struct MeshKey
+{
+	std::string file_name_ = "";
+	int32_t mesh_index_ = -1;
+};
+
+void add_mesh(std::string_view path, int32_t mesh_index, std::vector<GLushort> ebo_values, Vertices vertices, std::vector<Texture> textures, GLenum draw_mode);
+void add_mesh(std::string_view path, int32_t mesh_index, std::vector<GLushort> ebo_values, Vertices vertices, GLenum draw_mode);
+const Mesh* get_mesh(MeshKey mesh_key);
+
 void add_shader(std::string_view name, std::vector<std::string> shader_path);
 const ShaderProgram& get_shader(std::string_view name);
 void bind_shader(std::string_view name);
 
+//TODO : ces méthodes devraient être placées autre part
 void insert_uniform(const GLchar* name);
 void set_uniform_1f(const GLchar* name, GLfloat value);
 void set_uniform_1i(const GLchar* name, GLint value);

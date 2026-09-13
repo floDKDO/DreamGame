@@ -140,6 +140,16 @@ void Game::update_fps_count(Uint64& last_fps_refresh, unsigned int& frame_count_
 
 void detect_collision(const gltf::Node& node, gltf::Node& player_node)
 {
+	//TODO : pas ouf car répétition de code
+	if(node.is_empty_node())
+	{
+		for(const gltf::Node& child_node : node.children_nodes_)
+		{
+			detect_collision(child_node, player_node);
+		}
+		return;
+	}
+
 	glm::vec3 min_values_model = node.get_min_values_aabb();
 	glm::vec3 max_values_model = node.get_max_values_aabb();
 	

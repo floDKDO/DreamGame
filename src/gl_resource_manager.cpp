@@ -1,15 +1,69 @@
 #include "gl_resource_manager.h"
 #include "Logging/logging.h"
 
-#include <unordered_map>
+#include <map>
 #include <string>
 #include <iostream>
 
 namespace resource
 {
 
+//TODO : devrait sûrement être placé autre part
+bool operator<(const MeshKey& a, const MeshKey& b)
+{
+	if(a.file_name_ < b.file_name_)
+	{
+		return true;
+	}
+	else if(b.file_name_ < a.file_name_)
+	{
+		return false;
+	}
+	else if(a.mesh_index_ < b.mesh_index_)
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+
+	//TODO : ne marche pas pour ce cas-là : 
+	//a = "aaa", 42 ; b = "zzz", 1
+	//a < b => true
+	//b < a => true
+	//return (a.file_name_ < b.file_name_) || (a.mesh_index_ < b.mesh_index_);
+}
+
+//TODO : avant optimisations, 104 Meshes sont créés. Après optimisations, 15 Meshes sont créés
+
+std::map<MeshKey, Mesh> meshes_; //TODO : ne marche pas avec une std::unordered_map
 std::unordered_map<std::string, ShaderProgram> shader_programs_;
 std::unordered_map<std::string, GLint> uniforms_;
+
+void add_mesh(std::string_view path, int32_t mesh_index, std::vector<GLushort> ebo_values, Vertices vertices, std::vector<Texture> textures, GLenum draw_mode)
+{
+	MeshKey mesh_key = {std::string(path), mesh_index};
+	meshes_.insert(std::make_pair(mesh_key, Mesh(ebo_values, vertices, textures, draw_mode)));
+}
+
+void add_mesh(std::string_view path, int32_t mesh_index, std::vector<GLushort> ebo_values, Vertices vertices, GLenum draw_mode)
+{
+	MeshKey mesh_key = {std::string(path), mesh_index};
+	meshes_.insert(std::make_pair(mesh_key, Mesh(ebo_values, vertices, draw_mode)));
+}
+
+const Mesh* get_mesh(MeshKey mesh_key)
+{
+	if(meshes_.count(mesh_key))
+	{
+		return &meshes_.at(mesh_key);
+	}
+	else
+	{
+		return nullptr;
+	}
+}
 
 void add_shader(std::string_view name, std::vector<std::string> shader_path)
 {
@@ -62,7 +116,6 @@ void set_uniform_1f(const GLchar* name, GLfloat value)
 void set_uniform_1i(const GLchar* name, GLint value)
 {
 	insert_uniform(name);
-	std::cout << "Voici: " << name << std::endl;
 	glUniform1i(uniforms_.at(std::string(name)), value);
 }
 

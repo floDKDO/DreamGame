@@ -10,7 +10,7 @@ class Mesh
 		Mesh(std::vector<GLushort> ebo_values, Vertices vertices, std::vector<Texture> textures, GLenum draw_mode);
 		Mesh(std::vector<GLushort> ebo_values, Vertices vertices, GLenum draw_mode);
 
-		void draw();
+		void draw() const;
 		void destroy();
 
 	private:

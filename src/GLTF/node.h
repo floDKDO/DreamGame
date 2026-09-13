@@ -3,6 +3,7 @@
 #include "aabb.h"
 #include "Common/utils.h"
 #include "Common/transform.h"
+#include "gl_resource_manager.h"
 
 #include <optional>
 #include <memory>
@@ -13,7 +14,10 @@ namespace gltf
 class Node
 {
 	public:
-		Node(std::string name, Transform transform, glm::mat4 parent_matrix, std::optional<Mesh> mesh, std::optional<AABB> aabb);
+		Node(std::string name, Transform transform, glm::mat4 parent_matrix, resource::MeshKey mesh_key, std::optional<AABB> aabb);
+
+		void set_empty_node();
+		bool is_empty_node() const;
 
 		void draw();
 		void add_child(Node child_node);
@@ -42,10 +46,11 @@ class Node
 	private:
 		void update_parent_matrix_of_children(Node& node);
 
+		bool is_empty_node_;
 		Transform transform_;
 		glm::mat4 parent_matrix_;
 		std::string name_;
-		std::optional<Mesh> mesh_;
+		resource::MeshKey mesh_key_;
 		std::optional<AABB> aabb_;
 };
 

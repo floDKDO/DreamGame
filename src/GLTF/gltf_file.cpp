@@ -3,6 +3,7 @@
 #include "node.h"
 #include "aabb.h"
 #include "Logging/logging.h"
+#include "gl_resource_manager.h"
 
 #include <iostream>
 
@@ -12,12 +13,12 @@ namespace
 glm::vec3 get_node_position(const tg3_node& node_tg3);
 glm::quat get_node_rotation(const tg3_node& node_tg3);
 glm::vec3 get_node_scale(const tg3_node& node_tg3);
-gltf::Node get_node(const tg3_model& model_tg3, const tg3_node& node_tg3, glm::mat4 parent_matrix);
+gltf::Node get_node(std::string_view path, const tg3_model& model_tg3, const tg3_node& node_tg3, glm::mat4 parent_matrix);
 uint64_t get_attributes_count(const tg3_model& model_tg3, const tg3_primitive& primitive_tg3);
 Vertices get_vertices(const tg3_model& model_tg3, const tg3_primitive& primitive_tg3);
 Vertices get_aabb_vertices(const tg3_model& model_tg3, const tg3_primitive& primitive_tg3);
 Transform get_transform(const tg3_node& node_tg3);
-std::optional<Mesh> get_mesh(const tg3_model& model_tg3, const tg3_node& node_tg3);
+resource::MeshKey get_mesh(std::string_view path, const tg3_model& model_tg3, const tg3_node& node_tg3);
 std::optional<tg3_accessor> get_accessor_from_attribute(std::string_view attribute, const tg3_model& model_tg3, const tg3_primitive& primitive_tg3);
 glm::vec3 get_min_values(const tg3_model& model_tg3, const tg3_primitive& primitive_tg3);
 glm::vec3 get_max_values(const tg3_model& model_tg3, const tg3_primitive& primitive_tg3);
@@ -212,7 +213,13 @@ Node glTFFile::get_root_node() const
 	tg3_scene scene_tg3 = model_tg3_.scenes[0];
 	int32_t root_node_index = scene_tg3.nodes[0];
 	tg3_node root_node_tg3 = model_tg3_.nodes[root_node_index];
-	return get_node(model_tg3_, root_node_tg3, glm::mat4(1.0f)); //les root nodes n'ont pas de parent donc ont une matrice identitée pour leur parent_matrix
+
+	if(root_node_tg3.children_count > 1 && root_node_tg3.mesh == -1)
+	{
+		
+	}
+
+	return get_node(path_, model_tg3_, root_node_tg3, glm::mat4(1.0f)); //les root nodes n'ont pas de parent donc ont une matrice identitée pour leur parent_matrix
 }
 
 }
@@ -291,18 +298,22 @@ glm::vec3 get_node_scale(const tg3_node& node_tg3)
 	}
 }
 
-gltf::Node get_node(const tg3_model& model_tg3, const tg3_node& node_tg3, glm::mat4 parent_matrix)
+gltf::Node get_node(std::string_view path, const tg3_model& model_tg3, const tg3_node& node_tg3, glm::mat4 parent_matrix)
 {
 	std::string node_name;
 	if(node_tg3.name.len > 0)
 	{
 		node_name = std::string(node_tg3.name.data);
 	}
-	
-	gltf::Node node(node_name, get_transform(node_tg3), parent_matrix, get_mesh(model_tg3, node_tg3), get_aabb(model_tg3, node_tg3));
+
+	gltf::Node node(node_name, get_transform(node_tg3), parent_matrix, get_mesh(path, model_tg3, node_tg3), get_aabb(model_tg3, node_tg3));
+	if(node_tg3.children_count > 1 && node_tg3.mesh == -1)
+	{
+		node.set_empty_node();
+	}
 	for(uint32_t i = 0; i < node_tg3.children_count; ++i)
 	{
-		node.add_child(get_node(model_tg3, model_tg3.nodes[node_tg3.children[i]], node.compute_model()));
+		node.add_child(get_node(path, model_tg3, model_tg3.nodes[node_tg3.children[i]], node.compute_model()));
 	}
 	return node;
 }
@@ -396,11 +407,12 @@ Transform get_transform(const tg3_node& node_tg3)
 	return transform;
 }
 
-std::optional<Mesh> get_mesh(const tg3_model& model_tg3, const tg3_node& node_tg3)
+resource::MeshKey get_mesh(std::string_view path, const tg3_model& model_tg3, const tg3_node& node_tg3)
 {
-	if(node_tg3.mesh != -1)
+	int32_t mesh_index = node_tg3.mesh;
+	if(mesh_index != -1)
 	{
-		tg3_mesh mesh_tg3 = model_tg3.meshes[node_tg3.mesh];
+		tg3_mesh mesh_tg3 = model_tg3.meshes[mesh_index];
 		if(mesh_tg3.primitives_count > 1)
 		{
 			logging::log("Number of primitives > 1 not handled", logging::Severity::WARNING);
@@ -412,15 +424,14 @@ std::optional<Mesh> get_mesh(const tg3_model& model_tg3, const tg3_node& node_tg
 		if(has_textures(model_tg3))
 		{
 			std::vector<Texture> textures = get_textures(model_tg3);
-			return Mesh(ebo_values, vertices, textures, primitive_tg3.mode);
+			resource::add_mesh(path, mesh_index, ebo_values, vertices, textures, primitive_tg3.mode);
 		}
 		else
 		{
-			return Mesh(ebo_values, vertices, primitive_tg3.mode);
+			resource::add_mesh(path, mesh_index, ebo_values, vertices, primitive_tg3.mode);
 		}
 	}
-	logging::log("get_mesh() returned std::nullopt (the node " + std::string(node_tg3.name.data) + " does not have a mesh)", logging::Severity::NOTICE);
-	return std::nullopt; //cas où le node ne possède pas de mesh
+	return resource::MeshKey{std::string(path), mesh_index};
 }
 
 std::optional<tg3_accessor> get_accessor_from_attribute(std::string_view attribute, const tg3_model& model_tg3, const tg3_primitive& primitive_tg3)
@@ -477,9 +488,10 @@ glm::vec3 get_max_values(const tg3_model& model_tg3, const tg3_primitive& primit
 
 std::optional<AABB> get_aabb(const tg3_model& model_tg3, const tg3_node& node_tg3)
 {
-	if(node_tg3.mesh != -1)
+	int32_t mesh_index = node_tg3.mesh;
+	if(mesh_index != -1)
 	{
-		tg3_mesh mesh_tg3 = model_tg3.meshes[node_tg3.mesh];
+		tg3_mesh mesh_tg3 = model_tg3.meshes[mesh_index];
 		if(mesh_tg3.primitives_count > 1)
 		{
 			logging::log("Number of primitives > 1 not handled", logging::Severity::WARNING);

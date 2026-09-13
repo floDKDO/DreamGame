@@ -1,7 +1,7 @@
 #include "node.h"
 #include "gltf.h"
 #include "Logging/logging.h"
-#include "gl_resource_manager.h"
+//#include "gl_resource_manager.h"
 
 #include <glm/gtc/type_ptr.hpp>
 #include <iostream>
@@ -9,8 +9,8 @@
 namespace gltf
 {
 
-Node::Node(std::string name, Transform transform, glm::mat4 parent_matrix, std::optional<Mesh> mesh, std::optional<AABB> aabb)
-	: name_(name), mesh_(mesh), aabb_(aabb), transform_(transform), parent_matrix_(parent_matrix)
+Node::Node(std::string name, Transform transform, glm::mat4 parent_matrix, resource::MeshKey mesh_key, std::optional<AABB> aabb)
+	: is_empty_node_(false), name_(name), mesh_key_(mesh_key), aabb_(aabb), transform_(transform), parent_matrix_(parent_matrix)
 {}
 
 glm::mat4 Node::compute_model() const
@@ -23,14 +23,24 @@ glm::mat4 Node::get_parent_matrix() const
 	return parent_matrix_;
 }
 
+void Node::set_empty_node()
+{
+	is_empty_node_ = true;
+}
+
+bool Node::is_empty_node() const
+{
+	return is_empty_node_;
+}
+
 void Node::draw()
 {
 	resource::set_uniform_matrix_4fv("model_matrix_", glm::value_ptr(compute_model()));
 
-	if(mesh_.has_value())
+	if(const Mesh* mesh = resource::get_mesh(mesh_key_); mesh != nullptr)
 	{
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-		mesh_->draw();
+		mesh->draw();
 	}
 
 	if(aabb_.has_value())
@@ -125,7 +135,7 @@ glm::vec3 Node::get_min_values_aabb() const
 {
 	if(!aabb_.has_value())
 	{
-		logging::log("The node " + name_ + " does not have a AABB", logging::Severity::NOTICE);
+		logging::log("The node " + name_ + " " + std::to_string(mesh_key_.mesh_index_) + " does not have a AABB", logging::Severity::NOTICE);
 		return glm::vec3(0.0f);
 	}
 
@@ -135,6 +145,8 @@ glm::vec3 Node::get_min_values_aabb() const
 	for(const glm::vec3& position_attribute : position_attributes)
 	{
 		glm::vec3 world_position_attribute = glm::vec4(position_attribute, 1.0f) * compute_model();
+
+		//TODO : utiliser aabbMin = glm::min() et glm::max()
 
 		if(world_position_attribute.x < min_value.x)
 		{
@@ -156,7 +168,7 @@ glm::vec3 Node::get_max_values_aabb() const
 {
 	if(!aabb_.has_value())
 	{
-		logging::log("The node " + name_ + " does not have a AABB", logging::Severity::NOTICE);
+		logging::log("The node " + name_ + " " + std::to_string(mesh_key_.mesh_index_) + " does not have a AABB", logging::Severity::NOTICE);
 		return glm::vec3(0.0f);
 	}
 
@@ -166,6 +178,8 @@ glm::vec3 Node::get_max_values_aabb() const
 	for(const glm::vec3& position_attribute : position_attributes)
 	{
 		glm::vec3 world_position_attribute = glm::vec4(position_attribute, 1.0f) * compute_model();
+
+		//TODO : utiliser aabbMin = glm::min() et glm::max()
 
 		if(world_position_attribute.x > max_value.x)
 		{
