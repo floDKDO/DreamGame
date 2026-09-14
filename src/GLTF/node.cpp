@@ -135,7 +135,7 @@ glm::vec3 Node::get_min_values_aabb() const
 {
 	if(!aabb_.has_value())
 	{
-		logging::log("The node " + name_ + " " + std::to_string(mesh_key_.mesh_index_) + " does not have a AABB", logging::Severity::NOTICE);
+		logging::log("The node \"" + name_ + " " + std::to_string(mesh_key_.mesh_index_) + "\" does not have a AABB", logging::Severity::NOTICE);
 		return glm::vec3(0.0f);
 	}
 
@@ -168,7 +168,7 @@ glm::vec3 Node::get_max_values_aabb() const
 {
 	if(!aabb_.has_value())
 	{
-		logging::log("The node " + name_ + " " + std::to_string(mesh_key_.mesh_index_) + " does not have a AABB", logging::Severity::NOTICE);
+		logging::log("The node \"" + name_ + " " + std::to_string(mesh_key_.mesh_index_) + "\" does not have a AABB", logging::Severity::NOTICE);
 		return glm::vec3(0.0f);
 	}
 

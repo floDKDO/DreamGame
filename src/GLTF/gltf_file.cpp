@@ -236,9 +236,7 @@ std::vector<glm::vec<L, float>> get_float_vec_attribute(const tg3_model& model_t
 	tg3_buffer_view buffer_view_tg3 = model_tg3.buffer_views[accessor_tg3.buffer_view];
 	tg3_buffer buffer_tg3 = model_tg3.buffers[buffer_view_tg3.buffer];
 
-	std::string component_type_str = gltf::get_component_type_str(accessor_tg3.component_type);
 	std::size_t component_type_size = gltf::get_component_type_size(accessor_tg3.component_type);
-	std::string type_str = gltf::get_type_str(accessor_tg3.type);
 
 	uint64_t stride = buffer_view_tg3.byte_stride != 0 ? buffer_view_tg3.byte_stride : sizeof(vector_type::value_type);
 	vector_type attribute_vector;
@@ -499,7 +497,7 @@ std::optional<AABB> get_aabb(const tg3_model& model_tg3, const tg3_node& node_tg
 
 		tg3_primitive primitive_tg3 = mesh_tg3.primitives[0];
 		Vertices vertices = get_aabb_vertices(model_tg3, primitive_tg3);
-		std::vector<GLushort> ebo_values = //rubix cube avec la face verte au-dessus et la face rouge face à nous
+		std::vector<GLushort> ebo_values = //ex du rubix cube avec la face verte au-dessus et la face rouge face à nous
 		{
 			3, 2, 7, 2, 6, 7, //face rouge
 			1, 5, 7, 1, 3, 7, //face jaune
@@ -520,7 +518,8 @@ std::optional<AABB> get_aabb(const tg3_model& model_tg3, const tg3_node& node_tg
 			return AABB(min_values, max_values, ebo_values, vertices, primitive_tg3.mode);
 		}
 	}
-	logging::log("get_aabb() returned std::nullopt (the node " + std::string(node_tg3.name.data) + " does not have a aabb)", logging::Severity::NOTICE);
+	std::string node_name = (node_tg3.name.len > 0) ? std::string(node_tg3.name.data) : "";
+	logging::log("get_aabb() returned std::nullopt (the node \"" + node_name + "\" does not have a AABB)", logging::Severity::NOTICE);
 	return std::nullopt; //cas où le node ne possède pas de mesh
 }
 
@@ -546,8 +545,13 @@ std::vector<Texture> get_textures(const tg3_model& model_tg3)
 			if(tg3_is_data_uri(image_tg3.uri.data, image_tg3.uri.len))
 			{
 				mesh_texture.image_path_ = "";
-				//std::string image_data_base64 = image_str.substr(image_str.find(',') + 1); //+1 pour ne pas prendre la virgule
-				logging::log("Embedded glTF not handled for now!", logging::Severity::WARNING);
+				std::string image_data_base64 = image_str.substr(image_str.find(',') + 1); //+1 pour ne pas prendre la virgule
+				std::string image_data_decoded = utils::base64_decode(image_data_base64.data(), image_data_base64.length());
+				mesh_texture.image_data_.reserve(image_data_base64.length());
+				for(std::size_t j = 0; j < image_data_decoded.length(); ++j)
+				{
+					mesh_texture.image_data_.push_back(image_data_decoded[j]);
+				}
 			}
 			else
 			{

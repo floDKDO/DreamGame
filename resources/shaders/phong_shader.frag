@@ -1,7 +1,7 @@
 #version 450 core
 
 in vec4 color_;
-in vec2 text_coord_;
+in vec2 texcoord_;
 in vec3 normal_;
 in vec3 world_position_;
 out vec4 out_color_;
@@ -66,7 +66,7 @@ void main()
 
 	vec4 result = vec4(ambient + diffuse + specular, 1.0) * color_;
 
-	//out_color_ = texture(texture_sampler0_, text_coord_);
+	//out_color_ = texture(texture_sampler0_, texcoord_);
 	//out_color_ = color_;
 	out_color_ = result + light_intensity;
 }
