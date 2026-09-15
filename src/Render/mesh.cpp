@@ -1,11 +1,12 @@
 #include "mesh.h"
 #include "Logging/logging.h"
+#include "gl_resource_manager.h"
 
 #include <stb/stb_image.h>
 #include <iostream>
 
-Mesh::Mesh(std::vector<GLushort> ebo_values, Vertices vertices, std::vector<Texture> textures, GLenum draw_mode)
-	: ebo_values_(ebo_values), vertices_(vertices), textures_(textures), ebo_(0), vbo_(0), vao_(0), draw_mode_(draw_mode == -1 ? GL_TRIANGLES : draw_mode)
+Mesh::Mesh(std::vector<GLushort> ebo_values, Vertices vertices, std::vector<std::string> texture_keys, GLenum draw_mode)
+	: ebo_values_(ebo_values), vertices_(vertices), texture_keys_(texture_keys), ebo_(0), vbo_(0), vao_(0), draw_mode_(draw_mode == -1 ? GL_TRIANGLES : draw_mode)
 {
 	load_mesh();
 }
@@ -76,20 +77,21 @@ void Mesh::create_textures()
 	int desired_channels = 4;
 	GLsizei number_of_texture_levels = 1; //TODO : utiliser une autre valeur ?
 
-	for(Texture& t : textures_)
+	for(std::string& texture_key : texture_keys_)
 	{
-		glCreateTextures(GL_TEXTURE_2D, 1, &t.texture_id_);
-		glBindTextureUnit(t.texture_unit_, t.texture_id_);
-		glTextureParameteri(t.texture_id_, GL_TEXTURE_WRAP_S, t.wrap_s_);
-		glTextureParameteri(t.texture_id_, GL_TEXTURE_WRAP_T, t.wrap_t_);
-		glTextureParameteri(t.texture_id_, GL_TEXTURE_MAG_FILTER, t.mag_filter_);
-		glTextureParameteri(t.texture_id_, GL_TEXTURE_MIN_FILTER, t.min_filter_);
+		Texture* t = resource::get_texture(texture_key);
+		glCreateTextures(GL_TEXTURE_2D, 1, &t->texture_id_);
+		glBindTextureUnit(t->texture_unit_, t->texture_id_);
+		glTextureParameteri(t->texture_id_, GL_TEXTURE_WRAP_S, t->wrap_s_);
+		glTextureParameteri(t->texture_id_, GL_TEXTURE_WRAP_T, t->wrap_t_);
+		glTextureParameteri(t->texture_id_, GL_TEXTURE_MAG_FILTER, t->mag_filter_);
+		glTextureParameteri(t->texture_id_, GL_TEXTURE_MIN_FILTER, t->min_filter_);
 
 		int width, height, channels;
 		unsigned char* pixels;
-		if(!t.image_path_.empty())
+		if(!t->image_path_.empty())
 		{
-			if((pixels = stbi_load(t.image_path_.c_str(), &width, &height, &channels, desired_channels)) == nullptr) //4 pour que ça crashe pas pour une image RGB uniquement (ex : .jpg)
+			if((pixels = stbi_load(t->image_path_.c_str(), &width, &height, &channels, desired_channels)) == nullptr) //4 pour que ça crashe pas pour une image RGB uniquement (ex : .jpg)
 			{
 				logging::log("stbi_load() returned nullptr", logging::Severity::CRITICAL);
 				exit(EXIT_FAILURE);
@@ -97,24 +99,16 @@ void Mesh::create_textures()
 		}
 		else
 		{
-			if((pixels = stbi_load_from_memory(t.image_data_.data(), int(t.image_data_.size()), &width, &height, &channels, desired_channels)) == nullptr) //4 pour que ça crashe pas pour une image RGB uniquement (ex : .jpg)
+			if((pixels = stbi_load_from_memory(t->image_data_.data(), int(t->image_data_.size()), &width, &height, &channels, desired_channels)) == nullptr) //4 pour que ça crashe pas pour une image RGB uniquement (ex : .jpg)
 			{
 				logging::log("stbi_load_from_memory() returned nullptr", logging::Severity::CRITICAL);
 				exit(EXIT_FAILURE);
 			}
 		}
-		glGenerateTextureMipmap(t.texture_id_);
-		glTextureStorage2D(t.texture_id_, number_of_texture_levels, GL_RGBA8, width, height);
-		glTextureSubImage2D(t.texture_id_, 0, 0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+		glGenerateTextureMipmap(t->texture_id_);
+		glTextureStorage2D(t->texture_id_, number_of_texture_levels, GL_RGBA8, width, height);
+		glTextureSubImage2D(t->texture_id_, 0, 0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
 		stbi_image_free(pixels);
-	}
-}
-
-void Mesh::destroy_textures() const
-{
-	for(const Texture& t : textures_)
-	{
-		glDeleteTextures(1, &t.texture_id_);
 	}
 }
 
@@ -136,5 +130,4 @@ void Mesh::draw() const
 void Mesh::destroy() //TODO : appeler cette méthode
 {
 	destroy_all_buffers();
-	destroy_textures();
 }

@@ -28,29 +28,67 @@ bool operator<(const MeshKey& a, const MeshKey& b)
 		return false;
 	}
 
+	//return (a.file_name_ < b.file_name_) || (a.mesh_index_ < b.mesh_index_);
 	//TODO : ne marche pas pour ce cas-là : 
 	//a = "aaa", 42 ; b = "zzz", 1
 	//a < b => true
 	//b < a => true
-	//return (a.file_name_ < b.file_name_) || (a.mesh_index_ < b.mesh_index_);
 }
-
-//TODO : avant optimisations, 104 Meshes sont créés. Après optimisations, 15 Meshes sont créés
 
 std::map<MeshKey, Mesh> meshes_; //TODO : ne marche pas avec une std::unordered_map
 std::unordered_map<std::string, ShaderProgram> shader_programs_;
 std::unordered_map<std::string, GLint> uniforms_;
 
-void add_mesh(std::string_view path, int32_t mesh_index, std::vector<GLushort> ebo_values, Vertices vertices, std::vector<Texture> textures, GLenum draw_mode)
+//Conteneur de texture, texture id 
+// => cas texture dont l'image possède un path : la clef est le path (= chemin de la texture)
+// => cas texture dont l'image a ses données en base64 : (toujours insérer la texture car cas peu commun et pas vraiment possible d'identifer de manière unique ce type de texture sans lire tout leur contenu)
+std::unordered_map<std::string, Texture> textures_;
+
+std::string add_texture(Texture texture)
 {
-	MeshKey mesh_key = {std::string(path), mesh_index};
-	meshes_.insert(std::make_pair(mesh_key, Mesh(ebo_values, vertices, textures, draw_mode)));
+	std::string texture_key;
+	if(texture.image_path_.empty())
+	{
+		//Comme les images "embedded glTF" n'ont pas de path, la clef étant "", elle ne serait pas unique pour plusieurs images sans path
+		//Pour assurer que chacune de ces images aient un path fictif unique, je lui ajoute un entier (incrémenté à chaque ajout) => le path n'étant pas consulté donc la valeur de cette clef n'a aucune importance
+		//De toute façon, pour ce type d'images, aucune vérification n'est effectuée : elles sont ajoutées dans tous les cas dans textures_ 
+		static std::size_t counter = 0;
+		texture_key = "Empty path" + std::to_string(counter);
+		textures_.insert({texture_key, texture});
+		counter += 1;
+	}
+	else
+	{
+		texture_key = texture.image_path_;
+		textures_.insert({texture_key, texture});
+	}
+	return texture_key;
 }
 
-void add_mesh(std::string_view path, int32_t mesh_index, std::vector<GLushort> ebo_values, Vertices vertices, GLenum draw_mode)
+Texture* get_texture(std::string texture_key)
+{
+	if(textures_.count(texture_key))
+	{
+		return &textures_.at(texture_key);
+	}
+	else
+	{
+		return nullptr;
+	}
+}
+
+MeshKey add_mesh(std::string_view path, int32_t mesh_index, std::vector<GLushort> ebo_values, Vertices vertices, std::vector<std::string> texture_keys, GLenum draw_mode)
+{
+	MeshKey mesh_key = {std::string(path), mesh_index};
+	meshes_.insert(std::make_pair(mesh_key, Mesh(ebo_values, vertices, texture_keys, draw_mode)));
+	return mesh_key;
+}
+
+MeshKey add_mesh(std::string_view path, int32_t mesh_index, std::vector<GLushort> ebo_values, Vertices vertices, GLenum draw_mode)
 {
 	MeshKey mesh_key = {std::string(path), mesh_index};
 	meshes_.insert(std::make_pair(mesh_key, Mesh(ebo_values, vertices, draw_mode)));
+	return mesh_key;
 }
 
 const Mesh* get_mesh(MeshKey mesh_key)

@@ -2,6 +2,7 @@
 
 #include "Render/shader_program.h"
 #include "Render/mesh.h"
+#include "Render/texture.h"
 
 #include <string_view>
 
@@ -15,8 +16,11 @@ struct MeshKey
 	int32_t mesh_index_ = -1;
 };
 
-void add_mesh(std::string_view path, int32_t mesh_index, std::vector<GLushort> ebo_values, Vertices vertices, std::vector<Texture> textures, GLenum draw_mode);
-void add_mesh(std::string_view path, int32_t mesh_index, std::vector<GLushort> ebo_values, Vertices vertices, GLenum draw_mode);
+std::string add_texture(Texture texture);
+Texture* get_texture(std::string texture_key); //ne retourne pas de const Texture* car la fonction glCreateTextures() ne veut pas de const pour son troisième paramètre
+
+MeshKey add_mesh(std::string_view path, int32_t mesh_index, std::vector<GLushort> ebo_values, Vertices vertices, std::vector<std::string> texture_keys, GLenum draw_mode);
+MeshKey add_mesh(std::string_view path, int32_t mesh_index, std::vector<GLushort> ebo_values, Vertices vertices, GLenum draw_mode);
 const Mesh* get_mesh(MeshKey mesh_key);
 
 void add_shader(std::string_view name, std::vector<std::string> shader_path);

@@ -145,21 +145,7 @@ glm::vec3 Node::get_min_values_aabb() const
 	for(const glm::vec3& position_attribute : position_attributes)
 	{
 		glm::vec3 world_position_attribute = glm::vec4(position_attribute, 1.0f) * compute_model();
-
-		//TODO : utiliser aabbMin = glm::min() et glm::max()
-
-		if(world_position_attribute.x < min_value.x)
-		{
-			min_value.x = world_position_attribute.x;
-		}
-		if(world_position_attribute.y < min_value.y)
-		{
-			min_value.y = world_position_attribute.y;
-		}
-		if(world_position_attribute.z < min_value.z)
-		{
-			min_value.z = world_position_attribute.z;
-		}
+		min_value = glm::min(world_position_attribute, min_value);
 	}
 	return min_value;
 }
@@ -178,21 +164,7 @@ glm::vec3 Node::get_max_values_aabb() const
 	for(const glm::vec3& position_attribute : position_attributes)
 	{
 		glm::vec3 world_position_attribute = glm::vec4(position_attribute, 1.0f) * compute_model();
-
-		//TODO : utiliser aabbMin = glm::min() et glm::max()
-
-		if(world_position_attribute.x > max_value.x)
-		{
-			max_value.x = world_position_attribute.x;
-		}
-		if(world_position_attribute.y > max_value.y)
-		{
-			max_value.y = world_position_attribute.y;
-		}
-		if(world_position_attribute.z > max_value.z)
-		{
-			max_value.z = world_position_attribute.z;
-		}
+		max_value = glm::max(world_position_attribute, max_value);
 	}
 	return max_value;
 }

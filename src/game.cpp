@@ -140,79 +140,72 @@ void Game::update_fps_count(Uint64& last_fps_refresh, unsigned int& frame_count_
 
 void detect_collision(const gltf::Node& node, gltf::Node& player_node)
 {
-	//TODO : pas ouf car répétition de code
-	if(node.is_empty_node())
+	if(!node.is_empty_node())
 	{
-		for(const gltf::Node& child_node : node.children_nodes_)
+		glm::vec3 min_values_model = node.get_min_values_aabb();
+		glm::vec3 max_values_model = node.get_max_values_aabb();
+
+		glm::vec3 min_values_player = player_node.get_min_values_aabb();
+		glm::vec3 max_values_player = player_node.get_max_values_aabb();
+
+		glm::vec3 position_model = glm::vec3(node.get_parent_matrix() * glm::vec4(node.get_position(), 1.0f));
+		glm::vec3 position_player = player_node.get_position();
+
+		min_values_model += position_model;
+		max_values_model += position_model;
+		min_values_player += position_player;
+		max_values_player += position_player;
+
+		float overlap_x = std::min(max_values_player.x, max_values_model.x) - std::max(min_values_player.x, min_values_model.x); //la valeur obtenue représente de combien en x le joueur est entré dans le modèle
+		float overlap_y = std::min(max_values_player.y, max_values_model.y) - std::max(min_values_player.y, min_values_model.y);
+		float overlap_z = std::min(max_values_player.z, max_values_model.z) - std::max(min_values_player.z, min_values_model.z);
+
+		glm::vec3 player_center = (min_values_player + max_values_player) * 0.5f; //la valeur est différente de position_player car l'origine dans le modèle n'est pas centrée en Y
+		glm::vec3 model_center = (min_values_model + max_values_model) * 0.5f; //idem, peut être différente de position_model
+
+		if(min_values_model.x <= max_values_player.x && max_values_model.x >= min_values_player.x
+		&& min_values_model.y <= max_values_player.y && max_values_model.y >= min_values_player.y
+		&& min_values_model.z <= max_values_player.z && max_values_model.z >= min_values_player.z)
 		{
-			detect_collision(child_node, player_node);
-		}
-		return;
-	}
+			//std::cout << std::endl;
+			//std::cout << "Collision between " << node->get_name() << " and player!\n";
+			//std::cout << "Infos => model: position(" << position_model.x << ", " << position_model.y << ", " << position_model.z << "), min(" << min_values_model.x << ", " << min_values_model.y << ", " << min_values_model.z << "), max(" << max_values_model.x << ", " << max_values_model.y << ", " << max_values_model.z << ")\n";
+			//std::cout << "Infos => player: position(" << position_player.x << ", " << position_player.y << ", " << position_player.z << "), min(" << min_values_player.x << ", " << min_values_player.y << ", " << min_values_player.z << "), max(" << max_values_player.x << ", " << max_values_player.y << ", " << max_values_player.z << ")\n";
+			//std::cout << std::endl;
 
-	glm::vec3 min_values_model = node.get_min_values_aabb();
-	glm::vec3 max_values_model = node.get_max_values_aabb();
-	
-	glm::vec3 min_values_player = player_node.get_min_values_aabb();
-	glm::vec3 max_values_player = player_node.get_max_values_aabb();
-
-	glm::vec3 position_model = glm::vec3(node.get_parent_matrix() * glm::vec4(node.get_position(), 1.0f));
-	glm::vec3 position_player = player_node.get_position();
-
-	min_values_model += position_model;
-	max_values_model += position_model;
-	min_values_player += position_player;
-	max_values_player += position_player;
-
-	float overlap_x = std::min(max_values_player.x, max_values_model.x) - std::max(min_values_player.x, min_values_model.x); //la valeur obtenue représente de combien en x le joueur est entré dans le modèle
-	float overlap_y = std::min(max_values_player.y, max_values_model.y) - std::max(min_values_player.y, min_values_model.y);
-	float overlap_z = std::min(max_values_player.z, max_values_model.z) - std::max(min_values_player.z, min_values_model.z);
-
-	glm::vec3 player_center = (min_values_player + max_values_player) * 0.5f; //la valeur est différente de position_player car l'origine dans le modèle n'est pas centrée en Y
-	glm::vec3 model_center = (min_values_model + max_values_model) * 0.5f; //idem, peut être différente de position_model
-
-	if(min_values_model.x <= max_values_player.x && max_values_model.x >= min_values_player.x
-	&& min_values_model.y <= max_values_player.y && max_values_model.y >= min_values_player.y
-	&& min_values_model.z <= max_values_player.z && max_values_model.z >= min_values_player.z)
-	{
-		//std::cout << std::endl;
-		//std::cout << "Collision between " << node->get_name() << " and player!\n";
-		//std::cout << "Infos => model: position(" << position_model.x << ", " << position_model.y << ", " << position_model.z << "), min(" << min_values_model.x << ", " << min_values_model.y << ", " << min_values_model.z << "), max(" << max_values_model.x << ", " << max_values_model.y << ", " << max_values_model.z << ")\n";
-		//std::cout << "Infos => player: position(" << position_player.x << ", " << position_player.y << ", " << position_player.z << "), min(" << min_values_player.x << ", " << min_values_player.y << ", " << min_values_player.z << "), max(" << max_values_player.x << ", " << max_values_player.y << ", " << max_values_player.z << ")\n";
-		//std::cout << std::endl;
-
-		//on cherche le plus petit overlap car on veut déplacer le joueur de la plus petite distance possible pour qu'il ne soit plus en collision avec le modèle
-		if(overlap_x < overlap_y && overlap_x < overlap_z)
-		{
-			if(player_center.x < model_center.x)
+			//on cherche le plus petit overlap car on veut déplacer le joueur de la plus petite distance possible pour qu'il ne soit plus en collision avec le modèle
+			if(overlap_x < overlap_y && overlap_x < overlap_z)
 			{
-				player_node.add_translation_x(-overlap_x);
+				if(player_center.x < model_center.x)
+				{
+					player_node.add_translation_x(-overlap_x);
+				}
+				else
+				{
+					player_node.add_translation_x(overlap_x);
+				}
+			}
+			else if(overlap_y < overlap_z)
+			{
+				if(player_center.y < model_center.y)
+				{
+					player_node.add_translation_y(-overlap_y);
+				}
+				else
+				{
+					player_node.add_translation_y(overlap_y);
+				}
 			}
 			else
 			{
-				player_node.add_translation_x(overlap_x);
-			}
-		}
-		else if(overlap_y < overlap_z)
-		{
-			if(player_center.y < model_center.y)
-			{
-				player_node.add_translation_y(-overlap_y);
-			}
-			else
-			{
-				player_node.add_translation_y(overlap_y);
-			}
-		}
-		else
-		{
-			if(player_center.z < model_center.z)
-			{
-				player_node.add_translation_z(-overlap_z);
-			}
-			else
-			{
-				player_node.add_translation_z(overlap_z);
+				if(player_center.z < model_center.z)
+				{
+					player_node.add_translation_z(-overlap_z);
+				}
+				else
+				{
+					player_node.add_translation_z(overlap_z);
+				}
 			}
 		}
 	}
