@@ -2,6 +2,7 @@
 #include "Logging/logging.h"
 
 #include <map>
+#include <unordered_map>
 #include <string>
 #include <iostream>
 
@@ -86,9 +87,7 @@ MeshKey add_mesh(std::string_view path, int32_t mesh_index, std::vector<GLushort
 
 MeshKey add_mesh(std::string_view path, int32_t mesh_index, std::vector<GLushort> ebo_values, Vertices vertices, GLenum draw_mode)
 {
-	MeshKey mesh_key = {std::string(path), mesh_index};
-	meshes_.insert(std::make_pair(mesh_key, Mesh(ebo_values, vertices, draw_mode)));
-	return mesh_key;
+	return add_mesh(path, mesh_index, ebo_values, vertices, {}, draw_mode);
 }
 
 const Mesh* get_mesh(MeshKey mesh_key)

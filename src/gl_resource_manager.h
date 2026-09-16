@@ -17,7 +17,9 @@ struct MeshKey
 };
 
 std::string add_texture(Texture texture);
-Texture* get_texture(std::string texture_key); //ne retourne pas de const Texture* car la fonction glCreateTextures() ne veut pas de const pour son troisième paramètre
+
+//TODO : voir si je peux modifier l'implémentation pour quand même utiliser const
+Texture* get_texture(std::string texture_key); //ne retourne pas de const Texture* car la fonction glCreateTextures() modifie son troisième paramètre
 
 MeshKey add_mesh(std::string_view path, int32_t mesh_index, std::vector<GLushort> ebo_values, Vertices vertices, std::vector<std::string> texture_keys, GLenum draw_mode);
 MeshKey add_mesh(std::string_view path, int32_t mesh_index, std::vector<GLushort> ebo_values, Vertices vertices, GLenum draw_mode);

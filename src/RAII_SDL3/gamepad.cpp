@@ -1,4 +1,4 @@
-#include "RAII_SDL3/gamepad.h"
+#include "gamepad.h"
 
 #include <iostream>
 

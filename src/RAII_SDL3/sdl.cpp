@@ -1,5 +1,6 @@
-#include "RAII_SDL3/sdl.h"
+#include "sdl.h"
 
+#include <SDL3/SDL.h>
 #include <iostream>
 
 namespace sdl

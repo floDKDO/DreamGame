@@ -3,8 +3,6 @@
 #include "glTF/node.h"
 #include "glTF/gltf_file.h"
 
-#include <memory>
-
 class Model
 {
 	public:

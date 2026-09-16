@@ -1,6 +1,6 @@
-//#include "RAII_SDL2/sdl_ttf.h"
+//#include "sdl_ttf.h"
 //
-//#include <SDL2/SDL_ttf.h>
+//#include <SDL3/SDL_ttf.h>
 //
 //namespace sdl
 //{

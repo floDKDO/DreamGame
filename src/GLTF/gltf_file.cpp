@@ -2,6 +2,7 @@
 #include "gltf.h"
 #include "node.h"
 #include "aabb.h"
+#include "Common/utils.h"
 #include "Logging/logging.h"
 #include "gl_resource_manager.h"
 

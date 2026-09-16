@@ -1,4 +1,4 @@
-#include "RAII_SDL3/wav_buffer.h"
+#include "wav_buffer.h"
 #include "Logging/logging.h"
 
 #include <AL/al.h>

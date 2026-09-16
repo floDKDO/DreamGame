@@ -1,7 +1,8 @@
 #pragma once
 
 #include "input_common.h"
-#include "RAII_SDL3/gamepad.h"
+
+#include <SDL3/SDL.h>
 
 class GamepadInput
 {

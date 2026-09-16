@@ -13,7 +13,7 @@ class MapFile
 	public:
 		explicit MapFile(std::string_view map_file_path);
 
-		std::vector<std::unique_ptr<Model>> get_models() const;
+		std::vector<std::unique_ptr<Model>> get_models() const; //TODO : pas ouf, vaut mieux retourner qqc de const sans copie
 
 	private:
 		void open();

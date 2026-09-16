@@ -1,12 +1,10 @@
 #pragma once
 
 #include "aabb.h"
-#include "Common/utils.h"
 #include "Common/transform.h"
 #include "gl_resource_manager.h"
 
 #include <optional>
-#include <memory>
 
 namespace gltf
 {

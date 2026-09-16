@@ -1,6 +1,6 @@
 #pragma once
 
-#include "RAII_SDL3/surface.h"
+#include "surface.h"
 
 namespace sdl
 {
@@ -18,7 +18,7 @@ class Window
 		SDL_Window* fetch() const;
 		void swap_buffers() const;
 		void get_size(int* w, int* h) const;
-		SDL_GLContext get_context() const;
+		const SDL_GLContext& get_context() const;
 		void update_fps(unsigned int fps) const;
 		void set_relative_mouse_mode(bool enabled) const;
 

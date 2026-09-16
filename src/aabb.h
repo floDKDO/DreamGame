@@ -12,7 +12,7 @@ class AABB
 		void draw();
 		glm::vec3 get_min_values() const;
 		glm::vec3 get_max_values() const;
-		std::vector<glm::vec3> get_corners() const;
+		std::vector<glm::vec3> get_corners() const; //retourne une copie car le vector est une variable locale à la méthode
 
 	private:
 		Mesh mesh_;

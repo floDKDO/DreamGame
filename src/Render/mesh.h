@@ -1,6 +1,5 @@
 #pragma once
 
-#include "shader_program.h"
 #include "vertices.h"
 
 class Mesh

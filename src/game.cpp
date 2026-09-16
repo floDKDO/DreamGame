@@ -2,11 +2,11 @@
 #include "OpenAL/openal.h"
 #include "gl_resource_manager.h"
 
-#include "imgui/imgui.h"
-#include "imgui/imgui_impl_sdl3.h"
-#include "imgui/imgui_impl_opengl3.h"
+//#include "imgui/imgui.h"
+//#include "imgui/imgui_impl_sdl3.h"
+//#include "imgui/imgui_impl_opengl3.h"
 
-#include <SDL3_ttf/SDL_ttf.h>
+//#include <SDL3_ttf/SDL_ttf.h>
 #include <glm/gtc/type_ptr.hpp>
 #include <iostream>
 

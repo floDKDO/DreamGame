@@ -1,4 +1,4 @@
-#include "RAII_SDL3/window.h"
+#include "window.h"
 
 #include <string>
 #include <iostream>
@@ -108,7 +108,7 @@ void Window::get_size(int* w, int* h) const
 	}
 }
 
-SDL_GLContext Window::get_context() const
+const SDL_GLContext& Window::get_context() const
 {
 	return context_;
 }

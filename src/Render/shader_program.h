@@ -1,11 +1,9 @@
 #pragma once
 
 #include <GL/glew.h>
-#include <glm/vec3.hpp>
 #include <vector>
 #include <string>
 #include <string_view>
-#include <unordered_map>
 
 class ShaderProgram
 {

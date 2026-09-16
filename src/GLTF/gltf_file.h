@@ -1,7 +1,6 @@
 #pragma once
 
 #include <tinygltf/tiny_gltf_v3.h>
-#include <memory>
 #include <string>
 #include <string_view>
 
@@ -16,7 +15,7 @@ class glTFFile
 		explicit glTFFile(std::string_view path);
 		~glTFFile();
 
-		Node get_root_node() const;
+		Node get_root_node() const; //TODO : pas ouf, vaut mieux retourner qqc de const sans copie
 
 	private:
 		void open();

@@ -1,13 +1,12 @@
 #pragma once
 
-#include "RAII_SDL3/window.h"
+#include "RAII_SDL3/gamepad.h"
 #include "Backend/backend.h"
 #include "Render/model.h"
 #include "Map/map.h"
 #include "Camera/camera.h"
 #include "Player/player.h"
 #include "Input/input_manager.h"
-#include "Logging/logging.h"
 
 class Game
 {
