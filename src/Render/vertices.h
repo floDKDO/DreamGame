@@ -8,6 +8,7 @@ class Vertices
 {
 	public:
 		explicit Vertices(uint64_t number);
+
 		void add_position_attributes(std::vector<glm::vec3> position_vector);
 		void add_normal_attributes(std::vector<glm::vec3> normal_vector);
 		void add_texcoord_attributes(std::vector<glm::vec2> texcoord_vector);

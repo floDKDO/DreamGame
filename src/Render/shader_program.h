@@ -9,12 +9,11 @@ class ShaderProgram
 {
 	public:
 		ShaderProgram(std::string_view shader_program_name, std::vector<std::string> shader_paths);
-		~ShaderProgram();
-
 		ShaderProgram(const ShaderProgram&) = delete;
 		ShaderProgram(ShaderProgram&& shader_program);
 		ShaderProgram& operator=(const ShaderProgram&) = delete;
 		ShaderProgram& operator=(ShaderProgram&& shader_program);
+		~ShaderProgram();
 
 		void use() const;
 

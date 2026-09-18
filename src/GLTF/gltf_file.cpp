@@ -20,10 +20,11 @@ Vertices get_vertices(const tg3_model& model_tg3, const tg3_primitive& primitive
 Vertices get_aabb_vertices(const tg3_model& model_tg3, const tg3_primitive& primitive_tg3);
 Transform get_transform(const tg3_node& node_tg3);
 resource::MeshKey get_mesh(std::string_view path, const tg3_model& model_tg3, const tg3_node& node_tg3);
+resource::MeshKey get_mesh_aabb(std::string_view path, int32_t mesh_index, std::vector<GLushort> ebo_values, Vertices vertices, GLenum draw_mode);
 std::optional<tg3_accessor> get_accessor_from_attribute(std::string_view attribute, const tg3_model& model_tg3, const tg3_primitive& primitive_tg3);
 glm::vec3 get_min_values(const tg3_model& model_tg3, const tg3_primitive& primitive_tg3);
 glm::vec3 get_max_values(const tg3_model& model_tg3, const tg3_primitive& primitive_tg3);
-std::optional<AABB> get_aabb(const tg3_model& model_tg3, const tg3_node& node_tg3);
+std::optional<AABB> get_aabb(std::string_view path, const tg3_model& model_tg3, const tg3_node& node_tg3);
 std::vector<std::string> get_textures(const tg3_model& model_tg3);
 std::vector<GLushort> get_ebo_values(const tg3_model& model_tg3, const tg3_primitive& primitive_tg3);
 std::vector<glm::vec4> get_vec4_color_attribute(const tg3_model& model_tg3, const tg3_str_int_pair& attribute_tg3);
@@ -39,6 +40,28 @@ glTFFile::glTFFile(std::string_view path)
 {
 	open();
 	//print_info(); //TODO
+}
+
+glTFFile::glTFFile(glTFFile&& gltf_file)
+	: path_(gltf_file.path_), model_tg3_(gltf_file.model_tg3_)
+{
+	tg3_error_stack_init(&error_stack_tg3_); //reset de la stack d'erreurs
+	std::memset(&gltf_file.model_tg3_, 0, sizeof(tg3_model)); //mise à 0 car la fonction tg3_model_free ne supprime rien si le champ arena_ est à 0
+}
+
+glTFFile& glTFFile::operator=(glTFFile&& gltf_file)
+{
+	if(this == &gltf_file)
+	{
+		return *this;
+	}
+
+	close();
+	model_tg3_ = gltf_file.model_tg3_;
+	tg3_error_stack_init(&error_stack_tg3_); //reset de la stack d'erreurs
+	std::memset(&gltf_file.model_tg3_, 0, sizeof(tg3_model)); //mise à 0 car la fonction tg3_model_free ne supprime rien si le champ arena_ est à 0
+
+	return *this;
 }
 
 glTFFile::~glTFFile()
@@ -305,7 +328,7 @@ gltf::Node get_node(std::string_view path, const tg3_model& model_tg3, const tg3
 		node_name = std::string(node_tg3.name.data);
 	}
 
-	gltf::Node node(node_name, get_transform(node_tg3), parent_matrix, get_mesh(path, model_tg3, node_tg3), get_aabb(model_tg3, node_tg3));
+	gltf::Node node(node_name, get_transform(node_tg3), parent_matrix, get_mesh(path, model_tg3, node_tg3), get_aabb(path, model_tg3, node_tg3));
 	if(node_tg3.children_count > 1 && node_tg3.mesh == -1)
 	{
 		node.set_empty_node();
@@ -381,16 +404,17 @@ Vertices get_aabb_vertices(const tg3_model& model_tg3, const tg3_primitive& prim
 	glm::vec3 max_values = get_max_values(model_tg3, primitive_tg3);
 	std::size_t vertices_number = 8ULL;
 
-	std::vector<glm::vec3> position_attributes;
-	position_attributes.reserve(vertices_number);
-	position_attributes.push_back(glm::vec3(max_values.x, min_values.y, min_values.z)); //0 : bottom face, upper right
-	position_attributes.push_back(glm::vec3(min_values.x, min_values.y, min_values.z)); //1 : bottom face, upper left
-	position_attributes.push_back(glm::vec3(max_values.x, min_values.y, max_values.z)); //2 : bottom face, down right
-	position_attributes.push_back(glm::vec3(min_values.x, min_values.y, max_values.z)); //3 : bottom face, down left
-	position_attributes.push_back(glm::vec3(max_values.x, max_values.y, min_values.z)); //4 : top face, upper right
-	position_attributes.push_back(glm::vec3(min_values.x, max_values.y, min_values.z)); //5 : top face, upper left
-	position_attributes.push_back(glm::vec3(max_values.x, max_values.y, max_values.z)); //6 : top face, down right
-	position_attributes.push_back(glm::vec3(min_values.x, max_values.y, max_values.z)); //7 : top face, down left
+	std::vector<glm::vec3> position_attributes
+	{
+		glm::vec3(max_values.x, min_values.y, min_values.z), //0 : bottom face, upper right
+		glm::vec3(min_values.x, min_values.y, min_values.z), //1 : bottom face, upper left
+		glm::vec3(max_values.x, min_values.y, max_values.z), //2 : bottom face, down right
+		glm::vec3(min_values.x, min_values.y, max_values.z), //3 : bottom face, down left
+		glm::vec3(max_values.x, max_values.y, min_values.z), //4 : top face, upper right
+		glm::vec3(min_values.x, max_values.y, min_values.z), //5 : top face, upper left
+		glm::vec3(max_values.x, max_values.y, max_values.z), //6 : top face, down right
+		glm::vec3(min_values.x, max_values.y, max_values.z)  //7 : top face, down left
+	};
 
 	Vertices vertices(vertices_number);
 	vertices.add_position_attributes(position_attributes);
@@ -432,6 +456,11 @@ resource::MeshKey get_mesh(std::string_view path, const tg3_model& model_tg3, co
 		}
 	}
 	return mesh_key;
+}
+
+resource::MeshKey get_mesh_aabb(std::string_view path, int32_t mesh_index, std::vector<GLushort> ebo_values, Vertices vertices, GLenum draw_mode)
+{
+	return resource::add_aabb_mesh(path, mesh_index, ebo_values, vertices, draw_mode);
 }
 
 std::optional<tg3_accessor> get_accessor_from_attribute(std::string_view attribute, const tg3_model& model_tg3, const tg3_primitive& primitive_tg3)
@@ -486,7 +515,7 @@ glm::vec3 get_max_values(const tg3_model& model_tg3, const tg3_primitive& primit
 	return max_values;
 }
 
-std::optional<AABB> get_aabb(const tg3_model& model_tg3, const tg3_node& node_tg3)
+std::optional<AABB> get_aabb(std::string_view path, const tg3_model& model_tg3, const tg3_node& node_tg3)
 {
 	int32_t mesh_index = node_tg3.mesh;
 	if(mesh_index != -1)
@@ -510,9 +539,10 @@ std::optional<AABB> get_aabb(const tg3_model& model_tg3, const tg3_node& node_tg
 		};
 		glm::vec3 min_values = get_min_values(model_tg3, primitive_tg3);
 		glm::vec3 max_values = get_max_values(model_tg3, primitive_tg3);
+		resource::MeshKey mesh_key = get_mesh_aabb(path, mesh_index, ebo_values, vertices, primitive_tg3.mode);
 
 		//un AABB n'a pas de texture
-		return AABB(min_values, max_values, ebo_values, vertices, primitive_tg3.mode);
+		return AABB(min_values, max_values, mesh_key);
 	}
 	std::string node_name = (node_tg3.name.len > 0) ? std::string(node_tg3.name.data) : "";
 	logging::log("get_aabb() returned std::nullopt (the node \"" + node_name + "\" does not have a AABB)", logging::Severity::NOTICE);

@@ -37,6 +37,7 @@ bool operator<(const MeshKey& a, const MeshKey& b)
 }
 
 std::map<MeshKey, Mesh> meshes_; //TODO : ne marche pas avec une std::unordered_map
+std::map<MeshKey, Mesh> aabb_meshes_; //TODO : ne marche pas avec une std::unordered_map
 std::unordered_map<std::string, ShaderProgram> shader_programs_;
 std::unordered_map<std::string, GLint> uniforms_;
 
@@ -95,6 +96,30 @@ const Mesh* get_mesh(MeshKey mesh_key)
 	if(meshes_.count(mesh_key))
 	{
 		return &meshes_.at(mesh_key);
+	}
+	else
+	{
+		return nullptr;
+	}
+}
+
+MeshKey add_aabb_mesh(std::string_view path, int32_t mesh_index, std::vector<GLushort> ebo_values, Vertices vertices, std::vector<std::string> texture_keys, GLenum draw_mode)
+{
+	MeshKey mesh_key = {std::string(path), mesh_index};
+	aabb_meshes_.insert(std::make_pair(mesh_key, Mesh(ebo_values, vertices, texture_keys, draw_mode)));
+	return mesh_key;
+}
+
+MeshKey add_aabb_mesh(std::string_view path, int32_t mesh_index, std::vector<GLushort> ebo_values, Vertices vertices, GLenum draw_mode)
+{
+	return add_aabb_mesh(path, mesh_index, ebo_values, vertices, {}, draw_mode);
+}
+
+const Mesh* get_aabb_mesh(MeshKey mesh_key)
+{
+	if(aabb_meshes_.count(mesh_key))
+	{
+		return &aabb_meshes_.at(mesh_key);
 	}
 	else
 	{

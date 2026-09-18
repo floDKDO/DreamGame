@@ -25,6 +25,10 @@ MeshKey add_mesh(std::string_view path, int32_t mesh_index, std::vector<GLushort
 MeshKey add_mesh(std::string_view path, int32_t mesh_index, std::vector<GLushort> ebo_values, Vertices vertices, GLenum draw_mode);
 const Mesh* get_mesh(MeshKey mesh_key);
 
+MeshKey add_aabb_mesh(std::string_view path, int32_t mesh_index, std::vector<GLushort> ebo_values, Vertices vertices, std::vector<std::string> texture_keys, GLenum draw_mode);
+MeshKey add_aabb_mesh(std::string_view path, int32_t mesh_index, std::vector<GLushort> ebo_values, Vertices vertices, GLenum draw_mode);
+const Mesh* get_aabb_mesh(MeshKey mesh_key);
+
 void add_shader(std::string_view name, std::vector<std::string> shader_path);
 const ShaderProgram& get_shader(std::string_view name);
 void bind_shader(std::string_view name);

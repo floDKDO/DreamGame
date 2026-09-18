@@ -20,7 +20,11 @@ Game::Game()
 	running_(true), gamepad_(), test_map_("resources/maps/corridor.gltf"), 
 	gizmo_("resources/models/axis_gizmo.glb"),
 	fov_(glm::radians(45.0f)), near_plane_(0.1f), far_plane_(100.0f), perspective_projection_matrix_(1.0f)
-{}
+{
+	gltf::glTFFile file1("resources/models/axis_gizmo.glb");
+	gltf::glTFFile file2("resources/models/axis_gizmo.glb");
+	file2 = std::move(file1);
+}
 
 void Game::run()
 {
