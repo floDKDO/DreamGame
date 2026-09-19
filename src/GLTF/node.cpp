@@ -10,7 +10,7 @@ namespace gltf
 {
 
 Node::Node(std::string name, Transform transform, glm::mat4 parent_matrix, resource::MeshKey mesh_key, std::optional<AABB> aabb)
-	: is_empty_node_(false), name_(name), mesh_key_(mesh_key), aabb_(aabb), transform_(transform), parent_matrix_(parent_matrix)
+	: is_empty_node_(false), name_(name), mesh_key_(mesh_key), aabb_(aabb), transform_(transform), parent_matrix_(parent_matrix), position_(glm::vec3(parent_matrix_ * glm::vec4(transform_.position_, 1.0f)))
 {}
 
 glm::mat4 Node::compute_model() const
@@ -58,12 +58,14 @@ void Node::draw()
 void Node::set_translation(glm::vec3 position)
 {
 	transform_.position_ = position;
+	update_position();
 	update_parent_matrix_of_children(*this);
 }
 
 void Node::add_translation(glm::vec3 position)
 {
 	transform_.position_ += position;
+	update_position();
 	update_parent_matrix_of_children(*this);
 }
 
@@ -112,11 +114,17 @@ void Node::add_scale(glm::vec3 scale)
 	update_parent_matrix_of_children(*this);
 }
 
+void Node::update_position()
+{
+	position_ = glm::vec3(parent_matrix_ * glm::vec4(transform_.position_, 1.0f));
+}
+
 void Node::update_parent_matrix_of_children(Node& node)
 {
 	for(Node& child_node : node.children_nodes_)
 	{
 		child_node.parent_matrix_ = node.compute_model();
+		child_node.update_position();
 		update_parent_matrix_of_children(child_node);
 	}
 }
@@ -131,7 +139,7 @@ std::string Node::get_name() const
 	return name_;
 }
 
-glm::vec3 Node::get_min_values_aabb() const
+glm::vec3 Node::get_min_aabb_from_position() const
 {
 	if(!aabb_.has_value())
 	{
@@ -147,10 +155,10 @@ glm::vec3 Node::get_min_values_aabb() const
 		glm::vec3 world_position_attribute = glm::vec4(position_attribute, 1.0f) * compute_model();
 		min_value = glm::min(world_position_attribute, min_value);
 	}
-	return min_value;
+	return min_value + position_;
 }
 
-glm::vec3 Node::get_max_values_aabb() const
+glm::vec3 Node::get_max_aabb_from_position() const
 {
 	if(!aabb_.has_value())
 	{
@@ -166,12 +174,18 @@ glm::vec3 Node::get_max_values_aabb() const
 		glm::vec3 world_position_attribute = glm::vec4(position_attribute, 1.0f) * compute_model();
 		max_value = glm::max(world_position_attribute, max_value);
 	}
-	return max_value;
+	return max_value + position_;
+}
+
+glm::vec3 Node::get_center() const
+{
+	return (get_min_aabb_from_position() + get_max_aabb_from_position()) / 2.0f;
 }
 
 const glm::vec3& Node::get_position() const
 {
-	return transform_.position_;
+	//return transform_.position_;
+	return position_;
 }
 
 }

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "aabb.h"
+#include "Render/aabb.h"
 #include "Common/transform.h"
 #include "gl_resource_manager.h"
 
@@ -22,8 +22,9 @@ class Node
 		glm::mat4 compute_model() const;
 		glm::mat4 get_parent_matrix() const;
 		std::string get_name() const;
-		glm::vec3 get_min_values_aabb() const;
-		glm::vec3 get_max_values_aabb() const;
+		glm::vec3 get_min_aabb_from_position() const;
+		glm::vec3 get_max_aabb_from_position() const;
+		glm::vec3 get_center() const;
 
 		const glm::vec3& get_position() const; //retourne une référence car la position est utilisée en tant que membre (const ref) dans la classe Camera
 
@@ -42,11 +43,13 @@ class Node
 		std::vector<Node> children_nodes_;
 
 	private:
+		void update_position();
 		void update_parent_matrix_of_children(Node& node);
 
 		bool is_empty_node_;
 		Transform transform_;
 		glm::mat4 parent_matrix_;
+		glm::vec3 position_;
 		std::string name_;
 		resource::MeshKey mesh_key_;
 		std::optional<AABB> aabb_;

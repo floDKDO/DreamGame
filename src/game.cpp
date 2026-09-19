@@ -20,11 +20,7 @@ Game::Game()
 	running_(true), gamepad_(), test_map_("resources/maps/corridor.gltf"), 
 	gizmo_("resources/models/axis_gizmo.glb"),
 	fov_(glm::radians(45.0f)), near_plane_(0.1f), far_plane_(100.0f), perspective_projection_matrix_(1.0f)
-{
-	gltf::glTFFile file1("resources/models/axis_gizmo.glb");
-	gltf::glTFFile file2("resources/models/axis_gizmo.glb");
-	file2 = std::move(file1);
-}
+{}
 
 void Game::run()
 {
@@ -146,70 +142,35 @@ void detect_collision(const gltf::Node& node, gltf::Node& player_node)
 {
 	if(!node.is_empty_node())
 	{
-		glm::vec3 min_values_model = node.get_min_values_aabb();
-		glm::vec3 max_values_model = node.get_max_values_aabb();
+		glm::vec3 min_aabb_model = node.get_min_aabb_from_position();
+		glm::vec3 max_aabb_model = node.get_max_aabb_from_position();
+		glm::vec3 min_aabb_player = player_node.get_min_aabb_from_position();
+		glm::vec3 max_aabb_player = player_node.get_max_aabb_from_position();
 
-		glm::vec3 min_values_player = player_node.get_min_values_aabb();
-		glm::vec3 max_values_player = player_node.get_max_values_aabb();
-
-		glm::vec3 position_model = glm::vec3(node.get_parent_matrix() * glm::vec4(node.get_position(), 1.0f));
-		glm::vec3 position_player = player_node.get_position();
-
-		min_values_model += position_model;
-		max_values_model += position_model;
-		min_values_player += position_player;
-		max_values_player += position_player;
-
-		float overlap_x = std::min(max_values_player.x, max_values_model.x) - std::max(min_values_player.x, min_values_model.x); //la valeur obtenue représente de combien en x le joueur est entré dans le modèle
-		float overlap_y = std::min(max_values_player.y, max_values_model.y) - std::max(min_values_player.y, min_values_model.y);
-		float overlap_z = std::min(max_values_player.z, max_values_model.z) - std::max(min_values_player.z, min_values_model.z);
-
-		glm::vec3 player_center = (min_values_player + max_values_player) * 0.5f; //la valeur est différente de position_player car l'origine dans le modèle n'est pas centrée en Y
-		glm::vec3 model_center = (min_values_model + max_values_model) * 0.5f; //idem, peut être différente de position_model
-
-		if(min_values_model.x <= max_values_player.x && max_values_model.x >= min_values_player.x
-		&& min_values_model.y <= max_values_player.y && max_values_model.y >= min_values_player.y
-		&& min_values_model.z <= max_values_player.z && max_values_model.z >= min_values_player.z)
+		if(min_aabb_model.x <= max_aabb_player.x && max_aabb_model.x >= min_aabb_player.x
+		&& min_aabb_model.y <= max_aabb_player.y && max_aabb_model.y >= min_aabb_player.y
+		&& min_aabb_model.z <= max_aabb_player.z && max_aabb_model.z >= min_aabb_player.z)
 		{
-			//std::cout << std::endl;
-			//std::cout << "Collision between " << node->get_name() << " and player!\n";
-			//std::cout << "Infos => model: position(" << position_model.x << ", " << position_model.y << ", " << position_model.z << "), min(" << min_values_model.x << ", " << min_values_model.y << ", " << min_values_model.z << "), max(" << max_values_model.x << ", " << max_values_model.y << ", " << max_values_model.z << ")\n";
-			//std::cout << "Infos => player: position(" << position_player.x << ", " << position_player.y << ", " << position_player.z << "), min(" << min_values_player.x << ", " << min_values_player.y << ", " << min_values_player.z << "), max(" << max_values_player.x << ", " << max_values_player.y << ", " << max_values_player.z << ")\n";
-			//std::cout << std::endl;
+			glm::vec3 overlap(
+				std::min(max_aabb_player.x, max_aabb_model.x) - std::max(min_aabb_player.x, min_aabb_model.x), //la valeur obtenue représente de combien en x le joueur est entré dans le modèle
+				std::min(max_aabb_player.y, max_aabb_model.y) - std::max(min_aabb_player.y, min_aabb_model.y),
+				std::min(max_aabb_player.z, max_aabb_model.z) - std::max(min_aabb_player.z, min_aabb_model.z)
+			);
+			glm::vec3 player_center = player_node.get_center(); //la valeur est différente de position_player car l'origine dans le modèle n'est pas forcément centrée en Y
+			glm::vec3 model_center = node.get_center(); //idem, peut être différente de position_model
 
 			//on cherche le plus petit overlap car on veut déplacer le joueur de la plus petite distance possible pour qu'il ne soit plus en collision avec le modèle
-			if(overlap_x < overlap_y && overlap_x < overlap_z)
+			if(overlap.x < overlap.y && overlap.x < overlap.z)
 			{
-				if(player_center.x < model_center.x)
-				{
-					player_node.add_translation_x(-overlap_x);
-				}
-				else
-				{
-					player_node.add_translation_x(overlap_x);
-				}
+				player_node.add_translation_x((player_center.x < model_center.x) ? -overlap.x : overlap.x);
 			}
-			else if(overlap_y < overlap_z)
+			else if(overlap.y < overlap.z)
 			{
-				if(player_center.y < model_center.y)
-				{
-					player_node.add_translation_y(-overlap_y);
-				}
-				else
-				{
-					player_node.add_translation_y(overlap_y);
-				}
+				player_node.add_translation_y((player_center.y < model_center.y) ? -overlap.y : overlap.y);
 			}
 			else
 			{
-				if(player_center.z < model_center.z)
-				{
-					player_node.add_translation_z(-overlap_z);
-				}
-				else
-				{
-					player_node.add_translation_z(overlap_z);
-				}
+				player_node.add_translation_z((player_center.z < model_center.z) ? -overlap.z : overlap.z);
 			}
 		}
 	}
