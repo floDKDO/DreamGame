@@ -43,11 +43,12 @@ void Node::draw()
 		mesh->draw();
 	}
 
-	if(aabb_.has_value())
+	//TODO
+	/*if(aabb_.has_value())
 	{
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); //affichage wireframe pour AABB
 		aabb_->draw();
-	}
+	}*/
 
 	for(Node& children_node : children_nodes_)
 	{
@@ -139,47 +140,52 @@ std::string Node::get_name() const
 	return name_;
 }
 
-glm::vec3 Node::get_min_aabb_from_position() const
+std::vector<glm::vec3> Node::get_aabb_from_position() const
 {
 	if(!aabb_.has_value())
 	{
 		logging::log("The node \"" + name_ + " " + std::to_string(mesh_key_.mesh_index_) + "\" does not have a AABB", logging::Severity::NOTICE);
-		return glm::vec3(0.0f);
+		return std::vector<glm::vec3>(0.0f); //TODO : à gérer autrement
 	}
 
-	std::vector<glm::vec3> position_attributes = aabb_.value().get_corners();
-	glm::vec3 min_value(std::numeric_limits<float>::max());
+	std::vector<glm::vec3> aabb_points = aabb_.value().get_corners();
+	glm::vec3 min_values(std::numeric_limits<float>::max());
+	glm::vec3 max_values(std::numeric_limits<float>::lowest());
 
-	for(const glm::vec3& position_attribute : position_attributes)
+	for(const glm::vec3& aabb_point : aabb_points)
 	{
-		glm::vec3 world_position_attribute = glm::vec4(position_attribute, 1.0f) * compute_model();
-		min_value = glm::min(world_position_attribute, min_value);
+		glm::vec3 world_position_attribute = glm::vec4(aabb_point, 1.0f) * compute_model();
+		min_values = glm::min(world_position_attribute, min_values);
+		max_values = glm::max(world_position_attribute, max_values);
 	}
-	return min_value + position_;
+
+	min_values += position_;
+	max_values += position_;
+
+	std::vector<glm::vec3> aabb_points_world
+	{
+		glm::vec3(max_values.x, min_values.y, min_values.z), //0 : bottom face, upper right
+		glm::vec3(min_values.x, min_values.y, min_values.z), //1 : bottom face, upper left
+		glm::vec3(max_values.x, min_values.y, max_values.z), //2 : bottom face, down right
+		glm::vec3(min_values.x, min_values.y, max_values.z), //3 : bottom face, down left
+		glm::vec3(max_values.x, max_values.y, min_values.z), //4 : top face, upper right
+		glm::vec3(min_values.x, max_values.y, min_values.z), //5 : top face, upper left
+		glm::vec3(max_values.x, max_values.y, max_values.z), //6 : top face, down right
+		glm::vec3(min_values.x, max_values.y, max_values.z)  //7 : top face, down left
+	};
+	return aabb_points_world;
 }
 
-glm::vec3 Node::get_max_aabb_from_position() const
+std::optional<AABB> Node::get_world_aabb() const
 {
 	if(!aabb_.has_value())
 	{
-		logging::log("The node \"" + name_ + " " + std::to_string(mesh_key_.mesh_index_) + "\" does not have a AABB", logging::Severity::NOTICE);
-		return glm::vec3(0.0f);
+		return std::nullopt;
 	}
-
-	std::vector<glm::vec3> position_attributes = aabb_.value().get_corners();
-	glm::vec3 max_value(std::numeric_limits<float>::min());
-
-	for(const glm::vec3& position_attribute : position_attributes)
+	else
 	{
-		glm::vec3 world_position_attribute = glm::vec4(position_attribute, 1.0f) * compute_model();
-		max_value = glm::max(world_position_attribute, max_value);
+		return AABB(get_aabb_from_position());
 	}
-	return max_value + position_;
-}
-
-glm::vec3 Node::get_center() const
-{
-	return (get_min_aabb_from_position() + get_max_aabb_from_position()) / 2.0f;
 }
 
 const glm::vec3& Node::get_position() const

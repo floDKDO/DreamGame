@@ -539,10 +539,10 @@ std::optional<AABB> get_aabb(std::string_view path, const tg3_model& model_tg3, 
 		};
 		glm::vec3 min_values = get_min_values(model_tg3, primitive_tg3);
 		glm::vec3 max_values = get_max_values(model_tg3, primitive_tg3);
-		resource::MeshKey mesh_key = get_mesh_aabb(path, mesh_index, ebo_values, vertices, primitive_tg3.mode);
+		//resource::MeshKey mesh_key = get_mesh_aabb(path, mesh_index, ebo_values, vertices, primitive_tg3.mode); //TODO
 
 		//un AABB n'a pas de texture
-		return AABB(min_values, max_values, mesh_key);
+		return AABB(min_values, max_values);
 	}
 	std::string node_name = (node_tg3.name.len > 0) ? std::string(node_tg3.name.data) : "";
 	logging::log("get_aabb() returned std::nullopt (the node \"" + node_name + "\" does not have a AABB)", logging::Severity::NOTICE);

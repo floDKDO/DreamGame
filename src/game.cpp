@@ -138,46 +138,60 @@ void Game::update_fps_count(Uint64& last_fps_refresh, unsigned int& frame_count_
 	}
 }
 
-void detect_collision(const gltf::Node& node, gltf::Node& player_node)
+std::optional<std::pair<glm::vec3, AABB>> collision_detection(const gltf::Node& node, const gltf::Node& player_node)
 {
-	if(!node.is_empty_node())
+	if(!node.is_empty_node()) 
 	{
-		glm::vec3 min_aabb_model = node.get_min_aabb_from_position();
-		glm::vec3 max_aabb_model = node.get_max_aabb_from_position();
-		glm::vec3 min_aabb_player = player_node.get_min_aabb_from_position();
-		glm::vec3 max_aabb_player = player_node.get_max_aabb_from_position();
-
-		if(min_aabb_model.x <= max_aabb_player.x && max_aabb_model.x >= min_aabb_player.x
-		&& min_aabb_model.y <= max_aabb_player.y && max_aabb_model.y >= min_aabb_player.y
-		&& min_aabb_model.z <= max_aabb_player.z && max_aabb_model.z >= min_aabb_player.z)
+		std::optional<AABB> node_aabb_optional = node.get_world_aabb();
+		if(!node_aabb_optional.has_value())
 		{
-			glm::vec3 overlap(
-				std::min(max_aabb_player.x, max_aabb_model.x) - std::max(min_aabb_player.x, min_aabb_model.x), //la valeur obtenue représente de combien en x le joueur est entré dans le modèle
-				std::min(max_aabb_player.y, max_aabb_model.y) - std::max(min_aabb_player.y, min_aabb_model.y),
-				std::min(max_aabb_player.z, max_aabb_model.z) - std::max(min_aabb_player.z, min_aabb_model.z)
-			);
-			glm::vec3 player_center = player_node.get_center(); //la valeur est différente de position_player car l'origine dans le modèle n'est pas forcément centrée en Y
-			glm::vec3 model_center = node.get_center(); //idem, peut être différente de position_model
+			return std::nullopt;
+		}
 
-			//on cherche le plus petit overlap car on veut déplacer le joueur de la plus petite distance possible pour qu'il ne soit plus en collision avec le modèle
-			if(overlap.x < overlap.y && overlap.x < overlap.z)
-			{
-				player_node.add_translation_x((player_center.x < model_center.x) ? -overlap.x : overlap.x);
-			}
-			else if(overlap.y < overlap.z)
-			{
-				player_node.add_translation_y((player_center.y < model_center.y) ? -overlap.y : overlap.y);
-			}
-			else
-			{
-				player_node.add_translation_z((player_center.z < model_center.z) ? -overlap.z : overlap.z);
-			}
+		const AABB& node_aabb = node_aabb_optional.value();
+		std::optional<AABB> player_node_aabb_optional = player_node.get_world_aabb();
+		const AABB& player_node_aabb = player_node_aabb_optional.value(); //on part du principe que le joueur aura toujours un AABB
+
+		if(player_node_aabb.intersection_with_aabb(node_aabb))
+		{
+			return std::make_pair(player_node_aabb.get_overlap_with_aabb(node_aabb), node_aabb);
+		}
+		else
+		{
+			return std::nullopt;
 		}
 	}
 
 	for(const gltf::Node& child_node : node.children_nodes_)
 	{
-		detect_collision(child_node, player_node);
+		return collision_detection(child_node, player_node);
+	}
+
+	return std::nullopt;
+}
+
+void collision_response(const std::pair<glm::vec3, AABB>& collision_info, gltf::Node& player_node)
+{
+	const AABB& node_aabb = collision_info.second;
+	std::optional<AABB> player_node_aabb_optional = player_node.get_world_aabb();
+	const AABB& player_node_aabb = player_node_aabb_optional.value(); //on part du principe que le joueur aura toujours un AABB
+
+	glm::vec3 player_center = player_node_aabb.get_center(); //la valeur est différente de position_player car l'origine dans le modèle n'est pas forcément centrée en Y
+	glm::vec3 model_center = node_aabb.get_center(); //idem, peut être différente de position_model
+	glm::vec3 overlap = collision_info.first;
+
+	//on cherche le plus petit overlap car on veut déplacer le joueur de la plus petite distance possible pour qu'il ne soit plus en collision avec le modèle
+	if(overlap.x < overlap.y && overlap.x < overlap.z)
+	{
+		player_node.add_translation_x((player_center.x < model_center.x) ? -overlap.x : overlap.x);
+	}
+	else if(overlap.y < overlap.z)
+	{
+		player_node.add_translation_y((player_center.y < model_center.y) ? -overlap.y : overlap.y);
+	}
+	else
+	{
+		player_node.add_translation_z((player_center.z < model_center.z) ? -overlap.z : overlap.z);
 	}
 }
 
@@ -188,8 +202,16 @@ void Game::update(float delta_time)
 	gamepad_.check(1000); //tester une fois par seconde
 	input_manager_.update(delta_time);
 
+	/*for(const std::unique_ptr<Model>& model : test_map_.models_)
+	{
+		detect_collision_aabb(model->get_root_node(), player_.model_->get_root_node());
+	}*/
+
 	for(const std::unique_ptr<Model>& model : test_map_.models_)
 	{
-		detect_collision(model->get_root_node(), player_.model_->get_root_node());
+		if(std::optional<std::pair<glm::vec3, AABB>> collision_info = collision_detection(model->get_root_node(), player_.model_->get_root_node()); collision_info.has_value())
+		{
+			collision_response(collision_info.value(), player_.model_->get_root_node());
+		}
 	}
 }

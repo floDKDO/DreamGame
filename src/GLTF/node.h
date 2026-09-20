@@ -22,9 +22,7 @@ class Node
 		glm::mat4 compute_model() const;
 		glm::mat4 get_parent_matrix() const;
 		std::string get_name() const;
-		glm::vec3 get_min_aabb_from_position() const;
-		glm::vec3 get_max_aabb_from_position() const;
-		glm::vec3 get_center() const;
+		std::optional<AABB> get_world_aabb() const;
 
 		const glm::vec3& get_position() const; //retourne une référence car la position est utilisée en tant que membre (const ref) dans la classe Camera
 
@@ -45,8 +43,9 @@ class Node
 	private:
 		void update_position();
 		void update_parent_matrix_of_children(Node& node);
+		std::vector<glm::vec3> get_aabb_from_position() const;
 
-		bool is_empty_node_;
+		bool is_empty_node_; //<=> empty node sur Blender (le noeud n'a pas de mesh ni de AABB)
 		Transform transform_;
 		glm::mat4 parent_matrix_;
 		glm::vec3 position_;

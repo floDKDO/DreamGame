@@ -4,7 +4,9 @@
 
 Player::Player(InputManager& input_manager)
 	: model_(std::make_unique<Model>("resources/models/player.glb")), input_manager_(input_manager)
-{}
+{
+	model_->add_translation_y(5.0f);
+}
 
 void Player::draw()
 {
@@ -26,6 +28,6 @@ void Player::update(float delta_time, glm::vec3 camera_forward, glm::vec3 camera
 		model_->add_translation(-((input_info.x_movement_intensity_ * sensitivity * delta_time) * camera_left));
 	}
 
-	//model_.add_translation(glm::vec3(0.0f, -0.1f, 0.0f)); //gravité
-	//model_.rotate(glm::angleAxis(-glm::degrees(atan2((input_info.x_movement_intensity_ * sensitivity * delta_time)/* * camera_left.x*/, (input_info.y_movement_intensity_ * sensitivity * delta_time)/* * camera_forward.z*/)), glm::vec3(0.0f, 1.0f, 0.0f)));
+	model_->add_translation(glm::vec3(0.0f, -0.1f, 0.0f)); //gravité
+	//model_->rotate(glm::angleAxis(-glm::degrees(atan2((input_info.x_movement_intensity_ * sensitivity * delta_time)/* * camera_left.x*/, (input_info.y_movement_intensity_ * sensitivity * delta_time)/* * camera_forward.z*/)), glm::vec3(0.0f, 1.0f, 0.0f)));
 }
