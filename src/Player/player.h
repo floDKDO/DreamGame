@@ -6,7 +6,7 @@
 class Player
 {
 	public:
-		explicit Player(InputManager& input_manager);
+		explicit Player(const InputManager& input_manager);
 
 		void draw();
 		void update(float delta_time, glm::vec3 camera_forward, glm::vec3 camera_left);
@@ -14,5 +14,5 @@ class Player
 		std::unique_ptr<Model> model_;
 
 	private:
-		InputManager& input_manager_;
+		const InputManager& input_manager_;
 };

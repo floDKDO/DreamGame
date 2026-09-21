@@ -138,23 +138,23 @@ void Game::update_fps_count(Uint64& last_fps_refresh, unsigned int& frame_count_
 	}
 }
 
-std::optional<std::pair<glm::vec3, AABB>> collision_detection(const gltf::Node& node, const gltf::Node& player_node)
+std::optional<std::pair<glm::vec3, AABB>> collision_detection(const gltf::Node& map_node, const gltf::Node& player_node)
 {
-	if(!node.is_empty_node()) 
+	if(!map_node.is_empty_node()) 
 	{
-		std::optional<AABB> node_aabb_optional = node.get_world_aabb();
-		if(!node_aabb_optional.has_value())
+		std::optional<AABB> map_node_aabb_optional = map_node.get_world_aabb();
+		if(!map_node_aabb_optional.has_value())
 		{
 			return std::nullopt;
 		}
 
-		const AABB& node_aabb = node_aabb_optional.value();
+		const AABB& map_node_aabb = map_node_aabb_optional.value();
 		std::optional<AABB> player_node_aabb_optional = player_node.get_world_aabb();
 		const AABB& player_node_aabb = player_node_aabb_optional.value(); //on part du principe que le joueur aura toujours un AABB
 
-		if(player_node_aabb.intersection_with_aabb(node_aabb))
+		if(player_node_aabb.intersection_with_aabb(map_node_aabb))
 		{
-			return std::make_pair(player_node_aabb.get_overlap_with_aabb(node_aabb), node_aabb);
+			return std::make_pair(player_node_aabb.get_overlap_with_aabb(map_node_aabb), map_node_aabb);
 		}
 		else
 		{
@@ -162,36 +162,39 @@ std::optional<std::pair<glm::vec3, AABB>> collision_detection(const gltf::Node& 
 		}
 	}
 
-	for(const gltf::Node& child_node : node.children_nodes_)
+	for(const gltf::Node& child_node : map_node.get_children_nodes())
 	{
-		return collision_detection(child_node, player_node);
+		std::optional<std::pair<glm::vec3, AABB>> result = collision_detection(child_node, player_node);
+		if(result.has_value())
+		{
+			return result;
+		}
 	}
-
 	return std::nullopt;
 }
 
 void collision_response(const std::pair<glm::vec3, AABB>& collision_info, gltf::Node& player_node)
 {
-	const AABB& node_aabb = collision_info.second;
+	const AABB& map_node_aabb = collision_info.second;
 	std::optional<AABB> player_node_aabb_optional = player_node.get_world_aabb();
 	const AABB& player_node_aabb = player_node_aabb_optional.value(); //on part du principe que le joueur aura toujours un AABB
 
-	glm::vec3 player_center = player_node_aabb.get_center(); //la valeur est différente de position_player car l'origine dans le modèle n'est pas forcément centrée en Y
-	glm::vec3 model_center = node_aabb.get_center(); //idem, peut être différente de position_model
+	glm::vec3 player_center = player_node_aabb.get_center();
+	glm::vec3 map_node_center = map_node_aabb.get_center();
 	glm::vec3 overlap = collision_info.first;
 
 	//on cherche le plus petit overlap car on veut déplacer le joueur de la plus petite distance possible pour qu'il ne soit plus en collision avec le modèle
 	if(overlap.x < overlap.y && overlap.x < overlap.z)
 	{
-		player_node.add_translation_x((player_center.x < model_center.x) ? -overlap.x : overlap.x);
+		player_node.add_translation_x((player_center.x < map_node_center.x) ? -overlap.x : overlap.x);
 	}
 	else if(overlap.y < overlap.z)
 	{
-		player_node.add_translation_y((player_center.y < model_center.y) ? -overlap.y : overlap.y);
+		player_node.add_translation_y((player_center.y < map_node_center.y) ? -overlap.y : overlap.y);
 	}
 	else
 	{
-		player_node.add_translation_z((player_center.z < model_center.z) ? -overlap.z : overlap.z);
+		player_node.add_translation_z((player_center.z < map_node_center.z) ? -overlap.z : overlap.z);
 	}
 }
 
@@ -202,14 +205,9 @@ void Game::update(float delta_time)
 	gamepad_.check(1000); //tester une fois par seconde
 	input_manager_.update(delta_time);
 
-	/*for(const std::unique_ptr<Model>& model : test_map_.models_)
+	for(const std::unique_ptr<Model>& map_model : test_map_.models_)
 	{
-		detect_collision_aabb(model->get_root_node(), player_.model_->get_root_node());
-	}*/
-
-	for(const std::unique_ptr<Model>& model : test_map_.models_)
-	{
-		if(std::optional<std::pair<glm::vec3, AABB>> collision_info = collision_detection(model->get_root_node(), player_.model_->get_root_node()); collision_info.has_value())
+		if(std::optional<std::pair<glm::vec3, AABB>> collision_info = collision_detection(map_model->get_root_node(), player_.model_->get_root_node()); collision_info.has_value())
 		{
 			collision_response(collision_info.value(), player_.model_->get_root_node());
 		}

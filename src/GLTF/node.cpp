@@ -94,25 +94,29 @@ void Node::add_translation_z(float z)
 void Node::set_rotation(glm::quat rotation)
 {
 	transform_.rotation_ = rotation;
-	update_parent_matrix_of_children(*this);
+	//TODO : faire comme avec le membre position_ (avoir un membre qui prend en compte la parent_matrix_) ?
+	update_parent_matrix_of_children(*this); //TODO : créer une méthode exprès pour le root_node (objectif : retirer l'argument *this) ?
 }
 
 void Node::add_rotation(glm::quat rotation)
 {
 	transform_.rotation_ += rotation;
-	update_parent_matrix_of_children(*this);
+	//TODO : faire comme avec le membre position_ (avoir un membre qui prend en compte la parent_matrix_) ?
+	update_parent_matrix_of_children(*this); //TODO : créer une méthode exprès pour le root_node (objectif : retirer l'argument *this) ?
 }
 
 void Node::set_scale(glm::vec3 scale)
 {
 	transform_.scale_ = scale;
-	update_parent_matrix_of_children(*this);
+	//TODO : faire comme avec le membre position_ (avoir un membre qui prend en compte la parent_matrix_) ?
+	update_parent_matrix_of_children(*this); //TODO : créer une méthode exprès pour le root_node (objectif : retirer l'argument *this) ?
 }
 
 void Node::add_scale(glm::vec3 scale)
 {
 	transform_.scale_ += scale;
-	update_parent_matrix_of_children(*this);
+	//TODO : faire comme avec le membre position_ (avoir un membre qui prend en compte la parent_matrix_) ?
+	update_parent_matrix_of_children(*this); //TODO : créer une méthode exprès pour le root_node (objectif : retirer l'argument *this) ?
 }
 
 void Node::update_position()
@@ -142,12 +146,6 @@ std::string Node::get_name() const
 
 std::vector<glm::vec3> Node::get_aabb_from_position() const
 {
-	if(!aabb_.has_value())
-	{
-		logging::log("The node \"" + name_ + " " + std::to_string(mesh_key_.mesh_index_) + "\" does not have a AABB", logging::Severity::NOTICE);
-		return std::vector<glm::vec3>(0.0f); //TODO : à gérer autrement
-	}
-
 	std::vector<glm::vec3> aabb_points = aabb_.value().get_corners();
 	glm::vec3 min_values(std::numeric_limits<float>::max());
 	glm::vec3 max_values(std::numeric_limits<float>::lowest());
@@ -186,6 +184,11 @@ std::optional<AABB> Node::get_world_aabb() const
 	{
 		return AABB(get_aabb_from_position());
 	}
+}
+
+const std::vector<Node>&Node::get_children_nodes() const
+{
+	return children_nodes_;
 }
 
 const glm::vec3& Node::get_position() const

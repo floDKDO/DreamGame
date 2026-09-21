@@ -8,7 +8,7 @@
 class Camera
 {
 	public:
-		Camera(InputManager& input_manager, const glm::vec3& target_position);
+		Camera(const InputManager& input_manager, const glm::vec3& target_position);
 
 		void update(float delta_time);
 
@@ -36,7 +36,7 @@ class Camera
 		glm::mat4 look_at(glm::vec3 camera_position, glm::vec3 camera_target_position, glm::vec3 up_vector) const;
 		void compute_euler_angles(float delta_time);
 
-		InputManager& input_manager_;
+		const InputManager& input_manager_;
 		glm::mat4 view_matrix_;
 		EulerAngles euler_angles_;
 };

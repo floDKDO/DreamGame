@@ -23,6 +23,7 @@ class Node
 		glm::mat4 get_parent_matrix() const;
 		std::string get_name() const;
 		std::optional<AABB> get_world_aabb() const;
+		const std::vector<Node>& Node::get_children_nodes() const;
 
 		const glm::vec3& get_position() const; //retourne une référence car la position est utilisée en tant que membre (const ref) dans la classe Camera
 
@@ -38,8 +39,6 @@ class Node
 		void add_rotation(glm::quat rotation);
 		void add_scale(glm::vec3 scale);
 
-		std::vector<Node> children_nodes_;
-
 	private:
 		void update_position();
 		void update_parent_matrix_of_children(Node& node);
@@ -52,6 +51,7 @@ class Node
 		std::string name_;
 		resource::MeshKey mesh_key_;
 		std::optional<AABB> aabb_;
+		std::vector<Node> children_nodes_;
 };
 
 }

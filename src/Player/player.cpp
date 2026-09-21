@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-Player::Player(InputManager& input_manager)
+Player::Player(const InputManager& input_manager)
 	: model_(std::make_unique<Model>("resources/models/player.glb")), input_manager_(input_manager)
 {
 	model_->add_translation_y(5.0f);

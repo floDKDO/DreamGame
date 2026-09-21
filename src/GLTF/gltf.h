@@ -13,7 +13,6 @@ namespace gltf
 glm::mat4 get_mat4_from_1d_matrix(const double m[16]);
 glm::mat4 get_transformation_matrix(glm::mat4 parent_matrix, glm::vec3 translation, glm::quat rotation, glm::vec3 scale);
 glm::mat4 get_transformation_matrix_from_double(glm::mat4 parent_matrix, const double translation[3], const double rotation[4], const double scale[3]);
-void print_mat4(glm::mat4 m);
 void print_1d_matrix(const double m[16]);
 std::string get_target_str(int32_t target);
 std::string get_type_str(int32_t type);

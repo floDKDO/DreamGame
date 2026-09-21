@@ -53,20 +53,6 @@ glm::mat4 get_transformation_matrix_from_double(glm::mat4 parent_matrix, const d
 	return get_transformation_matrix(parent_matrix, translation_vec3, rotation_quat, scale_vec3);
 }
 
-//TODO : voir #include <glm/gtx/io.hpp> qui surcharge l'opérateur "<<"
-void print_mat4(glm::mat4 m)
-{
-	for(glm::length_t i = 0; i < 4; ++i)
-	{
-		for(glm::length_t j = 0; j < 4; ++j)
-		{
-			std::cout << m[j][i] << ", \t";
-		}
-		std::cout << std::endl;
-	}
-	std::cout << std::endl;
-}
-
 void print_1d_matrix(const double m[16])
 {
 	for(glm::length_t i = 0; i < 4; ++i)
