@@ -102,9 +102,11 @@ void Backend::destroy_openal()
 	}
 }
 
-void Backend::get_window_size(int* w, int* h) const
+glm::ivec2 Backend::get_window_size() const
 {
-	window_.get_size(w, h);
+	int w, h;
+	window_.get_size(&w, &h);
+	return glm::ivec2(w, h);
 }
 
 void Backend::swap_window_buffers() const

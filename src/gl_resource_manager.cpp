@@ -1,5 +1,6 @@
 #include "gl_resource_manager.h"
 #include "Logging/logging.h"
+#include "Render/model.h"
 
 #include <map>
 #include <unordered_map>
@@ -9,37 +10,11 @@
 namespace resource
 {
 
-//TODO : devrait sûrement être placé autre part
-bool operator<(const MeshKey& a, const MeshKey& b)
-{
-	if(a.file_name_ < b.file_name_)
-	{
-		return true;
-	}
-	else if(b.file_name_ < a.file_name_)
-	{
-		return false;
-	}
-	else if(a.mesh_index_ < b.mesh_index_)
-	{
-		return true;
-	}
-	else
-	{
-		return false;
-	}
-
-	//return (a.file_name_ < b.file_name_) || (a.mesh_index_ < b.mesh_index_);
-	//TODO : ne marche pas pour ce cas-là : 
-	//a = "aaa", 42 ; b = "zzz", 1
-	//a < b => true
-	//b < a => true
-}
-
-std::map<MeshKey, Mesh> meshes_; //TODO : ne marche pas avec une std::unordered_map
-std::map<MeshKey, Mesh> aabb_meshes_; //TODO : ne marche pas avec une std::unordered_map
+std::map<Mesh::MeshId, Mesh> meshes_; //TODO : ne marche pas avec une std::unordered_map
+std::map<Mesh::MeshId, Mesh> aabb_meshes_; //TODO : ne marche pas avec une std::unordered_map
 std::unordered_map<std::string, ShaderProgram> shader_programs_;
 std::unordered_map<std::string, GLint> uniforms_;
+std::unordered_map<std::string, Model> models_;
 
 //Conteneur de texture, texture id 
 // => cas texture dont l'image possède un path : la clef est le path (= chemin de la texture)
@@ -55,7 +30,7 @@ std::string add_texture(Texture texture)
 		//Pour assurer que chacune de ces images aient un path fictif unique, je lui ajoute un entier (incrémenté à chaque ajout) => le path n'étant pas consulté donc la valeur de cette clef n'a aucune importance
 		//De toute façon, pour ce type d'images, aucune vérification n'est effectuée : elles sont ajoutées dans tous les cas dans textures_ 
 		static std::size_t counter = 0;
-		texture_key = "Empty path" + std::to_string(counter);
+		texture_key = "Empty path " + std::to_string(counter);
 		textures_.insert({texture_key, texture});
 		counter += 1;
 	}
@@ -79,23 +54,17 @@ Texture* get_texture(std::string texture_key)
 	}
 }
 
-MeshKey add_mesh(std::string_view path, int32_t mesh_index, std::vector<GLushort> ebo_values, Vertices vertices, std::vector<std::string> texture_keys, GLenum draw_mode)
+Mesh::MeshId add_mesh(Mesh::MeshId mesh_id, Mesh::MeshInfo mesh_info)
 {
-	MeshKey mesh_key = {std::string(path), mesh_index};
-	meshes_.insert(std::make_pair(mesh_key, Mesh(ebo_values, vertices, texture_keys, draw_mode)));
-	return mesh_key;
+	meshes_.insert(std::make_pair(mesh_id, Mesh(mesh_id, mesh_info)));
+	return mesh_id;
 }
 
-MeshKey add_mesh(std::string_view path, int32_t mesh_index, std::vector<GLushort> ebo_values, Vertices vertices, GLenum draw_mode)
+const Mesh* get_mesh(Mesh::MeshId mesh_id)
 {
-	return add_mesh(path, mesh_index, ebo_values, vertices, {}, draw_mode);
-}
-
-const Mesh* get_mesh(MeshKey mesh_key)
-{
-	if(meshes_.count(mesh_key))
+	if(meshes_.count(mesh_id))
 	{
-		return &meshes_.at(mesh_key);
+		return &meshes_.at(mesh_id);
 	}
 	else
 	{
@@ -103,23 +72,44 @@ const Mesh* get_mesh(MeshKey mesh_key)
 	}
 }
 
-MeshKey add_aabb_mesh(std::string_view path, int32_t mesh_index, std::vector<GLushort> ebo_values, Vertices vertices, std::vector<std::string> texture_keys, GLenum draw_mode)
+Mesh::MeshId add_aabb_mesh(Mesh::MeshId mesh_id, Mesh::MeshInfo mesh_info)
 {
-	MeshKey mesh_key = {std::string(path), mesh_index};
-	aabb_meshes_.insert(std::make_pair(mesh_key, Mesh(ebo_values, vertices, texture_keys, draw_mode)));
-	return mesh_key;
+	aabb_meshes_.insert(std::make_pair(mesh_id, Mesh(mesh_id, mesh_info)));
+	return mesh_id;
 }
 
-MeshKey add_aabb_mesh(std::string_view path, int32_t mesh_index, std::vector<GLushort> ebo_values, Vertices vertices, GLenum draw_mode)
+const Mesh* get_aabb_mesh(Mesh::MeshId aabb_mesh_id)
 {
-	return add_aabb_mesh(path, mesh_index, ebo_values, vertices, {}, draw_mode);
-}
-
-const Mesh* get_aabb_mesh(MeshKey mesh_key)
-{
-	if(aabb_meshes_.count(mesh_key))
+	if(aabb_meshes_.count(aabb_mesh_id))
 	{
-		return &aabb_meshes_.at(mesh_key);
+		return &aabb_meshes_.at(aabb_mesh_id);
+	}
+	else
+	{
+		return nullptr;
+	}
+}
+
+std::string add_model(std::string_view path, Transform transform)
+{
+	std::string name_str = std::string(path);
+	models_.insert({name_str, Model(path, transform)}); //TODO : pour l'instant, la clef (= name) vaut le path
+	return name_str;
+}
+
+std::string add_model(std::string_view path)
+{
+	std::string name_str = std::string(path);
+	models_.insert({name_str, Model(path)}); //TODO : pour l'instant, la clef (= name) vaut le path
+	return name_str;
+}
+
+Model* get_model(std::string_view name) //TODO : pour l'instant, la clef (= name) vaut le path
+{
+	std::string name_str = std::string(name);
+	if(models_.count(name_str))
+	{
+		return &models_.at(name_str);
 	}
 	else
 	{

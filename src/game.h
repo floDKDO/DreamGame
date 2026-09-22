@@ -22,17 +22,13 @@ class Game
 		void update_fps_count(Uint64& last_fps_refresh, unsigned int& frame_count_this_second) const;
 
 		Backend backend_;
-
-		//sdl::Window window_;
-		InputManager input_manager_;
-
+		input::InputManager input_manager_;
 		Player player_;
 		Camera camera_;
 		bool running_;
 		sdl::Gamepad gamepad_;
 		Map test_map_;
-		Model gizmo_;
-
+		std::string gizmo_model_key_;
 		float fov_;
 		float near_plane_, far_plane_;
 		glm::mat4 perspective_projection_matrix_; //TODO : voir si je garde ici

@@ -11,12 +11,10 @@ class Map
 		explicit Map(std::string_view path);
 
 		void draw();
-		Model* get_model_by_name(std::string_view name);
+		const std::vector<std::unique_ptr<Model>>& get_models() const;
 
 	private:
 		MapFile map_file_;
-
-	public:
-		std::vector<std::unique_ptr<Model>> models_; //TODO : remettre en private
+		std::vector<std::unique_ptr<Model>> models_;
 		
 };

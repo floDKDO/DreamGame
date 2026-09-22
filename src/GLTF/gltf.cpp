@@ -195,7 +195,7 @@ std::size_t get_component_type_size(int32_t component_type)
 			break;
 
 		default:
-			component_type_size = 0;
+			component_type_size = 0ULL;
 			logging::log("In get_component_type_size(), the requested component type does not exist!", logging::Severity::WARNING);
 			break;
 	}

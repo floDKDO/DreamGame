@@ -3,31 +3,29 @@
 #include "Render/shader_program.h"
 #include "Render/mesh.h"
 #include "Render/texture.h"
+#include "Common/transform.h"
 
 #include <string_view>
 
+class Model;
+
 namespace resource
 {
-
-//TODO : devrait sûrement être placé autre part
-struct MeshKey
-{
-	std::string file_name_ = "";
-	int32_t mesh_index_ = -1;
-};
 
 std::string add_texture(Texture texture);
 
 //TODO : voir si je peux modifier l'implémentation pour quand même utiliser const
 Texture* get_texture(std::string texture_key); //ne retourne pas de const Texture* car la fonction glCreateTextures() modifie son troisième paramètre
 
-MeshKey add_mesh(std::string_view path, int32_t mesh_index, std::vector<GLushort> ebo_values, Vertices vertices, std::vector<std::string> texture_keys, GLenum draw_mode);
-MeshKey add_mesh(std::string_view path, int32_t mesh_index, std::vector<GLushort> ebo_values, Vertices vertices, GLenum draw_mode);
-const Mesh* get_mesh(MeshKey mesh_key);
+Mesh::MeshId add_mesh(Mesh::MeshId mesh_id, Mesh::MeshInfo mesh_info);
+const Mesh* get_mesh(Mesh::MeshId mesh_id);
 
-MeshKey add_aabb_mesh(std::string_view path, int32_t mesh_index, std::vector<GLushort> ebo_values, Vertices vertices, std::vector<std::string> texture_keys, GLenum draw_mode);
-MeshKey add_aabb_mesh(std::string_view path, int32_t mesh_index, std::vector<GLushort> ebo_values, Vertices vertices, GLenum draw_mode);
-const Mesh* get_aabb_mesh(MeshKey mesh_key);
+Mesh::MeshId add_aabb_mesh(Mesh::MeshId aabb_mesh_id, Mesh::MeshInfo aabb_mesh_info);
+const Mesh* get_aabb_mesh(Mesh::MeshId aabb_mesh_id);
+
+std::string add_model(std::string_view path, Transform transform);
+std::string add_model(std::string_view path);
+Model* get_model(std::string_view name); //Ne retourne pas de const cat la classe Player a besoin de modifier le modèle du joueur
 
 void add_shader(std::string_view name, std::vector<std::string> shader_path);
 const ShaderProgram& get_shader(std::string_view name);

@@ -19,8 +19,8 @@ uint64_t get_attributes_count(const tg3_model& model_tg3, const tg3_primitive& p
 Vertices get_vertices(const tg3_model& model_tg3, const tg3_primitive& primitive_tg3);
 Vertices get_aabb_vertices(const tg3_model& model_tg3, const tg3_primitive& primitive_tg3);
 Transform get_transform(const tg3_node& node_tg3);
-resource::MeshKey get_mesh(std::string_view path, const tg3_model& model_tg3, const tg3_node& node_tg3);
-resource::MeshKey get_mesh_aabb(std::string_view path, int32_t mesh_index, std::vector<GLushort> ebo_values, Vertices vertices, GLenum draw_mode);
+Mesh::MeshId get_mesh(std::string_view path, const tg3_model& model_tg3, const tg3_node& node_tg3);
+Mesh::MeshId get_mesh_aabb(Mesh::MeshId mesh_id, Mesh::MeshInfo mesh_info);
 std::optional<tg3_accessor> get_accessor_from_attribute(std::string_view attribute, const tg3_model& model_tg3, const tg3_primitive& primitive_tg3);
 glm::vec3 get_min_values(const tg3_model& model_tg3, const tg3_primitive& primitive_tg3);
 glm::vec3 get_max_values(const tg3_model& model_tg3, const tg3_primitive& primitive_tg3);
@@ -240,7 +240,7 @@ Node glTFFile::get_root_node() const
 
 	if(root_node_tg3.children_count > 1 && root_node_tg3.mesh == -1)
 	{
-		
+		logging::log("The root node " + std::string(root_node_tg3.name.data) + " is an empty node", logging::Severity::DEBUG);
 	}
 
 	return get_node(path_, model_tg3_, root_node_tg3, glm::mat4(1.0f)); //les root nodes n'ont pas de parent donc ont une matrice identitée pour leur parent_matrix
@@ -268,10 +268,10 @@ std::vector<glm::vec<L, float>> get_float_vec_attribute(const tg3_model& model_t
 	for(uint64_t i = buffer_view_tg3.byte_offset + accessor_tg3.byte_offset; i < buffer_view_tg3.byte_offset + buffer_view_tg3.byte_length; i += stride)
 	{
 		vector_type::value_type attribute(0.0f);
-		for(uint64_t j = 0; j < component_type_size * vector_type::value_type::length(); j += component_type_size)
+		for(uint64_t j = 0ULL; j < component_type_size * vector_type::value_type::length(); j += component_type_size)
 		{
 			uint32_t attribute_ieee754 = 0; //uint32_t car un float fait 32 bits (tous les attributs contiennent des composants de type GL_FLOAT)
-			for(uint64_t k = 0; k < component_type_size; k += sizeof(uint8_t))
+			for(uint64_t k = 0ULL; k < component_type_size; k += sizeof(uint8_t))
 			{
 				attribute_ieee754 |= uint32_t(buffer_tg3.data.data[i + j + k] << k * 8); //8 pour convertir les octets en bits
 			}
@@ -349,7 +349,7 @@ uint64_t get_attributes_count(const tg3_model& model_tg3, const tg3_primitive& p
 	}
 	else
 	{
-		return 0;
+		return 0ULL;
 	}
 }
 
@@ -430,10 +430,10 @@ Transform get_transform(const tg3_node& node_tg3)
 	return transform;
 }
 
-resource::MeshKey get_mesh(std::string_view path, const tg3_model& model_tg3, const tg3_node& node_tg3)
+Mesh::MeshId get_mesh(std::string_view path, const tg3_model& model_tg3, const tg3_node& node_tg3)
 {
 	int32_t mesh_index = node_tg3.mesh;
-	resource::MeshKey mesh_key;
+	Mesh::MeshId mesh_id;
 	if(mesh_index != -1)
 	{
 		tg3_mesh mesh_tg3 = model_tg3.meshes[mesh_index];
@@ -448,19 +448,19 @@ resource::MeshKey get_mesh(std::string_view path, const tg3_model& model_tg3, co
 		if(has_textures(model_tg3))
 		{
 			std::vector<std::string> texture_keys = get_textures(model_tg3);
-			mesh_key = resource::add_mesh(path, mesh_index, ebo_values, vertices, texture_keys, primitive_tg3.mode);
+			mesh_id = resource::add_mesh(Mesh::MeshId{std::string(path), mesh_index}, Mesh::MeshInfo{ebo_values, vertices, texture_keys, GLenum(primitive_tg3.mode)});
 		}
 		else
 		{
-			mesh_key = resource::add_mesh(path, mesh_index, ebo_values, vertices, primitive_tg3.mode);
+			mesh_id = resource::add_mesh(Mesh::MeshId{std::string(path), mesh_index}, Mesh::MeshInfo{ebo_values, vertices, {}, GLenum(primitive_tg3.mode)});
 		}
 	}
-	return mesh_key;
+	return mesh_id;
 }
 
-resource::MeshKey get_mesh_aabb(std::string_view path, int32_t mesh_index, std::vector<GLushort> ebo_values, Vertices vertices, GLenum draw_mode)
+Mesh::MeshId get_mesh_aabb(Mesh::MeshId mesh_id, Mesh::MeshInfo mesh_info)
 {
-	return resource::add_aabb_mesh(path, mesh_index, ebo_values, vertices, draw_mode);
+	return resource::add_aabb_mesh(mesh_id, mesh_info);
 }
 
 std::optional<tg3_accessor> get_accessor_from_attribute(std::string_view attribute, const tg3_model& model_tg3, const tg3_primitive& primitive_tg3)
@@ -539,7 +539,7 @@ std::optional<AABB> get_aabb(std::string_view path, const tg3_model& model_tg3, 
 		};
 		glm::vec3 min_values = get_min_values(model_tg3, primitive_tg3);
 		glm::vec3 max_values = get_max_values(model_tg3, primitive_tg3);
-		//resource::MeshKey mesh_key = get_mesh_aabb(path, mesh_index, ebo_values, vertices, primitive_tg3.mode); //TODO
+		//Mesh::MeshId mesh_id = get_mesh_aabb(Mesh::MeshId{std::string(path), mesh_index}, Mesh::MeshInfo{ebo_values, vertices, {}, GLenum(primitive_tg3.mode)}; //TODO
 
 		//un AABB n'a pas de texture
 		return AABB(min_values, max_values);
@@ -592,7 +592,7 @@ std::vector<std::string> get_textures(const tg3_model& model_tg3)
 			mesh_texture.image_data_.reserve(buffer_view_tg3.byte_length);
 
 			//std::copy(buffer.data.data, buffer.data.data + buffer_view.byte_length, std::back_inserter(mesh_texture.image_data_)); //TODO : mieux que la boucle for suivante ?
-			for(uint64_t j = 0; j < buffer_view_tg3.byte_length; ++j)
+			for(uint64_t j = 0ULL; j < buffer_view_tg3.byte_length; ++j)
 			{
 				mesh_texture.image_data_.push_back(buffer_tg3.data.data[buffer_view_tg3.byte_offset + j]);
 			}
@@ -615,15 +615,15 @@ std::vector<GLushort> get_ebo_values(const tg3_model& model_tg3, const tg3_primi
 	tg3_buffer_view buffer_view_tg3 = model_tg3.buffer_views[accessor_tg3.buffer_view];
 	tg3_buffer buffer_tg3 = model_tg3.buffers[buffer_view_tg3.buffer];
 
-	std::vector<GLushort> ebo_value;
-	ebo_value.reserve(accessor_tg3.count);
+	std::vector<GLushort> ebo_values;
+	ebo_values.reserve(accessor_tg3.count);
 
 	for(uint64_t i = buffer_view_tg3.byte_offset; i < buffer_view_tg3.byte_offset + buffer_view_tg3.byte_length; i += sizeof(GLushort))
 	{
 		GLushort indice_value = (buffer_tg3.data.data[i + 1] << 8) | buffer_tg3.data.data[i]; //=> little-endian
-		ebo_value.push_back(indice_value);
+		ebo_values.push_back(indice_value);
 	}
-	return ebo_value;
+	return ebo_values;
 }
 
 std::vector<glm::vec4> get_vec4_color_attribute(const tg3_model& model_tg3, const tg3_str_int_pair& attribute_tg3)
@@ -647,35 +647,35 @@ std::vector<glm::vec4> get_vec4_color_attribute(const tg3_model& model_tg3, cons
 			for(uint64_t i = buffer_view_tg3.byte_offset + accessor_tg3.byte_offset; i < buffer_view_tg3.byte_offset + buffer_view_tg3.byte_length; i += 4 * sizeof(GLubyte)) //car sizeof(glm::vec4) != 4 * sizeof(sizeof(GLubyte))
 			{
 				glm::vec4 vec4_color(0.0f);
-				for(uint64_t j = 0; j < component_type_size * glm::vec4::length(); j += component_type_size)
+				for(uint64_t j = 0ULL; j < component_type_size * glm::vec4::length(); j += component_type_size)
 				{
 					uint8_t attribute_u8 = 0; //uint8_t car un unsigned short fait 8 bits
-					for(uint64_t k = 0; k < component_type_size; k += sizeof(uint8_t))
+					for(uint64_t k = 0ULL; k < component_type_size; k += sizeof(uint8_t))
 					{
 						attribute_u8 |= uint8_t(buffer_tg3.data.data[i + j + k] << k * 8); //8 pour convertir octets en bits
 					}
 					GLfloat attribute_float = GLfloat(attribute_u8) / std::numeric_limits<GLubyte>::max(); //normalisation de la valeur de l'attribut
 					uint64_t component = j / component_type_size;
-					vec4_color[component % 4] = attribute_float;
+					vec4_color[component % 4ULL] = attribute_float;
 				}
 				vec4_colors.push_back(vec4_color);
 			}
 		}
 		else if(component_type_str == "GL_UNSIGNED_SHORT")
 		{
-			for(uint64_t i = buffer_view_tg3.byte_offset + accessor_tg3.byte_offset; i < buffer_view_tg3.byte_offset + buffer_view_tg3.byte_length; i += 4 * sizeof(GLushort)) //car sizeof(glm::vec4) != 4 * sizeof(sizeof(GLushort))
+			for(uint64_t i = buffer_view_tg3.byte_offset + accessor_tg3.byte_offset; i < buffer_view_tg3.byte_offset + buffer_view_tg3.byte_length; i += 4ULL * sizeof(GLushort)) //car sizeof(glm::vec4) != 4 * sizeof(sizeof(GLushort))
 			{
 				glm::vec4 vec4_color(0.0f);
-				for(uint64_t j = 0; j < component_type_size * glm::vec4::length(); j += component_type_size)
+				for(uint64_t j = 0ULL; j < component_type_size * glm::vec4::length(); j += component_type_size)
 				{
 					uint16_t attribute_u16 = 0; //uint16_t car un unsigned short fait 16 bits
-					for(uint64_t k = 0; k < component_type_size; k += sizeof(uint8_t))
+					for(uint64_t k = 0ULL; k < component_type_size; k += sizeof(uint8_t))
 					{
 						attribute_u16 |= uint16_t(buffer_tg3.data.data[i + j + k] << k * 8); //8 pour convertir octets en bits
 					}
 					GLfloat attribute_float = GLfloat(attribute_u16) / std::numeric_limits<GLushort>::max(); //normalisation de la valeur de l'attribut
 					uint64_t component = j / component_type_size;
-					vec4_color[component % 4] = attribute_float;
+					vec4_color[component % 4ULL] = attribute_float;
 				}
 				vec4_colors.push_back(vec4_color);
 			}

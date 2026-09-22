@@ -12,14 +12,7 @@ void Map::draw()
 	}
 }
 
-Model* Map::get_model_by_name(std::string_view name)
+const std::vector<std::unique_ptr<Model>>& Map::get_models() const
 {
-	for(std::unique_ptr<Model>& model : models_)
-	{
-		if(model->get_name() == name)
-		{
-			return model.get();
-		}
-	}
-	return nullptr;
+	return models_;
 }

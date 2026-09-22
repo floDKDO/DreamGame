@@ -3,13 +3,16 @@
 #include <algorithm>
 #include <iostream>
 
-const float MouseKeyboardInput::max_mouse_rel_value_ = 10.0f;
+namespace input
+{
 
-MouseKeyboardInput::MouseKeyboardInput()
+const float MouseKeyboard::max_mouse_rel_value_ = 10.0f;
+
+MouseKeyboard::MouseKeyboard()
 	: mouse_motion_last_time_(0)
 {}
 
-void MouseKeyboardInput::handle_events(const SDL_Event& e)
+void MouseKeyboard::handle_events(const SDL_Event& e)
 {
 	switch(e.type)
 	{
@@ -19,19 +22,19 @@ void MouseKeyboardInput::handle_events(const SDL_Event& e)
 
 			if(e.key.key == SDLK_UP || e.key.scancode == SDL_SCANCODE_W)
 			{
-				set_key_direction_active(input::Direction::UP);
+				set_key_direction_active(Direction::UP);
 			}
 			if(e.key.key == SDLK_DOWN || e.key.scancode == SDL_SCANCODE_S)
 			{
-				set_key_direction_active(input::Direction::DOWN);
+				set_key_direction_active(Direction::DOWN);
 			}
 			if(e.key.key == SDLK_LEFT || e.key.scancode == SDL_SCANCODE_A)
 			{
-				set_key_direction_active(input::Direction::LEFT);
+				set_key_direction_active(Direction::LEFT);
 			}
 			if(e.key.key == SDLK_RIGHT || e.key.scancode == SDL_SCANCODE_D)
 			{
-				set_key_direction_active(input::Direction::RIGHT);
+				set_key_direction_active(Direction::RIGHT);
 			}
 			//}
 			break;
@@ -39,19 +42,19 @@ void MouseKeyboardInput::handle_events(const SDL_Event& e)
 		case SDL_EVENT_KEY_UP:
 			if(e.key.key == SDLK_UP || e.key.scancode == SDL_SCANCODE_W)
 			{
-				set_key_direction_inactive(input::Direction::UP);
+				set_key_direction_inactive(Direction::UP);
 			}
 			if(e.key.key == SDLK_DOWN || e.key.scancode == SDL_SCANCODE_S)
 			{
-				set_key_direction_inactive(input::Direction::DOWN);
+				set_key_direction_inactive(Direction::DOWN);
 			}
 			if(e.key.key == SDLK_LEFT || e.key.scancode == SDL_SCANCODE_A)
 			{
-				set_key_direction_inactive(input::Direction::LEFT);
+				set_key_direction_inactive(Direction::LEFT);
 			}
 			if(e.key.key == SDLK_RIGHT || e.key.scancode == SDL_SCANCODE_D)
 			{
-				set_key_direction_inactive(input::Direction::RIGHT);
+				set_key_direction_inactive(Direction::RIGHT);
 			}
 			break;
 
@@ -64,7 +67,7 @@ void MouseKeyboardInput::handle_events(const SDL_Event& e)
 	}
 }
 
-void MouseKeyboardInput::update([[maybe_unused]] float delta_time)
+void MouseKeyboard::update([[maybe_unused]] float delta_time)
 {
 	//std::cout << "(MOUSE KEYBOARD) => x: " << input_info_.x_movement_intensity_ << ", y: " << input_info_.y_movement_intensity_  << ", rotation_x: " << input_info_.x_rotation_intensity_ << ", rotation_y: " << input_info_.y_rotation_intensity_ << std::endl;
 
@@ -72,55 +75,57 @@ void MouseKeyboardInput::update([[maybe_unused]] float delta_time)
 	mouse_motion_event_end();
 }
 
-input::Info MouseKeyboardInput::get_input_info() const
+Info MouseKeyboard::get_input_info() const
 {
 	return input_info_;
 }
 
-void MouseKeyboardInput::set_key_direction_active(input::Direction direction)
+void MouseKeyboard::set_key_direction_active(Direction direction)
 {
-	if(direction == input::Direction::UP)
+	if(direction == Direction::UP)
 	{
-		input_info_.y_movement_intensity_ = input::max_movement_intensity_;
+		input_info_.y_movement_intensity_ = max_movement_intensity_;
 	}
-	if(direction == input::Direction::DOWN)
+	if(direction == Direction::DOWN)
 	{
-		input_info_.y_movement_intensity_ = -input::max_movement_intensity_;
+		input_info_.y_movement_intensity_ = -max_movement_intensity_;
 	}
-	if(direction == input::Direction::LEFT)
+	if(direction == Direction::LEFT)
 	{
-		input_info_.x_movement_intensity_ = -input::max_movement_intensity_;
+		input_info_.x_movement_intensity_ = -max_movement_intensity_;
 	}
-	if(direction == input::Direction::RIGHT)
+	if(direction == Direction::RIGHT)
 	{
-		input_info_.x_movement_intensity_ = input::max_movement_intensity_;
+		input_info_.x_movement_intensity_ = max_movement_intensity_;
 	}
 }
 
-void MouseKeyboardInput::set_key_direction_inactive(input::Direction direction)
+void MouseKeyboard::set_key_direction_inactive(Direction direction)
 {
-	if(direction == input::Direction::UP || direction == input::Direction::DOWN)
+	if(direction == Direction::UP || direction == Direction::DOWN)
 	{
 		input_info_.y_movement_intensity_ = 0.0f;
 	}
-	else if(direction == input::Direction::LEFT || direction == input::Direction::RIGHT)
+	else if(direction == Direction::LEFT || direction == Direction::RIGHT)
 	{
 		input_info_.x_movement_intensity_ = 0.0f;
 	}
 }
 
-void MouseKeyboardInput::set_rotation_mouse(float xrel, float yrel)
+void MouseKeyboard::set_rotation_mouse(float xrel, float yrel)
 {
 	mouse_motion_last_time_ = SDL_GetTicks();
 	input_info_.x_rotation_intensity_ = std::clamp(xrel / max_mouse_rel_value_, -1.0f, 1.0f);
 	input_info_.y_rotation_intensity_ = std::clamp(yrel / max_mouse_rel_value_, -1.0f, 1.0f);
 }
 
-void MouseKeyboardInput::mouse_motion_event_end()
+void MouseKeyboard::mouse_motion_event_end()
 {
 	if(SDL_GetTicks() > mouse_motion_last_time_ + 100) //100 ms
 	{
 		input_info_.x_rotation_intensity_ = 0.0f;
 		input_info_.y_rotation_intensity_ = 0.0f;
 	}
+}
+
 }

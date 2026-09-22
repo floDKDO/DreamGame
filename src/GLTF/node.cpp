@@ -9,8 +9,8 @@
 namespace gltf
 {
 
-Node::Node(std::string name, Transform transform, glm::mat4 parent_matrix, resource::MeshKey mesh_key, std::optional<AABB> aabb)
-	: is_empty_node_(false), name_(name), mesh_key_(mesh_key), aabb_(aabb), transform_(transform), parent_matrix_(parent_matrix), position_(glm::vec3(parent_matrix_ * glm::vec4(transform_.position_, 1.0f)))
+Node::Node(std::string name, Transform transform, glm::mat4 parent_matrix, Mesh::MeshId mesh_id, std::optional<AABB> aabb)
+	: is_empty_node_(false), name_(name), mesh_id_(mesh_id), aabb_(aabb), transform_(transform), parent_matrix_(parent_matrix), position_(glm::vec3(parent_matrix_ * glm::vec4(transform_.position_, 1.0f)))
 {}
 
 glm::mat4 Node::compute_model() const
@@ -37,7 +37,7 @@ void Node::draw()
 {
 	resource::set_uniform_matrix_4fv("model_matrix_", glm::value_ptr(compute_model()));
 
-	if(const Mesh* mesh = resource::get_mesh(mesh_key_); mesh != nullptr)
+	if(const Mesh* mesh = resource::get_mesh(mesh_id_); mesh != nullptr)
 	{
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 		mesh->draw();
@@ -95,33 +95,43 @@ void Node::set_rotation(glm::quat rotation)
 {
 	transform_.rotation_ = rotation;
 	//TODO : faire comme avec le membre position_ (avoir un membre qui prend en compte la parent_matrix_) ?
-	update_parent_matrix_of_children(*this); //TODO : créer une méthode exprès pour le root_node (objectif : retirer l'argument *this) ?
+	update_parent_matrix_of_root_children();
 }
 
 void Node::add_rotation(glm::quat rotation)
 {
 	transform_.rotation_ += rotation;
 	//TODO : faire comme avec le membre position_ (avoir un membre qui prend en compte la parent_matrix_) ?
-	update_parent_matrix_of_children(*this); //TODO : créer une méthode exprès pour le root_node (objectif : retirer l'argument *this) ?
+	update_parent_matrix_of_root_children();
 }
 
 void Node::set_scale(glm::vec3 scale)
 {
 	transform_.scale_ = scale;
 	//TODO : faire comme avec le membre position_ (avoir un membre qui prend en compte la parent_matrix_) ?
-	update_parent_matrix_of_children(*this); //TODO : créer une méthode exprès pour le root_node (objectif : retirer l'argument *this) ?
+	update_parent_matrix_of_root_children();
 }
 
 void Node::add_scale(glm::vec3 scale)
 {
 	transform_.scale_ += scale;
 	//TODO : faire comme avec le membre position_ (avoir un membre qui prend en compte la parent_matrix_) ?
-	update_parent_matrix_of_children(*this); //TODO : créer une méthode exprès pour le root_node (objectif : retirer l'argument *this) ?
+	update_parent_matrix_of_root_children();
 }
 
 void Node::update_position()
 {
 	position_ = glm::vec3(parent_matrix_ * glm::vec4(transform_.position_, 1.0f));
+}
+
+void Node::update_parent_matrix_of_root_children()
+{
+	for(Node& child_node : children_nodes_)
+	{
+		child_node.parent_matrix_ = compute_model();
+		child_node.update_position();
+		update_parent_matrix_of_children(child_node);
+	}
 }
 
 void Node::update_parent_matrix_of_children(Node& node)
@@ -193,7 +203,6 @@ const std::vector<Node>&Node::get_children_nodes() const
 
 const glm::vec3& Node::get_position() const
 {
-	//return transform_.position_;
 	return position_;
 }
 

@@ -12,10 +12,17 @@ namespace gltf
 class Node
 {
 	public:
-		Node(std::string name, Transform transform, glm::mat4 parent_matrix, resource::MeshKey mesh_key, std::optional<AABB> aabb);
+		struct NodeId //TODO
+		{
 
-		void set_empty_node();
-		bool is_empty_node() const;
+		};
+
+		struct NodeInfo //TODO
+		{
+
+		};
+
+		Node(std::string name, Transform transform, glm::mat4 parent_matrix, Mesh::MeshId mesh_id, std::optional<AABB> aabb);
 
 		void draw();
 		void add_child(Node child_node);
@@ -23,7 +30,9 @@ class Node
 		glm::mat4 get_parent_matrix() const;
 		std::string get_name() const;
 		std::optional<AABB> get_world_aabb() const;
-		const std::vector<Node>& Node::get_children_nodes() const;
+		const std::vector<Node>& get_children_nodes() const;
+		void set_empty_node();
+		bool is_empty_node() const;
 
 		const glm::vec3& get_position() const; //retourne une référence car la position est utilisée en tant que membre (const ref) dans la classe Camera
 
@@ -41,6 +50,7 @@ class Node
 
 	private:
 		void update_position();
+		void update_parent_matrix_of_root_children();
 		void update_parent_matrix_of_children(Node& node);
 		std::vector<glm::vec3> get_aabb_from_position() const;
 
@@ -49,7 +59,7 @@ class Node
 		glm::mat4 parent_matrix_;
 		glm::vec3 position_;
 		std::string name_;
-		resource::MeshKey mesh_key_;
+		Mesh::MeshId mesh_id_;
 		std::optional<AABB> aabb_;
 		std::vector<Node> children_nodes_;
 };

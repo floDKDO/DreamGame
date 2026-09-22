@@ -3,6 +3,7 @@
 #include "RAII_SDL3/sdl.h"
 #include "RAII_SDL3/window.h"
 
+#include <glm/vec2.hpp>
 #include <AL/alc.h>
 #include <GL/glew.h>
 
@@ -16,7 +17,7 @@ class Backend
 		Backend& operator=(const Backend& backend) = delete;
 		Backend& operator=(Backend&& backend) = delete;
 
-		void get_window_size(int* w, int* h) const;
+		glm::ivec2 get_window_size() const;
 		void swap_window_buffers() const;
 		void handle_events(const SDL_Event& e);
 

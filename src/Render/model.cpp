@@ -17,7 +17,7 @@ Model::Model(std::string_view path, Transform transform)
 
 void Model::draw()
 {
-	if(get_name() == "Light source")
+	if(get_name() == "Light source") //TODO : hardcodé
 	{
 		resource::set_uniform_3f("light_position_", get_position());
 	}

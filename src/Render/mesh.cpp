@@ -5,15 +5,11 @@
 #include <stb/stb_image.h>
 #include <iostream>
 
-Mesh::Mesh(std::vector<GLushort> ebo_values, Vertices vertices, std::vector<std::string> texture_keys, GLenum draw_mode)
-	: ebo_values_(ebo_values), vertices_(vertices), texture_keys_(texture_keys), ebo_(0), vbo_(0), vao_(0), draw_mode_(draw_mode == -1 ? GL_TRIANGLES : draw_mode)
+Mesh::Mesh(const MeshId& mesh_id, const MeshInfo& mesh_info)
+	: mesh_id_(mesh_id), mesh_info_(mesh_info), ebo_(0), vbo_(0), vao_(0)
 {
 	load_mesh();
 }
-
-Mesh::Mesh(std::vector<GLushort> ebo_values, Vertices vertices, GLenum draw_mode)
-	: Mesh(ebo_values, vertices, {}, draw_mode)
-{}
 
 void Mesh::load_vertex_attribute(GLuint vbo_binding_index, attribute::Name attribute_name)
 {
@@ -26,13 +22,13 @@ void Mesh::load_vertex_attribute(GLuint vbo_binding_index, attribute::Name attri
 void Mesh::create_ebo()
 {
 	glCreateBuffers(1, &ebo_);
-	glNamedBufferStorage(ebo_, ebo_values_.size() * sizeof(ebo_values_[0]), ebo_values_.data(), GL_DYNAMIC_STORAGE_BIT); //TODO : voir pour le dernier argument
+	glNamedBufferStorage(ebo_, mesh_info_.ebo_values_.size() * sizeof(mesh_info_.ebo_values_[0]), mesh_info_.ebo_values_.data(), GL_DYNAMIC_STORAGE_BIT); //TODO : voir pour le dernier argument
 }
 
 void Mesh::create_vbo()
 {
 	glCreateBuffers(1, &vbo_);
-	glNamedBufferStorage(vbo_, vertices_.get_vertices_number() * sizeof(Vertex), vertices_.get_vertices_data(), GL_DYNAMIC_STORAGE_BIT); //TODO : voir pour le dernier argument
+	glNamedBufferStorage(vbo_, mesh_info_.vertices_.get_vertices_number() * sizeof(Vertex), mesh_info_.vertices_.get_vertices_data(), GL_DYNAMIC_STORAGE_BIT); //TODO : voir pour le dernier argument
 }
 
 void Mesh::create_vao()
@@ -44,22 +40,22 @@ void Mesh::create_vao()
 	glVertexArrayVertexBuffer(vao_, vbo_binding_index, vbo_, 0, GLsizei(sizeof(Vertex)));
 	glVertexArrayElementBuffer(vao_, ebo_);
 
-	if(vertices_.has_position_attribute())
+	if(mesh_info_.vertices_.has_position_attribute())
 	{
 		load_vertex_attribute(vbo_binding_index, attribute::Name::POSITION);
 	}
 
-	if(vertices_.has_normal_attribute())
+	if(mesh_info_.vertices_.has_normal_attribute())
 	{
 		load_vertex_attribute(vbo_binding_index, attribute::Name::NORMAL);
 	}
 
-	if(vertices_.has_texcoord_attribute())
+	if(mesh_info_.vertices_.has_texcoord_attribute())
 	{
 		load_vertex_attribute(vbo_binding_index, attribute::Name::TEXCOORD);
 	}
 
-	if(vertices_.has_color_attribute())
+	if(mesh_info_.vertices_.has_color_attribute())
 	{
 		load_vertex_attribute(vbo_binding_index, attribute::Name::COLOR);
 	}
@@ -77,7 +73,7 @@ void Mesh::create_textures()
 	int desired_channels = 4;
 	GLsizei number_of_texture_levels = 1; //TODO : utiliser une autre valeur ?
 
-	for(std::string& texture_key : texture_keys_)
+	for(std::string& texture_key : mesh_info_.texture_keys_)
 	{
 		Texture* t = resource::get_texture(texture_key);
 		glCreateTextures(GL_TEXTURE_2D, 1, &t->texture_id_);
@@ -123,7 +119,7 @@ void Mesh::load_mesh()
 void Mesh::draw() const
 {
 	glBindVertexArray(vao_);
-	glDrawElements(draw_mode_, GLsizei(ebo_values_.size()), GL_UNSIGNED_SHORT, 0);
+	glDrawElements(mesh_info_.draw_mode_, GLsizei(mesh_info_.ebo_values_.size()), GL_UNSIGNED_SHORT, 0);
 	//glBindVertexArray(0); //= unbind, commenté car provoque des erreurs
 }
 
