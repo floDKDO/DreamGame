@@ -10,9 +10,9 @@ class Player
 
 		void draw();
 		void update(float delta_time, glm::vec3 camera_forward, glm::vec3 camera_left);
-		std::string get_model_key() const;
+		Model* get_model() const;
 
 	private:
 		const input::InputManager& input_manager_;
-		Model* model_;
+		std::unique_ptr<Model> model_;
 };

@@ -12,10 +12,10 @@ class Backend
 	public:
 		Backend();
 		~Backend();
-		Backend(const Backend& backend) = delete;
-		Backend(Backend&& backend) = delete;
-		Backend& operator=(const Backend& backend) = delete;
-		Backend& operator=(Backend&& backend) = delete;
+		Backend(const Backend&) = delete;
+		Backend(Backend&&) = delete;
+		Backend& operator=(const Backend&) = delete;
+		Backend& operator=(Backend&&) = delete;
 
 		glm::ivec2 get_window_size() const;
 		void swap_window_buffers() const;

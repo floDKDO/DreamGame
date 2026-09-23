@@ -10,10 +10,10 @@ class Surface
 {
 	public:
 		explicit Surface(std::string_view file); //SDL_LoadPNG
-		Surface(const Surface& surface) = delete;
-		Surface(Surface&& surface) = delete;
-		Surface& operator=(const Surface& surface) = delete;
-		Surface& operator=(Surface&& surface) = delete;
+		Surface(const Surface&) = delete;
+		Surface(Surface&&) = delete;
+		Surface& operator=(const Surface&) = delete;
+		Surface& operator=(Surface&&) = delete;
 		~Surface(); //SDL_DestroySurface
 
 		SDL_Surface* fetch() const;

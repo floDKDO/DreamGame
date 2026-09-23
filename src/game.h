@@ -28,7 +28,7 @@ class Game
 		bool running_;
 		sdl::Gamepad gamepad_;
 		Map test_map_;
-		std::string gizmo_model_key_;
+		Model gizmo_;
 		float fov_;
 		float near_plane_, far_plane_;
 		glm::mat4 perspective_projection_matrix_; //TODO : voir si je garde ici

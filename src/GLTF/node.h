@@ -12,20 +12,19 @@ namespace gltf
 class Node
 {
 	public:
-		struct NodeId //TODO
+		struct NodeInfo
 		{
-
+			Transform transform_;
+			glm::mat4 parent_matrix_;
+			Mesh::MeshId mesh_id_;
+			std::optional<AABB> aabb_;
+			bool is_empty_node_ = false; //<=> empty node sur Blender (le noeud n'a pas de mesh ni de AABB)
 		};
 
-		struct NodeInfo //TODO
-		{
-
-		};
-
-		Node(std::string name, Transform transform, glm::mat4 parent_matrix, Mesh::MeshId mesh_id, std::optional<AABB> aabb);
+		Node(std::string_view name, const NodeInfo& node_info);
 
 		void draw();
-		void add_child(Node child_node);
+		void add_child(Node child_node); //TODO : pas ouf le fait de passer les Nodes par copie
 		glm::mat4 compute_model() const;
 		glm::mat4 get_parent_matrix() const;
 		std::string get_name() const;
@@ -49,18 +48,13 @@ class Node
 		void add_scale(glm::vec3 scale);
 
 	private:
-		void update_position();
+		glm::vec3 get_true_position(glm::vec3 position) const;
 		void update_parent_matrix_of_root_children();
 		void update_parent_matrix_of_children(Node& node);
 		std::vector<glm::vec3> get_aabb_from_position() const;
 
-		bool is_empty_node_; //<=> empty node sur Blender (le noeud n'a pas de mesh ni de AABB)
-		Transform transform_;
-		glm::mat4 parent_matrix_;
-		glm::vec3 position_;
-		std::string name_;
-		Mesh::MeshId mesh_id_;
-		std::optional<AABB> aabb_;
+		std::string name_; //node id
+		NodeInfo node_info_;
 		std::vector<Node> children_nodes_;
 };
 

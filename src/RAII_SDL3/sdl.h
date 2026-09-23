@@ -7,10 +7,10 @@ class SDL
 {
 	public:
 		SDL();
-		SDL(const SDL& sdl) = delete;
-		SDL(SDL&& sdl) = delete;
-		SDL& operator=(const SDL& sdl) = delete;
-		SDL& operator=(SDL&& sdl) = delete;
+		SDL(const SDL&) = delete;
+		SDL(SDL&&) = delete;
+		SDL& operator=(const SDL&) = delete;
+		SDL& operator=(SDL&&) = delete;
 		~SDL();
 };
 

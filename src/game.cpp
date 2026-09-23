@@ -11,14 +11,13 @@
 #include <iostream>
 
 //TODO : créer des constantes pour les valeurs par défaut de translation, rotation et scale
-//TODO : voir si je renomme position en translation
 
 Game::Game()
 	: backend_(), //window_(),
 	player_(input_manager_),
-	camera_(input_manager_, resource::get_model(player_.get_model_key())->get_position()),
+	camera_(input_manager_, player_.get_model()->get_position()),
 	running_(true), gamepad_(), test_map_("resources/maps/corridor.gltf"), 
-	gizmo_model_key_(resource::add_model("resources/models/axis_gizmo.glb")),
+	gizmo_("resources/models/axis_gizmo.glb"),
 	fov_(glm::radians(45.0f)), near_plane_(0.1f), far_plane_(100.0f), perspective_projection_matrix_(1.0f)
 {}
 
@@ -28,7 +27,7 @@ void Game::run()
 	perspective_projection_matrix_ = glm::perspective(fov_, float(window_size.x) / float(window_size.y), near_plane_, far_plane_);
 
 	std::string temp_model_name("test"); //ici, "test" serait le nom du modèle
-	audio::set_listener_position(resource::get_model(player_.get_model_key())->get_position());
+	audio::set_listener_position(player_.get_model()->get_position());
 	audio::set_listener_orientation(camera_.get_camera_forward(), camera_.get_camera_up());
 	audio::set_listener_velocity(glm::vec3(0.0f));
 	audio::create_source(temp_model_name, "resources/audio/test.wav"); 
@@ -111,11 +110,10 @@ void Game::draw()
 	resource::set_uniform_matrix_4fv("projection_matrix_", glm::value_ptr(perspective_projection_matrix_));
 
 	player_.draw();
-	Model* gizmo = resource::get_model(gizmo_model_key_);
-	gizmo->draw();
+	gizmo_.draw();
 	test_map_.draw();
 
-	audio::set_listener_position(resource::get_model(player_.get_model_key())->get_position());
+	audio::set_listener_position(player_.get_model()->get_position());
 	audio::set_listener_orientation(camera_.get_camera_forward(), camera_.get_camera_up());
 
 	//TODO
@@ -205,13 +203,11 @@ void Game::update(float delta_time)
 	gamepad_.check(1000); //tester une fois par seconde
 	input_manager_.update(delta_time);
 
-	Model* player_model = resource::get_model(player_.get_model_key());
-
 	for(const std::unique_ptr<Model>& map_model : test_map_.get_models())
 	{
-		if(std::optional<std::pair<glm::vec3, AABB>> collision_info = collision_detection(map_model->get_root_node(), player_model->get_root_node()); collision_info.has_value())
+		if(std::optional<std::pair<glm::vec3, AABB>> collision_info = collision_detection(map_model->get_root_node(), player_.get_model()->get_root_node()); collision_info.has_value())
 		{
-			collision_response(collision_info.value(), player_model->get_root_node());
+			collision_response(collision_info.value(), player_.get_model()->get_root_node());
 		}
 	}
 }

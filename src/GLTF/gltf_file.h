@@ -13,9 +13,9 @@ class glTFFile
 {
 	public:
 		explicit glTFFile(std::string_view path);
-		glTFFile(const glTFFile& gltf_file) = delete;
+		glTFFile(const glTFFile&) = delete;
 		glTFFile(glTFFile&& gltf_file);
-		glTFFile& operator=(const glTFFile& gltf_file) = delete;
+		glTFFile& operator=(const glTFFile&) = delete;
 		glTFFile& operator=(glTFFile&& gltf_file);
 		~glTFFile();
 

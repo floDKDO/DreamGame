@@ -14,7 +14,7 @@ namespace
 glm::vec3 get_node_position(const tg3_node& node_tg3);
 glm::quat get_node_rotation(const tg3_node& node_tg3);
 glm::vec3 get_node_scale(const tg3_node& node_tg3);
-gltf::Node get_node(std::string_view path, const tg3_model& model_tg3, const tg3_node& node_tg3, glm::mat4 parent_matrix);
+gltf::Node get_node(std::string_view path, glm::mat4 parent_matrix, const tg3_model& model_tg3, const tg3_node& node_tg3);
 uint64_t get_attributes_count(const tg3_model& model_tg3, const tg3_primitive& primitive_tg3);
 Vertices get_vertices(const tg3_model& model_tg3, const tg3_primitive& primitive_tg3);
 Vertices get_aabb_vertices(const tg3_model& model_tg3, const tg3_primitive& primitive_tg3);
@@ -243,7 +243,7 @@ Node glTFFile::get_root_node() const
 		logging::log("The root node " + std::string(root_node_tg3.name.data) + " is an empty node", logging::Severity::DEBUG);
 	}
 
-	return get_node(path_, model_tg3_, root_node_tg3, glm::mat4(1.0f)); //les root nodes n'ont pas de parent donc ont une matrice identitée pour leur parent_matrix
+	return get_node(path_, glm::mat4(1.0f), model_tg3_, root_node_tg3); //les root nodes n'ont pas de parent donc ont une matrice identitée pour leur parent_matrix
 }
 
 }
@@ -320,7 +320,7 @@ glm::vec3 get_node_scale(const tg3_node& node_tg3)
 	}
 }
 
-gltf::Node get_node(std::string_view path, const tg3_model& model_tg3, const tg3_node& node_tg3, glm::mat4 parent_matrix)
+gltf::Node get_node(std::string_view path, glm::mat4 parent_matrix, const tg3_model& model_tg3, const tg3_node& node_tg3)
 {
 	std::string node_name;
 	if(node_tg3.name.len > 0)
@@ -328,14 +328,14 @@ gltf::Node get_node(std::string_view path, const tg3_model& model_tg3, const tg3
 		node_name = std::string(node_tg3.name.data);
 	}
 
-	gltf::Node node(node_name, get_transform(node_tg3), parent_matrix, get_mesh(path, model_tg3, node_tg3), get_aabb(path, model_tg3, node_tg3));
+	gltf::Node node(std::string_view(node_name), gltf::Node::NodeInfo{get_transform(node_tg3), parent_matrix, get_mesh(path, model_tg3, node_tg3), get_aabb(path, model_tg3, node_tg3)});
 	if(node_tg3.children_count > 1 && node_tg3.mesh == -1)
 	{
 		node.set_empty_node();
 	}
 	for(uint32_t i = 0; i < node_tg3.children_count; ++i)
 	{
-		node.add_child(get_node(path, model_tg3, model_tg3.nodes[node_tg3.children[i]], node.compute_model()));
+		node.add_child(get_node(path, node.compute_model(), model_tg3, model_tg3.nodes[node_tg3.children[i]]));
 	}
 	return node;
 }

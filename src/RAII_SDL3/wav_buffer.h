@@ -10,10 +10,10 @@ class WAVBuffer
 {
 	public:
 		explicit WAVBuffer(std::string_view path);
-		WAVBuffer(const WAVBuffer& wav_buffer) = delete;
-		WAVBuffer(WAVBuffer&& wav_buffer) = delete;
-		WAVBuffer& operator=(const WAVBuffer& wav_buffer) = delete;
-		WAVBuffer& operator=(WAVBuffer&& wav_buffer) = delete;
+		WAVBuffer(const WAVBuffer&) = delete;
+		WAVBuffer(WAVBuffer&&) = delete;
+		WAVBuffer& operator=(const WAVBuffer&) = delete;
+		WAVBuffer& operator=(WAVBuffer&&) = delete;
 		~WAVBuffer();
 
 		const Uint8* const get_audio_data() const;

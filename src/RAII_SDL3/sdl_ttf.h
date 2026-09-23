@@ -7,10 +7,10 @@
 //{
 //	public:
 //		SDLTTF();
-//		SDLTTF(const SDLTTF& sdl_ttf) = delete;
-//		SDLTTF(SDLTTF&& sdl_ttf) = delete;
-//		SDLTTF& operator=(const SDLTTF& sdl_ttf) = delete;
-//		SDLTTF& operator=(SDLTTF&& sdl_ttf) = delete;
+//		SDLTTF(const SDLTTF&) = delete;
+//		SDLTTF(SDLTTF&&) = delete;
+//		SDLTTF& operator=(const SDLTTF&) = delete;
+//		SDLTTF& operator=(SDLTTF&&) = delete;
 //		~SDLTTF();
 //
 //};

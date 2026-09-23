@@ -11,6 +11,40 @@ Mesh::Mesh(const MeshId& mesh_id, const MeshInfo& mesh_info)
 	load_mesh();
 }
 
+Mesh::Mesh(Mesh&& mesh)
+	: mesh_id_(mesh.mesh_id_), mesh_info_(mesh.mesh_info_), ebo_(mesh.ebo_), vbo_(mesh.vbo_), vao_(mesh.vao_)
+{
+	mesh.ebo_ = 0; //glDeleteBuffers silently ignores 0's and names that do not correspond to existing buffer objects.
+	mesh.vbo_ = 0; //idem
+	mesh.vao_ = 0; //idem
+}
+
+Mesh& Mesh::operator=(Mesh&& mesh)
+{
+	if(this == &mesh)
+	{
+		return *this;
+	}
+
+	destroy_all_buffers();
+
+	mesh_id_ = mesh.mesh_id_;
+	mesh_info_ = mesh.mesh_info_;
+	ebo_ = mesh.ebo_;
+	vbo_ = mesh.vbo_;
+	vao_ = mesh.vao_;
+
+	mesh.ebo_ = 0; //glDeleteBuffers silently ignores 0's and names that do not correspond to existing buffer objects.
+	mesh.vbo_ = 0; //idem
+	mesh.vao_ = 0; //idem
+	return *this;
+}
+
+Mesh::~Mesh()
+{
+	destroy_all_buffers();
+}
+
 void Mesh::load_vertex_attribute(GLuint vbo_binding_index, attribute::Name attribute_name)
 {
 	attribute::Info attribute_info = Vertex::get_attribute_info(attribute_name);
@@ -121,9 +155,4 @@ void Mesh::draw() const
 	glBindVertexArray(vao_);
 	glDrawElements(mesh_info_.draw_mode_, GLsizei(mesh_info_.ebo_values_.size()), GL_UNSIGNED_SHORT, 0);
 	//glBindVertexArray(0); //= unbind, commenté car provoque des erreurs
-}
-
-void Mesh::destroy() //TODO : appeler cette méthode
-{
-	destroy_all_buffers();
 }

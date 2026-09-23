@@ -9,10 +9,10 @@ class Window
 {
 	public:
 		Window(); 
-		Window(const Window& window) = delete;
-		Window(Window&& window) = delete;
-		Window& operator=(const Window& window) = delete;
-		Window& operator=(Window&& window) = delete;
+		Window(const Window&) = delete;
+		Window(Window&&) = delete;
+		Window& operator=(const Window&) = delete;
+		Window& operator=(Window&&) = delete;
 		~Window(); 
 
 		SDL_Window* fetch() const;

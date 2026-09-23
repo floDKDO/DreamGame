@@ -9,10 +9,10 @@ class Gamepad
 {
 	public:
 		Gamepad(); //SDL_OpenGamepad
-		Gamepad(const Gamepad& gamepad) = delete;
-		Gamepad(Gamepad&& gamepad) = delete;
-		Gamepad& operator=(const Gamepad& gamepad) = delete;
-		Gamepad& operator=(Gamepad&& gamepad) = delete;
+		Gamepad(const Gamepad&) = delete;
+		Gamepad(Gamepad&&) = delete;
+		Gamepad& operator=(const Gamepad&) = delete;
+		Gamepad& operator=(Gamepad&&) = delete;
 		~Gamepad(); //SDL_CloseGamepad
 
 		SDL_Gamepad* fetch() const;

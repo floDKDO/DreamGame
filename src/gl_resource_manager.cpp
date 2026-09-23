@@ -10,11 +10,13 @@
 namespace resource
 {
 
+//static std::size_t global_model_id_ = 0ULL;
+
 std::map<Mesh::MeshId, Mesh> meshes_; //TODO : ne marche pas avec une std::unordered_map
 std::map<Mesh::MeshId, Mesh> aabb_meshes_; //TODO : ne marche pas avec une std::unordered_map
 std::unordered_map<std::string, ShaderProgram> shader_programs_;
 std::unordered_map<std::string, GLint> uniforms_;
-std::unordered_map<std::string, Model> models_;
+//std::unordered_map<std::size_t, Model> models_;
 
 //Conteneur de texture, texture id 
 // => cas texture dont l'image possède un path : la clef est le path (= chemin de la texture)
@@ -90,32 +92,41 @@ const Mesh* get_aabb_mesh(Mesh::MeshId aabb_mesh_id)
 	}
 }
 
-std::string add_model(std::string_view path, Transform transform)
+/*std::size_t add_model(std::string_view path, Transform transform)
 {
-	std::string name_str = std::string(path);
-	models_.insert({name_str, Model(path, transform)}); //TODO : pour l'instant, la clef (= name) vaut le path
-	return name_str;
-}
-
-std::string add_model(std::string_view path)
-{
-	std::string name_str = std::string(path);
-	models_.insert({name_str, Model(path)}); //TODO : pour l'instant, la clef (= name) vaut le path
-	return name_str;
-}
-
-Model* get_model(std::string_view name) //TODO : pour l'instant, la clef (= name) vaut le path
-{
-	std::string name_str = std::string(name);
-	if(models_.count(name_str))
+	std::size_t local_model_id = global_model_id_;
+	auto pair = models_.insert({local_model_id, Model(path, transform)});
+	std::cout << "ADD => " << path << ", " << local_model_id << std::endl;
+	if(pair.second)
 	{
-		return &models_.at(name_str);
+		global_model_id_ += 1;
+	}
+	return local_model_id;
+}
+
+std::size_t add_model(std::string_view path)
+{
+	std::size_t local_model_id = global_model_id_;
+	auto pair = models_.insert({local_model_id, Model(path)});
+	std::cout << "ADD => " << path << ", " << local_model_id << std::endl;
+	if(pair.second)
+	{
+		global_model_id_ += 1;
+	}
+	return local_model_id;
+}
+
+Model* get_model(std::size_t model_id)
+{
+	if(models_.count(model_id))
+	{
+		return &models_.at(model_id);
 	}
 	else
 	{
 		return nullptr;
 	}
-}
+}*/
 
 void add_shader(std::string_view name, std::vector<std::string> shader_path)
 {

@@ -20,9 +20,13 @@ class Mesh
 		};
 
 		Mesh(const MeshId& mesh_id, const MeshInfo& mesh_info);
+		Mesh(const Mesh&) = delete;
+		Mesh(Mesh&& mesh);
+		Mesh& operator=(const Mesh&) = delete;
+		Mesh& operator=(Mesh&& mesh);
+		~Mesh();
 
 		void draw() const;
-		void destroy();
 
 	private:
 		void load_vertex_attribute(GLuint vbo_binding_index, attribute::Name attribute_name);
