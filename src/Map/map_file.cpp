@@ -1,5 +1,5 @@
 #include "map_file.h"
-//#include "Logging/logging.h"
+#include "Logging/logging.h"
 
 #include <fstream>
 #include <filesystem>

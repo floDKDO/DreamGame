@@ -7,8 +7,7 @@ namespace input
 
 InputManager::InputManager()
 	: active_device_(ActiveDevice::MOUSE_KEYBOARD)
-{
-}
+{}
 
 bool InputManager::is_input_active(Info input_info) const
 {

@@ -1,6 +1,7 @@
 #include "game.h"
 #include "OpenAL/openal.h"
 #include "gl_resource_manager.h"
+#include "Render/projection.h"
 
 //#include "imgui/imgui.h"
 //#include "imgui/imgui_impl_sdl3.h"
@@ -17,14 +18,12 @@ Game::Game()
 	player_(input_manager_),
 	camera_(input_manager_, player_.get_model()->get_position()),
 	running_(true), gamepad_(), test_map_("resources/maps/corridor.gltf"), 
-	gizmo_("resources/models/axis_gizmo.glb"),
-	fov_(glm::radians(45.0f)), near_plane_(0.1f), far_plane_(100.0f), perspective_projection_matrix_(1.0f)
+	gizmo_("resources/models/axis_gizmo.glb")
 {}
 
 void Game::run()
 {
 	glm::ivec2 window_size = backend_.get_window_size();
-	perspective_projection_matrix_ = glm::perspective(fov_, float(window_size.x) / float(window_size.y), near_plane_, far_plane_);
 
 	std::string temp_model_name("test"); //ici, "test" serait le nom du modèle
 	audio::set_listener_position(player_.get_model()->get_position());
@@ -107,7 +106,8 @@ void Game::draw()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	//resource::set_uniform_1i("texture_sampler0_", 0);
-	resource::set_uniform_matrix_4fv("projection_matrix_", glm::value_ptr(perspective_projection_matrix_));
+	glm::ivec2 window_size = backend_.get_window_size();
+	resource::set_uniform_matrix_4fv("projection_matrix_", glm::value_ptr(projection::get_perspective_matrix(float(window_size.x) / float(window_size.y))));
 
 	player_.draw();
 	gizmo_.draw();

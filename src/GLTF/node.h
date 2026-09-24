@@ -51,10 +51,10 @@ class Node
 		glm::vec3 get_true_position(glm::vec3 position) const;
 		glm::quat get_true_rotation(glm::quat rotation) const;
 		glm::vec3 get_true_scale(glm::vec3 scale) const;
+		std::vector<glm::vec3> get_aabb_from_position() const;
 
 		void update_parent_matrix_of_root_children();
 		void update_parent_matrix_of_children(Node& node);
-		std::vector<glm::vec3> get_aabb_from_position() const;
 
 		std::string name_; //node id
 		NodeInfo node_info_;
