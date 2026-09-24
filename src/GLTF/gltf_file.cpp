@@ -24,7 +24,7 @@ Mesh::MeshId get_mesh_aabb(Mesh::MeshId mesh_id, Mesh::MeshInfo mesh_info);
 std::optional<tg3_accessor> get_accessor_from_attribute(std::string_view attribute, const tg3_model& model_tg3, const tg3_primitive& primitive_tg3);
 glm::vec3 get_min_values(const tg3_model& model_tg3, const tg3_primitive& primitive_tg3);
 glm::vec3 get_max_values(const tg3_model& model_tg3, const tg3_primitive& primitive_tg3);
-std::optional<AABB> get_aabb(std::string_view path, const tg3_model& model_tg3, const tg3_node& node_tg3);
+std::pair<Mesh::MeshId, std::optional<AABB>> get_aabb(std::string_view path, const tg3_model& model_tg3, const tg3_node& node_tg3);
 std::vector<std::string> get_textures(const tg3_model& model_tg3);
 std::vector<GLushort> get_ebo_values(const tg3_model& model_tg3, const tg3_primitive& primitive_tg3);
 std::vector<glm::vec4> get_vec4_color_attribute(const tg3_model& model_tg3, const tg3_str_int_pair& attribute_tg3);
@@ -515,7 +515,7 @@ glm::vec3 get_max_values(const tg3_model& model_tg3, const tg3_primitive& primit
 	return max_values;
 }
 
-std::optional<AABB> get_aabb(std::string_view path, const tg3_model& model_tg3, const tg3_node& node_tg3)
+std::pair<Mesh::MeshId, std::optional<AABB>> get_aabb(std::string_view path, const tg3_model& model_tg3, const tg3_node& node_tg3)
 {
 	int32_t mesh_index = node_tg3.mesh;
 	if(mesh_index != -1)
@@ -539,14 +539,14 @@ std::optional<AABB> get_aabb(std::string_view path, const tg3_model& model_tg3, 
 		};
 		glm::vec3 min_values = get_min_values(model_tg3, primitive_tg3);
 		glm::vec3 max_values = get_max_values(model_tg3, primitive_tg3);
-		//Mesh::MeshId mesh_id = get_mesh_aabb(Mesh::MeshId{std::string(path), mesh_index}, Mesh::MeshInfo{ebo_values, vertices, {}, GLenum(primitive_tg3.mode)}; //TODO
+		Mesh::MeshId mesh_id = get_mesh_aabb(Mesh::MeshId{std::string(path), mesh_index}, Mesh::MeshInfo{ebo_values, vertices, {}, GLenum(primitive_tg3.mode)});
 
 		//un AABB n'a pas de texture
-		return AABB(min_values, max_values);
+		return {mesh_id, AABB(min_values, max_values)};
 	}
 	std::string node_name = (node_tg3.name.len > 0) ? std::string(node_tg3.name.data) : "";
 	logging::log("get_aabb() returned std::nullopt (the node \"" + node_name + "\" does not have a AABB)", logging::Severity::NOTICE);
-	return std::nullopt; //cas où le node ne possède pas de mesh
+	return {Mesh::MeshId{}, std::nullopt}; //cas où le node ne possède pas de mesh
 }
 
 std::vector<std::string> get_textures(const tg3_model& model_tg3)

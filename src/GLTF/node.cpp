@@ -45,12 +45,14 @@ void Node::draw()
 		mesh->draw();
 	}
 
-	//TODO
-	/*if(aabb_.has_value())
+	if(node_info_.aabb_.second.has_value())
 	{
-		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); //affichage wireframe pour AABB
-		aabb_->draw();
-	}*/
+		if(const Mesh* aabb_mesh = resource::get_aabb_mesh(node_info_.aabb_.first); aabb_mesh != nullptr)
+		{
+			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); //affichage wireframe pour AABB
+			aabb_mesh->draw();
+		}
+	}
 
 	for(Node& children_node : children_nodes_)
 	{
@@ -61,6 +63,16 @@ void Node::draw()
 glm::vec3 Node::get_true_position(glm::vec3 position) const
 {
 	return glm::vec3(node_info_.parent_matrix_ * glm::vec4(position, 1.0f));
+}
+
+glm::quat Node::get_true_rotation(glm::quat rotation) const
+{
+	return glm::quat(node_info_.parent_matrix_ * glm::mat4_cast(rotation));
+}
+
+glm::vec3 Node::get_true_scale(glm::vec3 scale) const
+{
+	return glm::vec3(node_info_.parent_matrix_ * glm::vec4(scale, 1.0f));
 }
 
 void Node::set_translation(glm::vec3 position)
@@ -98,29 +110,25 @@ void Node::add_translation_z(float z)
 
 void Node::set_rotation(glm::quat rotation)
 {
-	node_info_.transform_.rotation_ = rotation;
-	//TODO : faire comme avec le membre position_ (avoir un membre qui prend en compte la parent_matrix_) ?
+	node_info_.transform_.rotation_ = get_true_rotation(rotation);
 	update_parent_matrix_of_root_children();
 }
 
 void Node::add_rotation(glm::quat rotation)
 {
-	node_info_.transform_.rotation_ += rotation;
-	//TODO : faire comme avec le membre position_ (avoir un membre qui prend en compte la parent_matrix_) ?
+	node_info_.transform_.rotation_ += get_true_rotation(rotation);
 	update_parent_matrix_of_root_children();
 }
 
 void Node::set_scale(glm::vec3 scale)
 {
-	node_info_.transform_.scale_ = scale;
-	//TODO : faire comme avec le membre position_ (avoir un membre qui prend en compte la parent_matrix_) ?
+	node_info_.transform_.scale_ = get_true_scale(scale);
 	update_parent_matrix_of_root_children();
 }
 
 void Node::add_scale(glm::vec3 scale)
 {
-	node_info_.transform_.scale_ += scale;
-	//TODO : faire comme avec le membre position_ (avoir un membre qui prend en compte la parent_matrix_) ?
+	node_info_.transform_.scale_ += get_true_scale(scale);
 	update_parent_matrix_of_root_children();
 }
 
@@ -154,7 +162,7 @@ std::string Node::get_name() const
 
 std::vector<glm::vec3> Node::get_aabb_from_position() const
 {
-	std::vector<glm::vec3> aabb_points = node_info_.aabb_.value().get_corners();
+	std::vector<glm::vec3> aabb_points = node_info_.aabb_.second.value().get_corners();
 	glm::vec3 min_values(std::numeric_limits<float>::max());
 	glm::vec3 max_values(std::numeric_limits<float>::lowest());
 
@@ -184,7 +192,7 @@ std::vector<glm::vec3> Node::get_aabb_from_position() const
 
 std::optional<AABB> Node::get_world_aabb() const
 {
-	if(!node_info_.aabb_.has_value())
+	if(!node_info_.aabb_.second.has_value())
 	{
 		return std::nullopt;
 	}

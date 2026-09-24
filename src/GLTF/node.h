@@ -17,7 +17,7 @@ class Node
 			Transform transform_;
 			glm::mat4 parent_matrix_;
 			Mesh::MeshId mesh_id_;
-			std::optional<AABB> aabb_;
+			std::pair<Mesh::MeshId, std::optional<AABB>> aabb_;
 			bool is_empty_node_ = false; //<=> empty node sur Blender (le noeud n'a pas de mesh ni de AABB)
 		};
 
@@ -49,6 +49,9 @@ class Node
 
 	private:
 		glm::vec3 get_true_position(glm::vec3 position) const;
+		glm::quat get_true_rotation(glm::quat rotation) const;
+		glm::vec3 get_true_scale(glm::vec3 scale) const;
+
 		void update_parent_matrix_of_root_children();
 		void update_parent_matrix_of_children(Node& node);
 		std::vector<glm::vec3> get_aabb_from_position() const;
