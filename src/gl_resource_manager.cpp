@@ -1,22 +1,21 @@
 #include "gl_resource_manager.h"
 #include "Logging/logging.h"
-//#include "Render/model.h"
+#include "Render/model.h"
 
 #include <map>
-#include <unordered_map>
 #include <string>
 #include <iostream>
 
 namespace resource
 {
 
-//static std::size_t global_model_id_ = 0ULL;
+static std::size_t global_model_id_ = 0ULL;
 
 std::map<Mesh::MeshId, Mesh> meshes_; //TODO : ne marche pas avec une std::unordered_map
 std::map<Mesh::MeshId, Mesh> aabb_meshes_; //TODO : ne marche pas avec une std::unordered_map
 std::unordered_map<std::string, ShaderProgram> shader_programs_;
 std::unordered_map<std::string, GLint> uniforms_;
-//std::unordered_map<std::size_t, Model> models_;
+std::unordered_map<std::size_t, Model> models_;
 
 //Conteneur de texture, texture id 
 // => cas texture dont l'image possède un path : la clef est le path (= chemin de la texture)
@@ -31,7 +30,7 @@ std::string add_texture(Texture texture)
 		//Comme les images "embedded glTF" n'ont pas de path, la clef étant "", elle ne serait pas unique pour plusieurs images sans path
 		//Pour assurer que chacune de ces images aient un path fictif unique, je lui ajoute un entier (incrémenté à chaque ajout) => le path n'étant pas consulté donc la valeur de cette clef n'a aucune importance
 		//De toute façon, pour ce type d'images, aucune vérification n'est effectuée : elles sont ajoutées dans tous les cas dans textures_ 
-		static std::size_t counter = 0;
+		static std::size_t counter = 0ULL;
 		texture_key = "Empty path " + std::to_string(counter);
 		textures_.insert({texture_key, texture});
 		counter += 1;
@@ -44,11 +43,12 @@ std::string add_texture(Texture texture)
 	return texture_key;
 }
 
-Texture* get_texture(std::string texture_key)
+Texture* get_texture(std::string_view texture_key)
 {
-	if(textures_.count(texture_key))
+	std::string texture_key_str = std::string(texture_key);
+	if(textures_.count(texture_key_str))
 	{
-		return &textures_.at(texture_key);
+		return &textures_.at(texture_key_str);
 	}
 	else
 	{
@@ -92,11 +92,11 @@ const Mesh* get_aabb_mesh(Mesh::MeshId aabb_mesh_id)
 	}
 }
 
-/*std::size_t add_model(std::string_view path, Transform transform)
+std::size_t add_model(std::string_view path, Transform transform)
 {
 	std::size_t local_model_id = global_model_id_;
 	auto pair = models_.insert({local_model_id, Model(path, transform)});
-	std::cout << "ADD => " << path << ", " << local_model_id << std::endl;
+	//std::cout << "ADD => " << path << ", " << local_model_id << std::endl;
 	if(pair.second)
 	{
 		global_model_id_ += 1;
@@ -108,7 +108,7 @@ std::size_t add_model(std::string_view path)
 {
 	std::size_t local_model_id = global_model_id_;
 	auto pair = models_.insert({local_model_id, Model(path)});
-	std::cout << "ADD => " << path << ", " << local_model_id << std::endl;
+	//std::cout << "ADD => " << path << ", " << local_model_id << std::endl;
 	if(pair.second)
 	{
 		global_model_id_ += 1;
@@ -126,7 +126,12 @@ Model* get_model(std::size_t model_id)
 	{
 		return nullptr;
 	}
-}*/
+}
+
+std::unordered_map<std::size_t, Model>& get_models()
+{
+	return models_;
+}
 
 void add_shader(std::string_view name, std::vector<std::string> shader_path)
 {

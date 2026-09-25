@@ -1,5 +1,5 @@
 #include "map_file.h"
-#include "Logging/logging.h"
+//#include "Logging/logging.h"
 
 #include <fstream>
 #include <filesystem>
@@ -11,11 +11,11 @@ MapFile::MapFile(std::string_view map_file_path)
 {
 	open();
 	gltf_to_map_format();
+	add_models();
 }
 
-std::vector<std::unique_ptr<Model>> MapFile::get_models() const
+void MapFile::add_models() const
 {
-	std::vector<std::unique_ptr<Model>> models;
 	for(const auto& model : map_data_["models"].items())
 	{
 		json model_value = model.value();
@@ -36,9 +36,8 @@ std::vector<std::unique_ptr<Model>> MapFile::get_models() const
 
 		std::string model_filename = model_value["modelFilename"];
 
-		models.push_back(std::make_unique<Model>("resources/models/" + model_filename, transform));
+		resource::add_model("resources/models/" + model_filename, transform);
 	}
-	return models;
 }
 
 void MapFile::open()

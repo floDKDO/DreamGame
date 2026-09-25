@@ -81,7 +81,7 @@ glm::quat get_rotation_from_model_matrix(glm::mat4 model_matrix)
 }
 
 //Credit: https://stackoverflow.com/questions/180947/base64-decode-snippet-in-c/13935718
-std::string base64_decode(const void* data, const size_t len)
+std::string base64_decode(const void* data, const std::size_t len)
 {
 	static const int base64_index[256] = {
 	0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
@@ -94,10 +94,10 @@ std::string base64_decode(const void* data, const size_t len)
 
 	unsigned char* p = (unsigned char*)data;
 	int pad = len > 0 && (len % 4 || p[len - 1] == '=');
-	const size_t L = ((len + 3) / 4 - pad) * 4;
+	const std::size_t L = ((len + 3) / 4 - pad) * 4;
 	std::string str(L / 4 * 3 + pad, '\0');
 
-	for(size_t i = 0, j = 0; i < L; i += 4)
+	for(std::size_t i = 0ULL, j = 0ULL; i < L; i += 4ULL)
 	{
 		int n = base64_index[p[i]] << 18 | base64_index[p[i + 1]] << 12 | base64_index[p[i + 2]] << 6 | base64_index[p[i + 3]];
 		str[j++] = char(n >> 16);

@@ -574,7 +574,7 @@ std::vector<std::string> get_textures(const tg3_model& model_tg3)
 				std::string image_data_base64 = image_str.substr(image_str.find(',') + 1); //+1 pour ne pas prendre la virgule
 				std::string image_data_decoded = utils::base64_decode(image_data_base64.data(), image_data_base64.length());
 				mesh_texture.image_data_.reserve(image_data_base64.length());
-				for(std::size_t j = 0; j < image_data_decoded.length(); ++j)
+				for(std::size_t j = 0ULL; j < image_data_decoded.length(); ++j)
 				{
 					mesh_texture.image_data_.push_back(image_data_decoded[j]);
 				}

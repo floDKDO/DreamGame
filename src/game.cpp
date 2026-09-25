@@ -18,8 +18,11 @@ Game::Game()
 	player_(input_manager_),
 	camera_(input_manager_, player_.get_model()->get_position()),
 	running_(true), gamepad_(), test_map_("resources/maps/corridor.gltf"), 
-	gizmo_("resources/models/axis_gizmo.glb")
-{}
+	gizmo_(nullptr)
+{
+	std::size_t gizmo_model_id = resource::add_model("resources/models/axis_gizmo.glb");
+	gizmo_ = resource::get_model(gizmo_model_id);
+}
 
 void Game::run()
 {
@@ -109,9 +112,14 @@ void Game::draw()
 	glm::ivec2 window_size = backend_.get_window_size();
 	resource::set_uniform_matrix_4fv("projection_matrix_", glm::value_ptr(projection::get_perspective_matrix(float(window_size.x) / float(window_size.y))));
 
-	player_.draw();
-	gizmo_.draw();
-	test_map_.draw();
+	//player_.draw();
+	//gizmo_->draw();
+	//test_map_.draw();
+
+	for(std::pair<const std::size_t, Model>& model_pair : resource::get_models())
+	{
+		model_pair.second.draw();
+	}
 
 	audio::set_listener_position(player_.get_model()->get_position());
 	audio::set_listener_orientation(camera_.get_camera_forward(), camera_.get_camera_up());
@@ -136,78 +144,10 @@ void Game::update_fps_count(Uint64& last_fps_refresh, unsigned int& frame_count_
 	}
 }
 
-std::optional<std::pair<glm::vec3, AABB>> collision_detection(const gltf::Node& map_node, const gltf::Node& player_node)
-{
-	if(!map_node.is_empty_node()) 
-	{
-		std::optional<AABB> map_node_aabb_optional = map_node.get_world_aabb();
-		if(!map_node_aabb_optional.has_value())
-		{
-			return std::nullopt;
-		}
-
-		const AABB& map_node_aabb = map_node_aabb_optional.value();
-		std::optional<AABB> player_node_aabb_optional = player_node.get_world_aabb();
-		const AABB& player_node_aabb = player_node_aabb_optional.value(); //on part du principe que le joueur aura toujours un AABB
-
-		if(player_node_aabb.intersection_with_aabb(map_node_aabb))
-		{
-			return std::make_pair(player_node_aabb.get_overlap_with_aabb(map_node_aabb), map_node_aabb);
-		}
-		else
-		{
-			return std::nullopt;
-		}
-	}
-
-	for(const gltf::Node& child_node : map_node.get_children_nodes())
-	{
-		std::optional<std::pair<glm::vec3, AABB>> result = collision_detection(child_node, player_node);
-		if(result.has_value())
-		{
-			return result;
-		}
-	}
-	return std::nullopt;
-}
-
-void collision_response(const std::pair<glm::vec3, AABB>& collision_info, gltf::Node& player_node)
-{
-	const AABB& map_node_aabb = collision_info.second;
-	std::optional<AABB> player_node_aabb_optional = player_node.get_world_aabb();
-	const AABB& player_node_aabb = player_node_aabb_optional.value(); //on part du principe que le joueur aura toujours un AABB
-
-	glm::vec3 player_center = player_node_aabb.get_center();
-	glm::vec3 map_node_center = map_node_aabb.get_center();
-	glm::vec3 overlap = collision_info.first;
-
-	//on cherche le plus petit overlap car on veut déplacer le joueur de la plus petite distance possible pour qu'il ne soit plus en collision avec le modèle
-	if(overlap.x < overlap.y && overlap.x < overlap.z)
-	{
-		player_node.add_translation_x((player_center.x < map_node_center.x) ? -overlap.x : overlap.x);
-	}
-	else if(overlap.y < overlap.z)
-	{
-		player_node.add_translation_y((player_center.y < map_node_center.y) ? -overlap.y : overlap.y);
-	}
-	else
-	{
-		player_node.add_translation_z((player_center.z < map_node_center.z) ? -overlap.z : overlap.z);
-	}
-}
-
 void Game::update(float delta_time)
 {
 	camera_.update(delta_time);
 	player_.update(delta_time, camera_.get_camera_forward(), camera_.get_camera_left());
 	gamepad_.check(1000); //tester une fois par seconde
 	input_manager_.update(delta_time);
-
-	for(const std::unique_ptr<Model>& map_model : test_map_.get_models())
-	{
-		if(std::optional<std::pair<glm::vec3, AABB>> collision_info = collision_detection(map_model->get_root_node(), player_.get_model()->get_root_node()); collision_info.has_value())
-		{
-			collision_response(collision_info.value(), player_.get_model()->get_root_node());
-		}
-	}
 }

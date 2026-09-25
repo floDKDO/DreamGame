@@ -30,7 +30,7 @@ GLfloat ieee754_to_float(uint64_t ieee754_number);
 glm::vec3 get_translation_from_model_matrix(glm::mat4 model_matrix);
 glm::vec3 get_scale_from_model_matrix(glm::mat4 model_matrix);
 glm::quat get_rotation_from_model_matrix(glm::mat4 model_matrix);
-std::string base64_decode(const void* data, const size_t len);
+std::string base64_decode(const void* data, const std::size_t len);
 
 
 }

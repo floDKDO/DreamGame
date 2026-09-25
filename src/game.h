@@ -3,7 +3,7 @@
 #include "RAII_SDL3/gamepad.h"
 #include "Backend/backend.h"
 #include "Render/model.h"
-#include "Map/map.h"
+#include "Map/map_file.h"
 #include "Camera/camera.h"
 #include "Player/player.h"
 #include "Input/input_manager.h"
@@ -27,6 +27,7 @@ class Game
 		Camera camera_;
 		bool running_;
 		sdl::Gamepad gamepad_;
-		Map test_map_;
-		Model gizmo_;
+		//Map test_map_;
+		MapFile test_map_;
+		Model* gizmo_;
 };
