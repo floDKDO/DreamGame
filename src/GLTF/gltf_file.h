@@ -3,6 +3,7 @@
 #include <tinygltf/tiny_gltf_v3.h>
 #include <string>
 #include <string_view>
+#include <memory>
 
 namespace gltf
 {
@@ -19,7 +20,7 @@ class glTFFile
 		glTFFile& operator=(glTFFile&& gltf_file);
 		~glTFFile();
 
-		Node get_root_node() const; //TODO : pas ouf, vaut mieux retourner qqc de const sans copie
+		std::unique_ptr<Node> get_root_node() const;
 
 	private:
 		void open();

@@ -20,7 +20,7 @@ WAVBuffer::~WAVBuffer()
 	SDL_free(audio_data_);
 }
 
-const Uint8* const WAVBuffer::get_audio_data() const
+const Uint8* WAVBuffer::get_audio_data() const
 {
 	return audio_data_;
 }

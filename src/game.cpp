@@ -3,15 +3,13 @@
 #include "gl_resource_manager.h"
 #include "Render/projection.h"
 
-//#include "imgui/imgui.h"
-//#include "imgui/imgui_impl_sdl3.h"
-//#include "imgui/imgui_impl_opengl3.h"
+//#include <imgui/imgui.h>
+//#include <imgui/imgui_impl_sdl3.h>
+//#include <imgui/imgui_impl_opengl3.h>
 
 //#include <SDL3_ttf/SDL_ttf.h>
 #include <glm/gtc/type_ptr.hpp>
 #include <iostream>
-
-//TODO : créer des constantes pour les valeurs par défaut de translation, rotation et scale
 
 Game::Game()
 	: backend_(), //window_(),
@@ -112,13 +110,9 @@ void Game::draw()
 	glm::ivec2 window_size = backend_.get_window_size();
 	resource::set_uniform_matrix_4fv("projection_matrix_", glm::value_ptr(projection::get_perspective_matrix(float(window_size.x) / float(window_size.y))));
 
-	//player_.draw();
-	//gizmo_->draw();
-	//test_map_.draw();
-
-	for(std::pair<const std::size_t, Model>& model_pair : resource::get_models())
+	for(auto& [model_id, model] : resource::get_models())
 	{
-		model_pair.second.draw();
+		model.draw();
 	}
 
 	audio::set_listener_position(player_.get_model()->get_position());

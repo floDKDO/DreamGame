@@ -1,11 +1,11 @@
 #include "backend.h"
 #include "Common/utils.h"
-#include "imgui/imgui.h"
-#include "imgui/imgui_impl_sdl3.h"
-#include "imgui/imgui_impl_opengl3.h"
 #include "gl_resource_manager.h"
 #include "Logging/logging.h"
 
+#include <imgui/imgui.h>
+#include <imgui/imgui_impl_sdl3.h>
+#include <imgui/imgui_impl_opengl3.h>
 #include <AL/al.h>
 #include <stb/stb_image.h>
 #include <iostream>

@@ -11,8 +11,8 @@ namespace resource
 
 static std::size_t global_model_id_ = 0ULL;
 
-std::map<Mesh::MeshId, Mesh> meshes_; //TODO : ne marche pas avec une std::unordered_map
-std::map<Mesh::MeshId, Mesh> aabb_meshes_; //TODO : ne marche pas avec une std::unordered_map
+std::unordered_map<Mesh::MeshId, Mesh> meshes_;
+std::unordered_map<Mesh::MeshId, Mesh> aabb_meshes_;
 std::unordered_map<std::string, ShaderProgram> shader_programs_;
 std::unordered_map<std::string, GLint> uniforms_;
 std::unordered_map<std::size_t, Model> models_;
@@ -167,7 +167,7 @@ void insert_uniform(const GLchar* name)
 		glGetIntegerv(GL_CURRENT_PROGRAM, &shader_program);
 
 		GLint location;
-		if((location = glGetUniformLocation(shader_program, name)) == -1)
+		if((location = glGetUniformLocation(GLuint(shader_program), name)) == -1)
 		{
 			logging::log("The requested uniform variable (" + std::string(name) + ") does not exist!", logging::Severity::WARNING);
 		}

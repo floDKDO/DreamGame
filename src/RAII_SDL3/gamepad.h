@@ -23,12 +23,12 @@ class Gamepad
 		bool is_open() const;
 		void open();
 
+		SDL_Gamepad* gamepad_;
+
 		//for the check method
 		Uint64 last_check_time_;
 		Uint64 current_check_time_;
 		///////////////////////////
-
-		SDL_Gamepad* gamepad_;
 };
 
 }

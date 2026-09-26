@@ -8,7 +8,7 @@
 //
 //void Map::draw()
 //{
-//	for(std::unique_ptr<Model>& model : models_)
+//	for(const std::unique_ptr<Model>& model : models_)
 //	{
 //		model->draw();
 //	}

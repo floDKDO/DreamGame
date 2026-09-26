@@ -17,7 +17,7 @@ Node::Node(std::string_view name, const NodeInfo& node_info)
 
 glm::mat4 Node::compute_model() const
 {
-	return gltf::get_transformation_matrix(node_info_.parent_matrix_, node_info_.transform_.position_, node_info_.transform_.rotation_, node_info_.transform_.scale_);
+	return get_transformation_matrix(node_info_.parent_matrix_, node_info_.transform_.position_, node_info_.transform_.rotation_, node_info_.transform_.scale_);
 }
 
 glm::mat4 Node::get_parent_matrix() const
@@ -54,9 +54,9 @@ void Node::draw()
 		}
 	}
 
-	for(Node& children_node : children_nodes_)
+	for(const std::unique_ptr<Node>& children_node : children_nodes_)
 	{
-		children_node.draw();
+		children_node->draw();
 	}
 }
 
@@ -78,13 +78,13 @@ glm::vec3 Node::get_true_scale(glm::vec3 scale) const
 void Node::set_translation(glm::vec3 position)
 {
 	node_info_.transform_.position_ = get_true_position(position);
-	update_parent_matrix_of_children(*this);
+	update_parent_matrix_of_root_children();
 }
 
 void Node::add_translation(glm::vec3 position)
 {
 	node_info_.transform_.position_ += get_true_position(position);
-	update_parent_matrix_of_children(*this);
+	update_parent_matrix_of_root_children();
 }
 
 void Node::add_translation_x(float x)
@@ -134,25 +134,25 @@ void Node::add_scale(glm::vec3 scale)
 
 void Node::update_parent_matrix_of_root_children()
 {
-	for(Node& child_node : children_nodes_)
+	for(const std::unique_ptr<Node>& child_node : children_nodes_)
 	{
-		child_node.node_info_.parent_matrix_ = compute_model();
+		child_node->node_info_.parent_matrix_ = compute_model();
 		update_parent_matrix_of_children(child_node);
 	}
 }
 
-void Node::update_parent_matrix_of_children(Node& node)
+void Node::update_parent_matrix_of_children(const std::unique_ptr<Node>& node)
 {
-	for(Node& child_node : node.children_nodes_)
+	for(const std::unique_ptr<Node>& child_node : node->children_nodes_)
 	{
-		child_node.node_info_.parent_matrix_ = node.compute_model();
+		child_node->node_info_.parent_matrix_ = node->compute_model();
 		update_parent_matrix_of_children(child_node);
 	}
 }
 
-void Node::add_child(Node child_node)
+void Node::add_child(std::unique_ptr<Node> child_node)
 {
-	children_nodes_.push_back(child_node);
+	children_nodes_.push_back(std::move(child_node));
 }
 
 std::string Node::get_name() const
@@ -202,7 +202,7 @@ std::optional<AABB> Node::get_world_aabb() const
 	}
 }
 
-const std::vector<Node>&Node::get_children_nodes() const
+const std::vector<std::unique_ptr<Node>>&Node::get_children_nodes() const
 {
 	return children_nodes_;
 }

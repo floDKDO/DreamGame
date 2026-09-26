@@ -14,7 +14,7 @@ namespace
 glm::vec3 get_node_position(const tg3_node& node_tg3);
 glm::quat get_node_rotation(const tg3_node& node_tg3);
 glm::vec3 get_node_scale(const tg3_node& node_tg3);
-gltf::Node get_node(std::string_view path, glm::mat4 parent_matrix, const tg3_model& model_tg3, const tg3_node& node_tg3);
+std::unique_ptr<gltf::Node> get_node(std::string_view path, glm::mat4 parent_matrix, const tg3_model& model_tg3, const tg3_node& node_tg3);
 uint64_t get_attributes_count(const tg3_model& model_tg3, const tg3_primitive& primitive_tg3);
 Vertices get_vertices(const tg3_model& model_tg3, const tg3_primitive& primitive_tg3);
 Vertices get_aabb_vertices(const tg3_model& model_tg3, const tg3_primitive& primitive_tg3);
@@ -164,8 +164,8 @@ void glTFFile::print_info() const
 		tg3_accessor accessor_tg3 = model_tg3_.accessors[i];
 		logging::log("        - Accessor " + std::to_string(i) + ": ", logging::Severity::DEBUG);
 		logging::log("           .Buffer view (index = " + std::to_string(accessor_tg3.buffer_view) + ", offset = " + std::to_string(accessor_tg3.byte_offset) + ")", logging::Severity::DEBUG);
-		logging::log("           .Type = " + gltf::get_type_str(accessor_tg3.type) + ", count = " + std::to_string(accessor_tg3.count) + ", component type = " 
-			+ gltf::get_component_type_str(accessor_tg3.component_type), logging::Severity::DEBUG);
+		logging::log("           .Type = " + get_type_str(accessor_tg3.type) + ", count = " + std::to_string(accessor_tg3.count) + ", component type = " 
+			+ get_component_type_str(accessor_tg3.component_type), logging::Severity::DEBUG);
 	}
 
 	logging::log("    - Buffer view(s): ", logging::Severity::DEBUG);
@@ -175,7 +175,7 @@ void glTFFile::print_info() const
 		logging::log("        - Buffer view " + std::to_string(i) + ": ", logging::Severity::DEBUG);
 		logging::log("           .Buffer indice = " + std::to_string(buffer_view_tg3.buffer), logging::Severity::DEBUG);
 		logging::log("           .Length = " + std::to_string(buffer_view_tg3.byte_length) + ", offset = " + std::to_string(buffer_view_tg3.byte_offset) + ", target = " 
-			+ gltf::get_target_str(buffer_view_tg3.target), logging::Severity::DEBUG);
+			+ get_target_str(buffer_view_tg3.target), logging::Severity::DEBUG);
 	}
 
 	logging::log("    - Buffer(s): ", logging::Severity::DEBUG);
@@ -199,8 +199,8 @@ void glTFFile::print_info() const
 	{
 		tg3_sampler sampler_tg3 = model_tg3_.samplers[i];
 		logging::log("        - Sampler " + std::to_string(i) + ": ", logging::Severity::DEBUG);
-		logging::log("           .MagFilter = " + gltf::get_filter_str(sampler_tg3.mag_filter) + ", minFilter = " + gltf::get_filter_str(sampler_tg3.min_filter)
-			+ ", wrapS = " + gltf::get_wrap_str(sampler_tg3.wrap_s) + ", wrapT = " + gltf::get_wrap_str(sampler_tg3.wrap_t), logging::Severity::DEBUG);
+		logging::log("           .MagFilter = " + get_filter_str(sampler_tg3.mag_filter) + ", minFilter = " + get_filter_str(sampler_tg3.min_filter)
+			+ ", wrapS = " + get_wrap_str(sampler_tg3.wrap_s) + ", wrapT = " + get_wrap_str(sampler_tg3.wrap_t), logging::Severity::DEBUG);
 	}
 
 	logging::log("    - Image(s): ", logging::Severity::DEBUG);
@@ -227,7 +227,7 @@ void glTFFile::print_info() const
 	std::cout << std::endl;
 }
 
-Node glTFFile::get_root_node() const
+std::unique_ptr<Node> glTFFile::get_root_node() const
 {
 	if(model_tg3_.scenes_count > 1)
 	{
@@ -320,7 +320,7 @@ glm::vec3 get_node_scale(const tg3_node& node_tg3)
 	}
 }
 
-gltf::Node get_node(std::string_view path, glm::mat4 parent_matrix, const tg3_model& model_tg3, const tg3_node& node_tg3)
+std::unique_ptr<gltf::Node> get_node(std::string_view path, glm::mat4 parent_matrix, const tg3_model& model_tg3, const tg3_node& node_tg3)
 {
 	std::string node_name;
 	if(node_tg3.name.len > 0)
@@ -328,14 +328,14 @@ gltf::Node get_node(std::string_view path, glm::mat4 parent_matrix, const tg3_mo
 		node_name = std::string(node_tg3.name.data);
 	}
 
-	gltf::Node node(std::string_view(node_name), gltf::Node::NodeInfo{get_transform(node_tg3), parent_matrix, get_mesh(path, model_tg3, node_tg3), get_aabb(path, model_tg3, node_tg3)});
+	std::unique_ptr<gltf::Node> node = std::make_unique<gltf::Node>(std::string_view(node_name), gltf::Node::NodeInfo{get_transform(node_tg3), parent_matrix, get_mesh(path, model_tg3, node_tg3), get_aabb(path, model_tg3, node_tg3)});
 	if(node_tg3.children_count > 1 && node_tg3.mesh == -1)
 	{
-		node.set_empty_node();
+		node->set_empty_node();
 	}
 	for(uint32_t i = 0; i < node_tg3.children_count; ++i)
 	{
-		node.add_child(get_node(path, node.compute_model(), model_tg3, model_tg3.nodes[node_tg3.children[i]]));
+		node->add_child(get_node(path, node->compute_model(), model_tg3, model_tg3.nodes[node_tg3.children[i]]));
 	}
 	return node;
 }

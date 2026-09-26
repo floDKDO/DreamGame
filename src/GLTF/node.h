@@ -18,18 +18,18 @@ class Node
 			glm::mat4 parent_matrix_;
 			Mesh::MeshId mesh_id_;
 			std::pair<Mesh::MeshId, std::optional<AABB>> aabb_;
-			bool is_empty_node_ = false; //<=> empty node sur Blender (le noeud n'a pas de mesh ni de AABB)
+			bool is_empty_node_ = false; //<=> empty node sur Blender (le noeud n'a pas de mesh ni d'AABB)
 		};
 
 		Node(std::string_view name, const NodeInfo& node_info);
 
 		void draw();
-		void add_child(Node child_node); //TODO : pas ouf le fait de passer les Nodes par copie
+		void add_child(std::unique_ptr<Node> child_node);
 		glm::mat4 compute_model() const;
 		glm::mat4 get_parent_matrix() const;
 		std::string get_name() const;
 		std::optional<AABB> get_world_aabb() const;
-		const std::vector<Node>& get_children_nodes() const;
+		const std::vector<std::unique_ptr<Node>>& get_children_nodes() const;
 		void set_empty_node();
 		bool is_empty_node() const;
 
@@ -54,11 +54,11 @@ class Node
 		std::vector<glm::vec3> get_aabb_from_position() const;
 
 		void update_parent_matrix_of_root_children();
-		void update_parent_matrix_of_children(Node& node);
+		void update_parent_matrix_of_children(const std::unique_ptr<Node>& node);
 
 		std::string name_; //node id
 		NodeInfo node_info_;
-		std::vector<Node> children_nodes_;
+		std::vector<std::unique_ptr<Node>> children_nodes_;
 };
 
 }

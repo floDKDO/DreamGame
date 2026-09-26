@@ -18,5 +18,5 @@ class AABB
 		glm::vec3 get_overlap_with_aabb(const AABB& aabb) const;
 
 	private:
-		glm::vec3 max_values_, min_values_;
+		glm::vec3 min_values_, max_values_;
 };

@@ -17,6 +17,11 @@ class Mesh
 		{
 			std::string file_name_ = "";
 			int32_t mesh_index_ = -1;
+
+			bool operator==(const MeshId& other) const
+			{
+				return (file_name_ == other.file_name_ && mesh_index_ == other.mesh_index_);
+			}
 		};
 
 		Mesh(const MeshId& mesh_id, const MeshInfo& mesh_info);
@@ -42,28 +47,11 @@ class Mesh
 		GLuint ebo_, vbo_, vao_;
 };
 
-inline bool operator<(const Mesh::MeshId& a, const Mesh::MeshId& b)
+template <>
+struct std::hash<Mesh::MeshId>
 {
-	if(a.file_name_ < b.file_name_)
+	std::size_t operator()(const Mesh::MeshId& mesh_id) const
 	{
-		return true;
+		return (std::hash<std::string>()(mesh_id.file_name_) ^ (std::hash<int32_t>()(mesh_id.mesh_index_) << 1));
 	}
-	else if(b.file_name_ < a.file_name_)
-	{
-		return false;
-	}
-	else if(a.mesh_index_ < b.mesh_index_)
-	{
-		return true;
-	}
-	else
-	{
-		return false;
-	}
-
-	//return (a.file_name_ < b.file_name_) || (a.mesh_index_ < b.mesh_index_);
-	//TODO : ne marche pas pour ce cas-là : 
-	//a = "aaa", 42 ; b = "zzz", 1
-	//a < b => true
-	//b < a => true
-}
+};

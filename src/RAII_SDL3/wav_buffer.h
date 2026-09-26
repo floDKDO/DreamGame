@@ -16,7 +16,7 @@ class WAVBuffer
 		WAVBuffer& operator=(WAVBuffer&&) = delete;
 		~WAVBuffer();
 
-		const Uint8* const get_audio_data() const;
+		const Uint8* get_audio_data() const;
 		int get_format() const;
 		int get_number_of_channels() const;
 		int get_sample_rate() const;
