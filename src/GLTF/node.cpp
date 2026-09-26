@@ -1,6 +1,5 @@
 #include "node.h"
 #include "gltf.h"
-#include "Logging/logging.h"
 //#include "gl_resource_manager.h"
 
 #include <glm/gtc/type_ptr.hpp>
@@ -11,7 +10,7 @@
 namespace gltf
 {
 
-Node::Node(std::string_view name, const NodeInfo& node_info)
+Node::Node(std::string_view name, const Info& node_info)
 	: name_(name), node_info_(node_info)
 {}
 
@@ -35,14 +34,14 @@ bool Node::is_empty_node() const
 	return node_info_.is_empty_node_;
 }
 
-void Node::draw()
+void Node::render()
 {
 	resource::set_uniform_matrix_4fv("model_matrix_", glm::value_ptr(compute_model()));
 
 	if(const Mesh* mesh = resource::get_mesh(node_info_.mesh_id_); mesh != nullptr)
 	{
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-		mesh->draw();
+		mesh->render();
 	}
 
 	if(node_info_.aabb_.second.has_value())
@@ -50,13 +49,13 @@ void Node::draw()
 		if(const Mesh* aabb_mesh = resource::get_aabb_mesh(node_info_.aabb_.first); aabb_mesh != nullptr)
 		{
 			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); //affichage wireframe pour AABB
-			aabb_mesh->draw();
+			aabb_mesh->render();
 		}
 	}
 
 	for(const std::unique_ptr<Node>& children_node : children_nodes_)
 	{
-		children_node->draw();
+		children_node->render();
 	}
 }
 

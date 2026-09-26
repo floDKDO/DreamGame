@@ -1,5 +1,5 @@
 #include "camera.h"
-#include "gl_resource_manager.h"
+#include "Resource/gl_resource_manager.h"
 
 #include <glm/gtc/type_ptr.hpp>
 #include <algorithm>

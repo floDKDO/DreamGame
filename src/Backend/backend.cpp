@@ -1,6 +1,6 @@
 #include "backend.h"
 #include "Common/utils.h"
-#include "gl_resource_manager.h"
+#include "Resource/gl_resource_manager.h"
 #include "Logging/logging.h"
 
 #include <imgui/imgui.h>
@@ -112,6 +112,11 @@ glm::ivec2 Backend::get_window_size() const
 void Backend::swap_window_buffers() const
 {
 	window_.swap_buffers();
+}
+
+void Backend::update_window_fps(unsigned int frame_count_this_second) const
+{
+	window_.update_fps(frame_count_this_second);
 }
 
 void GLAPIENTRY message_callback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, [[maybe_unused]] const void* user_param)

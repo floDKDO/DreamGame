@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Render/model.h"
+#include "Resource/model.h"
 #include "Input/input_manager.h"
 
 class Player

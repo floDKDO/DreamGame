@@ -1,6 +1,6 @@
 #pragma once
 
-#include "gl_resource_manager.h"
+#include "Resource/gl_resource_manager.h"
 
 #include <vector>
 

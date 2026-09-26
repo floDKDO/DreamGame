@@ -1,8 +1,7 @@
 #include "gl_resource_manager.h"
 #include "Logging/logging.h"
-#include "Render/model.h"
+#include "Resource/model.h"
 
-#include <map>
 #include <string>
 #include <iostream>
 
@@ -11,8 +10,8 @@ namespace resource
 
 static std::size_t global_model_id_ = 0ULL;
 
-std::unordered_map<Mesh::MeshId, Mesh> meshes_;
-std::unordered_map<Mesh::MeshId, Mesh> aabb_meshes_;
+std::unordered_map<Mesh::Id, Mesh> meshes_;
+std::unordered_map<Mesh::Id, Mesh> aabb_meshes_;
 std::unordered_map<std::string, ShaderProgram> shader_programs_;
 std::unordered_map<std::string, GLint> uniforms_;
 std::unordered_map<std::size_t, Model> models_;
@@ -56,13 +55,13 @@ Texture* get_texture(std::string_view texture_key)
 	}
 }
 
-Mesh::MeshId add_mesh(Mesh::MeshId mesh_id, Mesh::MeshInfo mesh_info)
+Mesh::Id add_mesh(Mesh::Id mesh_id, Mesh::Info mesh_info)
 {
 	meshes_.insert(std::make_pair(mesh_id, Mesh(mesh_id, mesh_info)));
 	return mesh_id;
 }
 
-const Mesh* get_mesh(Mesh::MeshId mesh_id)
+const Mesh* get_mesh(Mesh::Id mesh_id)
 {
 	if(meshes_.count(mesh_id))
 	{
@@ -74,13 +73,13 @@ const Mesh* get_mesh(Mesh::MeshId mesh_id)
 	}
 }
 
-Mesh::MeshId add_aabb_mesh(Mesh::MeshId mesh_id, Mesh::MeshInfo mesh_info)
+Mesh::Id add_aabb_mesh(Mesh::Id mesh_id, Mesh::Info mesh_info)
 {
 	aabb_meshes_.insert(std::make_pair(mesh_id, Mesh(mesh_id, mesh_info)));
 	return mesh_id;
 }
 
-const Mesh* get_aabb_mesh(Mesh::MeshId aabb_mesh_id)
+const Mesh* get_aabb_mesh(Mesh::Id aabb_mesh_id)
 {
 	if(aabb_meshes_.count(aabb_mesh_id))
 	{

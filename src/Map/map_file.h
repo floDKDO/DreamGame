@@ -1,9 +1,8 @@
 #pragma once
 
-#include "Render/model.h"
+#include "Resource/model.h"
 
 #include <string_view>
-#include <vector>
 #include <nlohmann/json.hpp>
 
 using json = nlohmann::json;

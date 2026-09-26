@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Render/shader_program.h"
+#include "Resource/shader_program.h"
 #include "Render/mesh.h"
 #include "Render/texture.h"
 #include "Common/transform.h"
@@ -16,11 +16,11 @@ namespace resource
 std::string add_texture(Texture texture);
 Texture* get_texture(std::string_view texture_key); //ne retourne pas de const Texture* car la fonction glCreateTextures() modifie son troisième paramètre
 
-Mesh::MeshId add_mesh(Mesh::MeshId mesh_id, Mesh::MeshInfo mesh_info);
-const Mesh* get_mesh(Mesh::MeshId mesh_id);
+Mesh::Id add_mesh(Mesh::Id mesh_id, Mesh::Info mesh_info);
+const Mesh* get_mesh(Mesh::Id mesh_id);
 
-Mesh::MeshId add_aabb_mesh(Mesh::MeshId aabb_mesh_id, Mesh::MeshInfo aabb_mesh_info);
-const Mesh* get_aabb_mesh(Mesh::MeshId aabb_mesh_id);
+Mesh::Id add_aabb_mesh(Mesh::Id aabb_mesh_id, Mesh::Info aabb_mesh_info);
+const Mesh* get_aabb_mesh(Mesh::Id aabb_mesh_id);
 
 std::size_t add_model(std::string_view path, Transform transform);
 std::size_t add_model(std::string_view path);

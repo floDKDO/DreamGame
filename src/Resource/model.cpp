@@ -15,13 +15,13 @@ Model::Model(std::string_view path, Transform transform)
 	set_scale(transform.scale_);
 }
 
-void Model::draw()
+void Model::render()
 {
 	if(get_name() == "Light source") //TODO : hardcodé
 	{
 		resource::set_uniform_3f("light_position_", get_position());
 	}
-	root_node_->draw();
+	root_node_->render();
 }
 
 const glm::vec3& Model::get_position() const

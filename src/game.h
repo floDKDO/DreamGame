@@ -2,7 +2,7 @@
 
 #include "RAII_SDL3/gamepad.h"
 #include "Backend/backend.h"
-#include "Render/model.h"
+#include "Resource/model.h"
 #include "Map/map_file.h"
 #include "Camera/camera.h"
 #include "Player/player.h"
@@ -17,7 +17,7 @@ class Game
 
 	private:
 		void handle_events();
-		void draw();
+		void render();
 		void update(float delta_time);
 		void update_fps_count(Uint64& last_fps_refresh, unsigned int& frame_count_this_second) const;
 

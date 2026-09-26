@@ -1,11 +1,11 @@
 #include "mesh.h"
 #include "Logging/logging.h"
-#include "gl_resource_manager.h"
+#include "Resource/gl_resource_manager.h"
 
 #include <stb/stb_image.h>
 #include <iostream>
 
-Mesh::Mesh(const MeshId& mesh_id, const MeshInfo& mesh_info)
+Mesh::Mesh(const Id& mesh_id, const Info& mesh_info)
 	: mesh_id_(mesh_id), mesh_info_(mesh_info), ebo_(0), vbo_(0), vao_(0)
 {
 	load_mesh();
@@ -150,9 +150,9 @@ void Mesh::load_mesh()
 	create_textures();
 }
 
-void Mesh::draw() const
+void Mesh::render() const
 {
 	glBindVertexArray(vao_);
-	glDrawElements(mesh_info_.draw_mode_, GLsizei(mesh_info_.ebo_values_.size()), GL_UNSIGNED_SHORT, 0);
+	glDrawElements(mesh_info_.render_mode_, GLsizei(mesh_info_.ebo_values_.size()), GL_UNSIGNED_SHORT, 0);
 	//glBindVertexArray(0); //= unbind, commenté car provoque des erreurs
 }

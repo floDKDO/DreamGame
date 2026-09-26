@@ -12,7 +12,7 @@
 //	public:
 //		explicit Map(std::string_view path);
 //
-//		void draw();
+//		void render();
 //		const std::vector<std::unique_ptr<Model>>& get_models() const;
 //
 //	private:

@@ -9,7 +9,7 @@ class Model
 		explicit Model(std::string_view path);
 		Model(std::string_view path, Transform transform);
 
-		void draw();
+		void render();
 
 		const glm::vec3& get_position() const; //retourne une référence car la position est utilisée en tant que membre (const ref) dans la classe Camera
 		std::string get_name() const; //get name of root_node_

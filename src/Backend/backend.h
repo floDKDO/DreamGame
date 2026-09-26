@@ -19,6 +19,7 @@ class Backend
 
 		glm::ivec2 get_window_size() const;
 		void swap_window_buffers() const;
+		void update_window_fps(unsigned int frame_count_this_second) const;
 		void handle_events(const SDL_Event& e);
 
 	private:

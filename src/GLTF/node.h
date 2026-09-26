@@ -1,8 +1,8 @@
 #pragma once
 
-#include "Render/aabb.h"
+#include "Collision/aabb.h"
 #include "Common/transform.h"
-#include "gl_resource_manager.h"
+#include "Resource/gl_resource_manager.h"
 
 #include <optional>
 
@@ -12,18 +12,18 @@ namespace gltf
 class Node
 {
 	public:
-		struct NodeInfo
+		struct Info
 		{
 			Transform transform_;
 			glm::mat4 parent_matrix_;
-			Mesh::MeshId mesh_id_;
-			std::pair<Mesh::MeshId, std::optional<AABB>> aabb_;
+			Mesh::Id mesh_id_;
+			std::pair<Mesh::Id, std::optional<AABB>> aabb_;
 			bool is_empty_node_ = false; //<=> empty node sur Blender (le noeud n'a pas de mesh ni d'AABB)
 		};
 
-		Node(std::string_view name, const NodeInfo& node_info);
+		Node(std::string_view name, const Info& node_info);
 
-		void draw();
+		void render();
 		void add_child(std::unique_ptr<Node> child_node);
 		glm::mat4 compute_model() const;
 		glm::mat4 get_parent_matrix() const;
@@ -57,7 +57,7 @@ class Node
 		void update_parent_matrix_of_children(const std::unique_ptr<Node>& node);
 
 		std::string name_; //node id
-		NodeInfo node_info_;
+		Info node_info_;
 		std::vector<std::unique_ptr<Node>> children_nodes_;
 };
 

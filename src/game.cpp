@@ -1,7 +1,7 @@
 #include "game.h"
 #include "OpenAL/openal.h"
-#include "gl_resource_manager.h"
-#include "Render/projection.h"
+#include "Resource/gl_resource_manager.h"
+#include "Projection/projection.h"
 
 //#include <imgui/imgui.h>
 //#include <imgui/imgui_impl_sdl3.h>
@@ -12,7 +12,7 @@
 #include <iostream>
 
 Game::Game()
-	: backend_(), //window_(),
+	: backend_(),
 	player_(input_manager_),
 	camera_(input_manager_, player_.get_model()->get_position()),
 	running_(true), gamepad_(), test_map_("resources/maps/corridor.gltf"), 
@@ -62,7 +62,7 @@ void Game::run()
 		////////////////////////////////////////////////////////////////////////////////////////
 
 		update(delta_time);
-		draw();
+		render();
 
 		update_fps_count(last_fps_refresh, frame_count_this_second);
 		last_frame = begin_current_frame;
@@ -101,7 +101,7 @@ void Game::handle_events()
 	}
 }
 
-void Game::draw()
+void Game::render()
 {
 	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -112,7 +112,7 @@ void Game::draw()
 
 	for(auto& [model_id, model] : resource::get_models())
 	{
-		model.draw();
+		model.render();
 	}
 
 	audio::set_listener_position(player_.get_model()->get_position());
@@ -124,7 +124,7 @@ void Game::draw()
 	//ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 	////////////////////////////////////////////////////////////////////////////////////////
 
-	backend_.swap_window_buffers(); //TODO : pas ouf, devrait directement être dans la classe Backend
+	backend_.swap_window_buffers();
 }
 
 void Game::update_fps_count(Uint64& last_fps_refresh, unsigned int& frame_count_this_second) const
@@ -132,7 +132,7 @@ void Game::update_fps_count(Uint64& last_fps_refresh, unsigned int& frame_count_
 	frame_count_this_second += 1;
 	if(SDL_GetTicks() >= last_fps_refresh + 1000) //tester une fois par seconde pour obtenir des frames par seconde
 	{
-		//window_.update_fps(frame_count_this_second); //TODO
+		backend_.update_window_fps(frame_count_this_second);
 		last_fps_refresh = SDL_GetTicks();
 		frame_count_this_second = 0;
 	}

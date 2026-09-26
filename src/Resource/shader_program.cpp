@@ -5,7 +5,6 @@
 #include <filesystem>
 #include <iostream>
 
-
 namespace
 {
 

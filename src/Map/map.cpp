@@ -6,11 +6,11 @@
 //	: map_file_(path), models_(map_file_.get_models())
 //{}
 //
-//void Map::draw()
+//void Map::render()
 //{
 //	for(const std::unique_ptr<Model>& model : models_)
 //	{
-//		model->draw();
+//		model->render();
 //	}
 //}
 //
