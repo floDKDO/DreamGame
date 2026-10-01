@@ -20,8 +20,11 @@ void Camera::update(float delta_time)
 {
 	compute_euler_angles(delta_time);
 	view_matrix_ = look_at(camera_position_, target_position_ + target_to_camera_offset_, get_camera_up());
-	resource::set_uniform_matrix_4fv("view_matrix_", glm::value_ptr(view_matrix_));
-	resource::set_uniform_3f("view_position_", camera_position_);
+	if(ShaderProgram* shader_program = resource::bind_shader("Phong"); shader_program != nullptr)
+	{
+		shader_program->set_uniform_matrix_4fv("view_matrix_", glm::value_ptr(view_matrix_));
+		shader_program->set_uniform_3f("view_position_", camera_position_);
+	}
 }
 
 glm::vec3 Camera::get_camera_forward() const

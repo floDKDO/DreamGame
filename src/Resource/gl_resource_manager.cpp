@@ -13,13 +13,17 @@ static std::size_t global_model_id_ = 0ULL;
 std::unordered_map<Mesh::Id, Mesh> meshes_;
 std::unordered_map<Mesh::Id, Mesh> aabb_meshes_;
 std::unordered_map<std::string, ShaderProgram> shader_programs_;
-std::unordered_map<std::string, GLint> uniforms_;
 std::unordered_map<std::size_t, Model> models_;
 
 //Conteneur de texture, texture id 
 // => cas texture dont l'image possède un path : la clef est le path (= chemin de la texture)
 // => cas texture dont l'image a ses données en base64 : (toujours insérer la texture car cas peu commun et pas vraiment possible d'identifer de manière unique ce type de texture sans lire tout leur contenu)
 std::unordered_map<std::string, Texture> textures_;
+
+//Ces deux méthodes sont placées là (donc pas dans le header) car elles sont utilisées uniquement dans ce fichier .cpp
+ShaderProgram* get_shader(std::string_view name);
+ShaderProgram* get_currently_bound_shader();
+
 
 std::string add_texture(Texture texture)
 {
@@ -137,65 +141,47 @@ void add_shader(std::string_view name, std::vector<std::string> shader_path)
 	shader_programs_.insert(std::make_pair(name, ShaderProgram(name, shader_path)));
 }
 
-const ShaderProgram& get_shader(std::string_view name)
+ShaderProgram* bind_shader(std::string_view name)
+{
+	ShaderProgram* shader_program = get_shader(name);
+
+	GLint shader_program_id = 0;
+	glGetIntegerv(GL_CURRENT_PROGRAM, &shader_program_id);
+	if(GLuint(shader_program_id) == shader_program->get_shader_program_id())
+	{
+		//logging::log("Trying to bind to an already bound shader (" + std::string(name) + ")", logging::Severity::NOTICE);
+		return shader_program;
+	}
+	shader_program->use();
+	return shader_program;
+}
+
+ShaderProgram* get_shader(std::string_view name)
 {
 	std::string name_str = std::string(name);
 	if(shader_programs_.count(name_str))
 	{
-		return shader_programs_.at(name_str);
+		return &shader_programs_.at(name_str);
 	}
 	else
 	{
-		logging::log("The requested shader does not exist! Returning the phong shader instead.", logging::Severity::WARNING);
-		return shader_programs_.at("Phong");
+		return nullptr;
 	}
 }
 
-void bind_shader(std::string_view name)
+ShaderProgram* get_currently_bound_shader()
 {
-	const ShaderProgram& shader_program = get_shader(name);
-	shader_program.use();
-}
+	GLint shader_program_id = 0;
+	glGetIntegerv(GL_CURRENT_PROGRAM, &shader_program_id);
 
-void insert_uniform(const GLchar* name)
-{
-	std::string name_str = std::string(name);
-	if(!uniforms_.count(name_str))
+	for(auto& [shader_program_name, shader_program] : shader_programs_)
 	{
-		GLint shader_program = 0;
-		glGetIntegerv(GL_CURRENT_PROGRAM, &shader_program);
-
-		GLint location;
-		if((location = glGetUniformLocation(GLuint(shader_program), name)) == -1)
+		if(shader_program.get_shader_program_id() == GLuint(shader_program_id))
 		{
-			logging::log("The requested uniform variable (" + std::string(name) + ") does not exist!", logging::Severity::WARNING);
+			return &shader_program;
 		}
-		uniforms_.insert({name_str, location});
 	}
-}
-
-void set_uniform_1f(const GLchar* name, GLfloat value)
-{
-	insert_uniform(name);
-	glUniform1f(uniforms_.at(std::string(name)), value);
-}
-
-void set_uniform_1i(const GLchar* name, GLint value)
-{
-	insert_uniform(name);
-	glUniform1i(uniforms_.at(std::string(name)), value);
-}
-
-void set_uniform_matrix_4fv(const GLchar* name, const GLfloat* value)
-{
-	insert_uniform(name);
-	glUniformMatrix4fv(uniforms_.at(std::string(name)), 1, GL_FALSE, value);
-}
-
-void set_uniform_3f(const GLchar* name, glm::vec3 v)
-{
-	insert_uniform(name);
-	glUniform3f(uniforms_.at(std::string(name)), v.x, v.y, v.z);
+	return nullptr;
 }
 
 }

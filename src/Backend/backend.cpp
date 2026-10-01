@@ -16,6 +16,7 @@ Backend::Backend()
 	logging::create(logging::Severity::CRITICAL);
 
 	resource::add_shader("Phong", {"resources/shaders/phong_shader.vert", "resources/shaders/phong_shader.frag"});
+	resource::add_shader("2d", {"resources/shaders/2d_shader.vert", "resources/shaders/2d_shader.frag"});
 	resource::bind_shader("Phong");
 
 	int w, h;
@@ -24,7 +25,7 @@ Backend::Backend()
 
 	window_.set_relative_mouse_mode(true);
 
-	stbi_set_flip_vertically_on_load(true);
+	//stbi_set_flip_vertically_on_load(true); //TODO : commenté car la texture de la classe Image s'affiche à l'envers quand cette ligne est active
 
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_DEBUG_OUTPUT);

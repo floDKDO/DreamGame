@@ -24,16 +24,10 @@ const Mesh* get_aabb_mesh(Mesh::Id aabb_mesh_id);
 
 std::size_t add_model(std::string_view path, Transform transform);
 std::size_t add_model(std::string_view path);
-Model* get_model(std::size_t model_id); //Ne retourne pas de const cat la classe Player a besoin de modifier le modèle du joueur
+Model* get_model(std::size_t model_id); //ne retourne pas de const cat la classe Player a besoin de modifier le modèle du joueur
 std::unordered_map<std::size_t, Model>& get_models();
 
 void add_shader(std::string_view name, std::vector<std::string> shader_path);
-const ShaderProgram& get_shader(std::string_view name);
-void bind_shader(std::string_view name);
-void insert_uniform(const GLchar* name);
-void set_uniform_1f(const GLchar* name, GLfloat value);
-void set_uniform_1i(const GLchar* name, GLint value);
-void set_uniform_matrix_4fv(const GLchar* name, const GLfloat* value);
-void set_uniform_3f(const GLchar* name, glm::vec3 v);
+ShaderProgram* bind_shader(std::string_view name); //ne retourne pas de const car les méthodes d'ajout et de modification de variables uniformes ne sont pas const
 
 }

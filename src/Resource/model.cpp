@@ -19,7 +19,10 @@ void Model::render()
 {
 	if(get_name() == "Light source") //TODO : hardcodé
 	{
-		resource::set_uniform_3f("light_position_", get_position());
+		if(ShaderProgram* shader_program = resource::bind_shader("Phong"); shader_program != nullptr)
+		{
+			shader_program->set_uniform_3f("light_position_", get_position());
+		}
 	}
 	root_node_->render();
 }

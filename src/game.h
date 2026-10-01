@@ -7,6 +7,7 @@
 #include "Camera/camera.h"
 #include "Player/player.h"
 #include "Input/input_manager.h"
+#include "image.h"
 
 class Game
 {
@@ -30,4 +31,6 @@ class Game
 		//Map test_map_;
 		MapFile test_map_;
 		Model* gizmo_;
+
+		Image test_image_;
 };

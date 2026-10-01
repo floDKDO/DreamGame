@@ -95,11 +95,15 @@ void Mesh::create_vao()
 	}
 }
 
-void Mesh::destroy_all_buffers() const
+void Mesh::destroy_all_buffers()
 {
 	glDeleteBuffers(1, &ebo_);
 	glDeleteBuffers(1, &vbo_);
-	glDeleteBuffers(1, &vao_);
+	glDeleteVertexArrays(1, &vao_); //Attention : si j'utilise glDeleteBuffers() pour le vao, je vais avoir des problèmes !
+
+	ebo_ = 0;
+	vbo_ = 0;
+	vao_ = 0;
 }
 
 void Mesh::create_textures()
@@ -110,6 +114,11 @@ void Mesh::create_textures()
 	for(std::string& texture_key : mesh_info_.texture_keys_)
 	{
 		Texture* t = resource::get_texture(texture_key);
+		if(t == nullptr)
+		{
+			logging::log("The texture is nullptr!", logging::Severity::WARNING);
+			continue;
+		}
 		glCreateTextures(GL_TEXTURE_2D, 1, &t->texture_id_);
 		glBindTextureUnit(t->texture_unit_, t->texture_id_);
 		glTextureParameteri(t->texture_id_, GL_TEXTURE_WRAP_S, t->wrap_s_);

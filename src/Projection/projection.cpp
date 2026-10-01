@@ -10,4 +10,9 @@ glm::mat4 get_perspective_matrix(float aspect)
 	return glm::perspective(glm::radians(45.0f), aspect, 0.1f, 100.0f);
 }
 
+glm::mat4 get_orthographic_matrix(float window_width, float window_height)
+{
+	return glm::ortho(0.0f, window_width, window_height, 0.0f, -1.0f, 1.0f);
+}
+
 }

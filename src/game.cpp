@@ -16,7 +16,7 @@ Game::Game()
 	player_(input_manager_),
 	camera_(input_manager_, player_.get_model()->get_position()),
 	running_(true), gamepad_(), test_map_("resources/maps/corridor.gltf"), 
-	gizmo_(nullptr)
+	gizmo_(nullptr), test_image_("resources/images/yuri_tea.png")
 {
 	std::size_t gizmo_model_id = resource::add_model("resources/models/axis_gizmo.glb");
 	gizmo_ = resource::get_model(gizmo_model_id);
@@ -105,11 +105,24 @@ void Game::render()
 {
 	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	//resource::set_uniform_1i("texture_sampler0_", 0);
 	glm::ivec2 window_size = backend_.get_window_size();
-	resource::set_uniform_matrix_4fv("projection_matrix_", glm::value_ptr(projection::get_perspective_matrix(float(window_size.x) / float(window_size.y))));
 
+	if(ShaderProgram* shader_program_2d = resource::bind_shader("2d"); shader_program_2d != nullptr)
+	{
+		shader_program_2d->set_uniform_1i("texture_sampler0_", 0);
+		shader_program_2d->set_uniform_matrix_4fv("projection_matrix_", glm::value_ptr(projection::get_orthographic_matrix(float(window_size.x), float(window_size.y))));
+		glm::mat4 model_matrix(1.0f);
+		model_matrix = glm::translate(model_matrix, glm::vec3(100.0f, 0.0f, 0.0f));
+		model_matrix = glm::scale(model_matrix, glm::vec3(100.0f, 100.0f, 100.0f));
+		shader_program_2d->set_uniform_matrix_4fv("model_matrix_", glm::value_ptr(model_matrix));
+	}
+	test_image_.render();
+
+	if(ShaderProgram* shader_program_phong = resource::bind_shader("Phong"); shader_program_phong != nullptr)
+	{
+		//shader_program_phong->set_uniform_1i("texture_sampler0_", 0);
+		shader_program_phong->set_uniform_matrix_4fv("projection_matrix_", glm::value_ptr(projection::get_perspective_matrix(float(window_size.x) / float(window_size.y))));
+	}
 	for(auto& [model_id, model] : resource::get_models())
 	{
 		model.render();

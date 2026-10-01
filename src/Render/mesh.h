@@ -38,7 +38,7 @@ class Mesh
 		void create_ebo();
 		void create_vbo();
 		void create_vao();
-		void destroy_all_buffers() const;
+		void destroy_all_buffers();
 		void create_textures();
 		void load_mesh();
 

@@ -546,7 +546,7 @@ std::pair<Mesh::Id, std::optional<AABB>> get_aabb(std::string_view path, const t
 	}
 	std::string node_name = (node_tg3.name.len > 0) ? std::string(node_tg3.name.data) : "";
 	logging::log("get_aabb() returned std::nullopt (the node \"" + node_name + "\" does not have a AABB)", logging::Severity::NOTICE);
-	return {Mesh::Id{}, std::nullopt}; //cas où le node ne possède pas de mesh
+	return {Mesh::Id{}, std::nullopt}; //cas où le node ne possède pas de aabb
 }
 
 std::vector<std::string> get_textures(const tg3_model& model_tg3)

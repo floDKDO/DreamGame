@@ -23,7 +23,7 @@ class Node
 
 		Node(std::string_view name, const Info& node_info);
 
-		void render();
+		void render() const;
 		void add_child(std::unique_ptr<Node> child_node);
 		glm::mat4 compute_model() const;
 		glm::mat4 get_parent_matrix() const;

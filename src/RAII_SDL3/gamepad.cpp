@@ -47,8 +47,7 @@ bool Gamepad::is_open() const
 void Gamepad::open()
 {
 	int count = 0;
-	SDL_JoystickID* joysticks = nullptr;
-	if((joysticks = SDL_GetGamepads(&count)) == nullptr)
+	if(SDL_JoystickID* joysticks = SDL_GetGamepads(&count); joysticks == nullptr)
 	{
 		//SDL_Log("(SDL_GetGamepads) %s\n", SDL_GetError()); //TODO : décommenter
 	}

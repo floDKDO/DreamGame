@@ -34,9 +34,12 @@ bool Node::is_empty_node() const
 	return node_info_.is_empty_node_;
 }
 
-void Node::render()
+void Node::render() const
 {
-	resource::set_uniform_matrix_4fv("model_matrix_", glm::value_ptr(compute_model()));
+	if(ShaderProgram* shader_program = resource::bind_shader("Phong"); shader_program != nullptr)
+	{
+		shader_program->set_uniform_matrix_4fv("model_matrix_", glm::value_ptr(compute_model()));
+	}
 
 	if(const Mesh* mesh = resource::get_mesh(node_info_.mesh_id_); mesh != nullptr)
 	{
