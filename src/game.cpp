@@ -132,6 +132,7 @@ void Game::render()
 	////////////////////////////////////////////////////////////////////////////////////////
 
 	backend_.swap_window_buffers();
+	backend_.reset_opengl_states();
 }
 
 void Game::update_fps_count(Uint64& last_fps_refresh, unsigned int& frame_count_this_second) const

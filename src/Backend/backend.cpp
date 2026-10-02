@@ -115,6 +115,11 @@ void Backend::swap_window_buffers() const
 	window_.swap_buffers();
 }
 
+void Backend::reset_opengl_states() const
+{
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+}
+
 void Backend::update_window_fps(unsigned int frame_count_this_second) const
 {
 	window_.update_fps(frame_count_this_second);

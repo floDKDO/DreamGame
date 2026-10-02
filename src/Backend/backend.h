@@ -21,6 +21,7 @@ class Backend
 		void swap_window_buffers() const;
 		void update_window_fps(unsigned int frame_count_this_second) const;
 		void handle_events(const SDL_Event& e);
+		void reset_opengl_states() const;
 
 	private:
 		void init_imgui() const;

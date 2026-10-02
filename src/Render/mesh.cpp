@@ -126,15 +126,6 @@ void Mesh::create_textures()
 		glTextureParameteri(t->texture_id_, GL_TEXTURE_MAG_FILTER, t->mag_filter_);
 		glTextureParameteri(t->texture_id_, GL_TEXTURE_MIN_FILTER, t->min_filter_);
 
-		if(ShaderProgram* shader_program = resource::get_currently_bound_shader(); shader_program != nullptr)
-		{
-			if(t->texture_unit_ > 0)
-			{
-				logging::log("Only one texture by mesh for now!", logging::Severity::WARNING);
-			}
-			shader_program->set_uniform_1i("texture_sampler0_", t->texture_unit_);
-		}
-
 		int width, height, channels;
 		unsigned char* pixels;
 		if(!t->image_path_.empty())
@@ -170,6 +161,18 @@ void Mesh::load_mesh()
 
 void Mesh::render() const
 {
+	if(ShaderProgram* shader_program = resource::get_currently_bound_shader(); shader_program != nullptr)
+	{
+		for(const std::string& texture_key : mesh_info_.texture_keys_)
+		{
+			Texture* texture = resource::get_texture(texture_key);
+			if(texture->texture_unit_ > 0)
+			{
+				logging::log("Only one texture by mesh for now!", logging::Severity::WARNING);
+			}
+			shader_program->set_uniform_1i("texture_sampler0_", texture->texture_unit_);
+		}
+	}
 	glBindVertexArray(vao_);
 	glDrawElements(mesh_info_.render_mode_, GLsizei(mesh_info_.ebo_values_.size()), GL_UNSIGNED_SHORT, 0);
 	//glBindVertexArray(0); //= unbind, commenté car provoque des erreurs
