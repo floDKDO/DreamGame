@@ -20,10 +20,8 @@ std::unordered_map<std::size_t, Model> models_;
 // => cas texture dont l'image a ses données en base64 : (toujours insérer la texture car cas peu commun et pas vraiment possible d'identifer de manière unique ce type de texture sans lire tout leur contenu)
 std::unordered_map<std::string, Texture> textures_;
 
-//Ces deux méthodes sont placées là (donc pas dans le header) car elles sont utilisées uniquement dans ce fichier .cpp
+//Cette méthode est placée là (donc pas dans le header) car elle est utilisée uniquement dans ce fichier .cpp
 ShaderProgram* get_shader(std::string_view name);
-ShaderProgram* get_currently_bound_shader();
-
 
 std::string add_texture(Texture texture)
 {

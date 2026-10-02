@@ -29,5 +29,6 @@ std::unordered_map<std::size_t, Model>& get_models();
 
 void add_shader(std::string_view name, std::vector<std::string> shader_path);
 ShaderProgram* bind_shader(std::string_view name); //ne retourne pas de const car les méthodes d'ajout et de modification de variables uniformes ne sont pas const
+ShaderProgram* get_currently_bound_shader();
 
 }

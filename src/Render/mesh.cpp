@@ -126,6 +126,15 @@ void Mesh::create_textures()
 		glTextureParameteri(t->texture_id_, GL_TEXTURE_MAG_FILTER, t->mag_filter_);
 		glTextureParameteri(t->texture_id_, GL_TEXTURE_MIN_FILTER, t->min_filter_);
 
+		if(ShaderProgram* shader_program = resource::get_currently_bound_shader(); shader_program != nullptr)
+		{
+			if(t->texture_unit_ > 0)
+			{
+				logging::log("Only one texture by mesh for now!", logging::Severity::WARNING);
+			}
+			shader_program->set_uniform_1i("texture_sampler0_", t->texture_unit_);
+		}
+
 		int width, height, channels;
 		unsigned char* pixels;
 		if(!t->image_path_.empty())
