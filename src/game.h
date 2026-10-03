@@ -1,6 +1,5 @@
 #pragma once
 
-#include "RAII_SDL3/gamepad.h"
 #include "Backend/backend.h"
 #include "Resource/model.h"
 #include "Map/map_file.h"
@@ -8,6 +7,7 @@
 #include "Player/player.h"
 #include "Input/input_manager.h"
 #include "Render/image.h"
+#include "Render/text.h"
 
 class Game
 {
@@ -27,10 +27,11 @@ class Game
 		Player player_;
 		Camera camera_;
 		bool running_;
-		sdl::Gamepad gamepad_;
 		//Map test_map_;
 		MapFile test_map_;
 		Model* gizmo_;
-
 		Image test_image_;
+		Image test_image_2_;
+		Text test_text_;
+		Text test_text_2_;
 };

@@ -8,16 +8,15 @@
 #include <imgui/imgui_impl_opengl3.h>
 #include <AL/al.h>
 #include <stb/stb_image.h>
+#include <filesystem>
 #include <iostream>
 
 Backend::Backend()
-	: sdl_(), window_(), glew_(glewInit())
+	: sdl_(), sdl_ttf_(), window_(), glew_(glewInit())
 {
 	logging::create(logging::Severity::CRITICAL);
 
-	resource::add_shader("Phong", {"resources/shaders/phong_shader.vert", "resources/shaders/phong_shader.frag"});
-	resource::add_shader("2d", {"resources/shaders/2d_shader.vert", "resources/shaders/2d_shader.frag"});
-	resource::bind_shader("Phong");
+	init_shaders();
 
 	int w, h;
 	window_.get_size(&w, &h);
@@ -51,6 +50,26 @@ void Backend::handle_events(const SDL_Event& e)
 	{
 		glViewport(0, 0, e.window.data1, e.window.data2);
 	}
+}
+
+void Backend::init_shaders() const
+{
+	std::filesystem::path path("resources/shaders");
+	std::filesystem::directory_iterator it = std::filesystem::directory_iterator(path);
+	while(it != std::filesystem::directory_iterator())
+	{
+		std::filesystem::path fragment_shader_path = it->path();
+		std::advance(it, 1);
+
+		std::filesystem::path vertex_shader_path = it->path();
+		std::advance(it, 1);
+
+		std::string shader_name = fragment_shader_path.stem().string();
+		shader_name[0] = std::toupper(shader_name[0]);
+
+		resource::add_shader(shader_name, {vertex_shader_path.string(), fragment_shader_path.string()});
+	}
+	resource::bind_shader("Phong");
 }
 
 void Backend::init_imgui() const

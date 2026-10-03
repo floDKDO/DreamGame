@@ -2,6 +2,7 @@
 
 #include "RAII_SDL3/sdl.h"
 #include "RAII_SDL3/window.h"
+#include "RAII_SDL3/sdl_ttf.h"
 
 #include <glm/vec2.hpp>
 #include <AL/alc.h>
@@ -24,12 +25,14 @@ class Backend
 		void reset_opengl_states() const;
 
 	private:
+		void init_shaders() const;
 		void init_imgui() const;
 		void destroy_imgui() const;
 		void init_openal();
 		void destroy_openal();
 
 		sdl::SDL sdl_;
+		sdl::SDLTTF sdl_ttf_;
 		sdl::Window window_;
 		GLenum glew_;
 		ALCdevice* device_;

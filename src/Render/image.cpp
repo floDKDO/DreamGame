@@ -8,6 +8,7 @@ Image::Image(std::string_view path, glm::vec2 position, glm::vec2 size, float an
 {
 	std::string path_str = std::string(path);
 
+	//TODO : code dupliqué avec la classe Image
 	std::vector<GLushort> ebo_values{0, 1, 2, 0, 3, 1};
 
 	std::vector<glm::vec3> position_vector //on simule un vec2 avec un vec3 => la composante z vaut donc 0.0f
@@ -37,7 +38,7 @@ Image::Image(std::string_view path, glm::vec2 position, glm::vec2 size, float an
 	vertices.add_color_attributes(color_vector);
 	vertices.add_texcoord_attributes(texcoord_vector);
 
-	Texture texture{0, 0, path_str};
+	Texture texture{TextureInfo{}, ImageTexture{path_str}};
 	std::string texture_key = resource::add_texture(texture);
 
 	mesh_id_ = resource::add_mesh(Mesh::Id{path_str, -1}, Mesh::Info{ebo_values, vertices, {texture_key}, GL_TRIANGLES});

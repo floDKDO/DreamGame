@@ -6,7 +6,7 @@ namespace input
 {
 
 Gamepad::Gamepad()
-	: is_movement_from_joystick_(false)
+	: gamepad_(), is_movement_from_joystick_(false)
 {}
 
 void Gamepad::set_pad_direction_active(Direction direction)
@@ -140,6 +140,7 @@ void Gamepad::handle_events(const SDL_Event& e)
 void Gamepad::update([[maybe_unused]] float delta_time)
 {
 	//std::cout << "(GAMEPAD) => x: " << input_info_.x_movement_intensity_ << ", y: " << input_info_.y_movement_intensity_ << ", rotation_x: " << input_info_.x_rotation_intensity_ << ", rotation_y: " << input_info_.y_rotation_intensity_ << std::endl;
+	gamepad_.check(1000); //tester une fois par seconde
 }
 
 Info Gamepad::get_input_info() const

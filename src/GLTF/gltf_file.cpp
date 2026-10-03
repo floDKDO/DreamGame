@@ -81,7 +81,7 @@ void glTFFile::open()
 	tg3_parse_options_init(&options_tg3);
 	tg3_error_stack_init(&error_stack_tg3_);
 
-	if(tg3_parse_file(&model_tg3_, &error_stack_tg3_, path_.c_str(), uint32_t(path_.length()), &options_tg3) != TG3_OK)
+	if(tg3_parse_file(&model_tg3_, &error_stack_tg3_, path_.c_str(), uint32_t(path_.size()), &options_tg3) != TG3_OK)
 	{
 		for(uint32_t i = 0; i < error_stack_tg3_.count; i++)
 		{
@@ -558,7 +558,8 @@ std::vector<std::string> get_textures(const tg3_model& model_tg3)
 		tg3_image image_tg3 = model_tg3.images[texture_tg3.source];
 
 		Texture mesh_texture;
-		mesh_texture.texture_unit_ = i;
+		ImageTexture& image_texture = std::get<ImageTexture>(mesh_texture.texture_);
+		mesh_texture.info_.texture_unit_ = i;
 
 		if(image_tg3.buffer_view == -1)
 		{
@@ -570,39 +571,39 @@ std::vector<std::string> get_textures(const tg3_model& model_tg3)
 
 			if(tg3_is_data_uri(image_tg3.uri.data, image_tg3.uri.len))
 			{
-				mesh_texture.image_path_ = "";
+				image_texture.image_path_ = "";
 				std::string image_data_base64 = image_str.substr(image_str.find(',') + 1); //+1 pour ne pas prendre la virgule
-				std::string image_data_decoded = utils::base64_decode(image_data_base64.data(), image_data_base64.length());
-				mesh_texture.image_data_.reserve(image_data_base64.length());
-				for(std::size_t j = 0ULL; j < image_data_decoded.length(); ++j)
+				std::string image_data_decoded = utils::base64_decode(image_data_base64.data(), image_data_base64.size());
+				image_texture.image_data_.reserve(image_data_base64.size());
+				for(std::size_t j = 0ULL; j < image_data_decoded.size(); ++j)
 				{
-					mesh_texture.image_data_.push_back(image_data_decoded[j]);
+					image_texture.image_data_.push_back(image_data_decoded[j]);
 				}
 			}
 			else
 			{
-				mesh_texture.image_path_ = "resources/models/" + image_str;
+				image_texture.image_path_ = "resources/models/" + image_str;
 			}
 		}
 		else
 		{
-			mesh_texture.image_path_ = "";
+			image_texture.image_path_ = "";
 			tg3_buffer_view buffer_view_tg3 = model_tg3.buffer_views[image_tg3.buffer_view];
 			tg3_buffer buffer_tg3 = model_tg3.buffers[buffer_view_tg3.buffer];
-			mesh_texture.image_data_.reserve(buffer_view_tg3.byte_length);
+			image_texture.image_data_.reserve(buffer_view_tg3.byte_length);
 
 			//std::copy(buffer.data.data, buffer.data.data + buffer_view.byte_length, std::back_inserter(mesh_texture.image_data_)); //TODO : mieux que la boucle for suivante ?
 			for(uint64_t j = 0ULL; j < buffer_view_tg3.byte_length; ++j)
 			{
-				mesh_texture.image_data_.push_back(buffer_tg3.data.data[buffer_view_tg3.byte_offset + j]);
+				image_texture.image_data_.push_back(buffer_tg3.data.data[buffer_view_tg3.byte_offset + j]);
 			}
 		}
 
 		tg3_sampler sampler_tg3 = model_tg3.samplers[texture_tg3.sampler];
-		mesh_texture.min_filter_ = sampler_tg3.min_filter;
-		mesh_texture.mag_filter_ = sampler_tg3.mag_filter;
-		mesh_texture.wrap_s_ = sampler_tg3.wrap_s;
-		mesh_texture.wrap_t_ = sampler_tg3.wrap_t;
+		mesh_texture.info_.min_filter_ = sampler_tg3.min_filter;
+		mesh_texture.info_.mag_filter_ = sampler_tg3.mag_filter;
+		mesh_texture.info_.wrap_s_ = sampler_tg3.wrap_s;
+		mesh_texture.info_.wrap_t_ = sampler_tg3.wrap_t;
 
 		texture_keys.push_back(resource::add_texture(mesh_texture));
 	}

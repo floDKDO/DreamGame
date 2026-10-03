@@ -25,21 +25,32 @@ ShaderProgram* get_shader(std::string_view name);
 
 std::string add_texture(Texture texture)
 {
+	static std::size_t counter = 0ULL;
 	std::string texture_key;
-	if(texture.image_path_.empty())
+
+	if(std::holds_alternative<ImageTexture>(texture.texture_))
 	{
-		//Comme les images "embedded glTF" n'ont pas de path, la clef étant "", elle ne serait pas unique pour plusieurs images sans path
-		//Pour assurer que chacune de ces images aient un path fictif unique, je lui ajoute un entier (incrémenté à chaque ajout) => le path n'étant pas consulté donc la valeur de cette clef n'a aucune importance
-		//De toute façon, pour ce type d'images, aucune vérification n'est effectuée : elles sont ajoutées dans tous les cas dans textures_ 
-		static std::size_t counter = 0ULL;
-		texture_key = "Empty path " + std::to_string(counter);
+		ImageTexture& image_texture = std::get<ImageTexture>(texture.texture_);
+		if(image_texture.image_path_.empty())
+		{
+			//Comme les images "embedded glTF" n'ont pas de path, la clef étant "", elle ne serait pas unique pour plusieurs images sans path
+			//Pour assurer que chacune de ces images aient un path fictif unique, je lui ajoute un entier (incrémenté à chaque ajout) => le path n'étant pas consulté donc la valeur de cette clef n'a aucune importance
+			//De toute façon, pour ce type d'images, aucune vérification n'est effectuée : elles sont ajoutées dans tous les cas dans textures_ 
+			texture_key = "Empty path " + std::to_string(counter);
+			textures_.insert({texture_key, texture});
+			counter += 1;
+		}
+		else
+		{
+			texture_key = image_texture.image_path_;
+			textures_.insert({texture_key, texture});
+		}
+	}
+	else if(std::holds_alternative<TextTexture>(texture.texture_))
+	{
+		texture_key = "Text " + std::to_string(counter);
 		textures_.insert({texture_key, texture});
 		counter += 1;
-	}
-	else
-	{
-		texture_key = texture.image_path_;
-		textures_.insert({texture_key, texture});
 	}
 	return texture_key;
 }
@@ -134,9 +145,9 @@ std::unordered_map<std::size_t, Model>& get_models()
 	return models_;
 }
 
-void add_shader(std::string_view name, std::vector<std::string> shader_path)
+void add_shader(std::string_view name, std::vector<std::string> shader_paths)
 {
-	shader_programs_.insert(std::make_pair(name, ShaderProgram(name, shader_path)));
+	shader_programs_.insert(std::make_pair(name, ShaderProgram(name, shader_paths)));
 }
 
 ShaderProgram* bind_shader(std::string_view name)

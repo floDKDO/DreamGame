@@ -2,6 +2,7 @@
 
 #include <GL/glew.h>
 #include <glm/vec3.hpp>
+#include <glm/vec4.hpp>
 #include <vector>
 #include <unordered_map>
 #include <string>
@@ -25,6 +26,7 @@ class ShaderProgram
 		void set_uniform_1i(const GLchar* name, GLint value);
 		void set_uniform_matrix_4fv(const GLchar* name, const GLfloat* value);
 		void set_uniform_3f(const GLchar* name, glm::vec3 v);
+		void set_uniform_4f(const GLchar* name, glm::vec4 v);
 
 	private:
 		void create_shader(GLenum shader_type, std::string_view shader_path);

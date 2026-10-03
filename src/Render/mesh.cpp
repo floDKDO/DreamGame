@@ -1,8 +1,11 @@
 #include "mesh.h"
 #include "Logging/logging.h"
 #include "Resource/gl_resource_manager.h"
+#include "RAII_SDL3/font.h"
+#include "RAII_SDL3/surface.h"
 
 #include <stb/stb_image.h>
+#include <SDL3_ttf/SDL_ttf.h>
 #include <iostream>
 
 Mesh::Mesh(const Id& mesh_id, const Info& mesh_info)
@@ -119,35 +122,51 @@ void Mesh::create_textures()
 			logging::log("The texture is nullptr!", logging::Severity::WARNING);
 			continue;
 		}
-		glCreateTextures(GL_TEXTURE_2D, 1, &t->texture_id_);
-		glBindTextureUnit(t->texture_unit_, t->texture_id_);
-		glTextureParameteri(t->texture_id_, GL_TEXTURE_WRAP_S, t->wrap_s_);
-		glTextureParameteri(t->texture_id_, GL_TEXTURE_WRAP_T, t->wrap_t_);
-		glTextureParameteri(t->texture_id_, GL_TEXTURE_MAG_FILTER, t->mag_filter_);
-		glTextureParameteri(t->texture_id_, GL_TEXTURE_MIN_FILTER, t->min_filter_);
+		glCreateTextures(GL_TEXTURE_2D, 1, &t->info_.id_);
+		glBindTextureUnit(t->info_.texture_unit_, t->info_.id_);
+		glTextureParameteri(t->info_.id_, GL_TEXTURE_WRAP_S, t->info_.wrap_s_);
+		glTextureParameteri(t->info_.id_, GL_TEXTURE_WRAP_T, t->info_.wrap_t_);
+		glTextureParameteri(t->info_.id_, GL_TEXTURE_MAG_FILTER, t->info_.mag_filter_);
+		glTextureParameteri(t->info_.id_, GL_TEXTURE_MIN_FILTER, t->info_.min_filter_);
+		glGenerateTextureMipmap(t->info_.id_);
 
-		int width, height, channels;
-		unsigned char* pixels;
-		if(!t->image_path_.empty())
+		int width = 0, height = 0, channels = 0;
+		unsigned char* pixels = nullptr;
+
+		if(std::holds_alternative<ImageTexture>(t->texture_))
 		{
-			if((pixels = stbi_load(t->image_path_.c_str(), &width, &height, &channels, desired_channels)) == nullptr) //4 pour que ça crashe pas pour une image RGB uniquement (ex : .jpg)
+			ImageTexture& image_texture = std::get<ImageTexture>(t->texture_);
+			if(!image_texture.image_path_.empty())
 			{
-				logging::log("stbi_load() returned nullptr", logging::Severity::CRITICAL);
-				exit(EXIT_FAILURE);
+				if((pixels = stbi_load(image_texture.image_path_.c_str(), &width, &height, &channels, desired_channels)) == nullptr) //4 pour que ça crashe pas pour une image RGB uniquement (ex : .jpg)
+				{
+					logging::log("stbi_load() returned nullptr: " + std::string(stbi_failure_reason()), logging::Severity::CRITICAL);
+					exit(EXIT_FAILURE);
+				}
+			}
+			else
+			{
+				if((pixels = stbi_load_from_memory(image_texture.image_data_.data(), int(image_texture.image_data_.size()), &width, &height, &channels, desired_channels)) == nullptr) //4 pour que ça crashe pas pour une image RGB uniquement (ex : .jpg)
+				{
+					logging::log("stbi_load_from_memory() returned nullptr: " + std::string(stbi_failure_reason()), logging::Severity::CRITICAL);
+					exit(EXIT_FAILURE);
+				}
 			}
 		}
-		else
+		else if(std::holds_alternative<TextTexture>(t->texture_))
 		{
-			if((pixels = stbi_load_from_memory(t->image_data_.data(), int(t->image_data_.size()), &width, &height, &channels, desired_channels)) == nullptr) //4 pour que ça crashe pas pour une image RGB uniquement (ex : .jpg)
-			{
-				logging::log("stbi_load_from_memory() returned nullptr", logging::Severity::CRITICAL);
-				exit(EXIT_FAILURE);
-			}
+			TextTexture& text_texture = std::get<TextTexture>(t->texture_);
+			pixels = static_cast<unsigned char*>(text_texture.pixels_);
+			width = text_texture.width_;
+			height = text_texture.height_;
 		}
-		glGenerateTextureMipmap(t->texture_id_);
-		glTextureStorage2D(t->texture_id_, number_of_texture_levels, GL_RGBA8, width, height);
-		glTextureSubImage2D(t->texture_id_, 0, 0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
-		stbi_image_free(pixels);
+
+		glTextureStorage2D(t->info_.id_, number_of_texture_levels, GL_RGBA8, width, height);
+		glTextureSubImage2D(t->info_.id_, 0, 0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+		if(std::holds_alternative<ImageTexture>(t->texture_))
+		{
+			stbi_image_free(pixels);
+		}
 	}
 }
 
@@ -166,11 +185,12 @@ void Mesh::render() const
 		for(const std::string& texture_key : mesh_info_.texture_keys_)
 		{
 			Texture* texture = resource::get_texture(texture_key);
-			if(texture->texture_unit_ > 0)
+			if(texture->info_.texture_unit_ > 0)
 			{
 				logging::log("Only one texture by mesh for now!", logging::Severity::WARNING);
 			}
-			shader_program->set_uniform_1i("texture_sampler0_", texture->texture_unit_);
+			glBindTextureUnit(texture->info_.texture_unit_, texture->info_.id_);
+			shader_program->set_uniform_1i("texture_sampler0_", texture->info_.texture_unit_);
 		}
 	}
 	glBindVertexArray(vao_);

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "input_common.h"
+#include "RAII_SDL3/gamepad.h"
 
 #include <SDL3/SDL.h>
 
@@ -24,8 +25,9 @@ class Gamepad //le fichier se nomme gamepad_input pour ne pas entrer en collisio
 		void set_direction_joystick(Sint16 axis_value, JoystickAxis joystick_axis);
 		void set_rotation_joystick(Sint16 axis_value, JoystickAxis joystick_axis);
 
-		Info input_info_;
+		sdl::Gamepad gamepad_;
 		bool is_movement_from_joystick_;
+		Info input_info_;
 };
 
 }
