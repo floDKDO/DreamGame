@@ -7,7 +7,7 @@
 #include <imgui/imgui_impl_sdl3.h>
 #include <imgui/imgui_impl_opengl3.h>
 #include <AL/al.h>
-#include <stb/stb_image.h>
+//#include <stb/stb_image.h>
 #include <filesystem>
 #include <iostream>
 
@@ -65,7 +65,7 @@ void Backend::init_shaders() const
 		std::advance(it, 1);
 
 		std::string shader_name = fragment_shader_path.stem().string();
-		shader_name[0] = std::toupper(shader_name[0]);
+		shader_name[0] = char(std::toupper(static_cast<unsigned char>(shader_name[0]))); //voir cppreference pour les raisons des casts
 
 		resource::add_shader(shader_name, {vertex_shader_path.string(), fragment_shader_path.string()});
 	}

@@ -14,7 +14,7 @@ Game::Game()
 	: backend_(),
 	player_(input_manager_),
 	camera_(input_manager_, player_.get_model()->get_position()),
-	running_(true), test_map_("resources/maps/corridor.gltf"), 
+	running_(true), test_map_("resources/maps/corridor.gltf"),
 	gizmo_(nullptr), test_image_("resources/images/yuri_tea.png", glm::vec2(500.0f, 50.0f), glm::vec2(200.0f), 90.0f),
 	test_image_2_("resources/images/yuri_tea.png", glm::vec2(800.0f, 300.0f), glm::vec2(200.0f), 0.0f),
 	test_text_("C'est un texte de test !", {0, 255, 255, 255}),

@@ -5,15 +5,8 @@
 #include <vector>
 #include <variant>
 
-enum class TextureType
-{
-	IMAGE,
-	TEXT
-};
-
 struct TextureInfo
 {
-	TextureType type_;
 	GLuint id_ = 0; //id returned when calling glCreateTextures
 	GLuint texture_unit_ = 0;
 	GLint mag_filter_ = GL_NEAREST;
