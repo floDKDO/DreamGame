@@ -14,9 +14,9 @@ class Surface
 		explicit Surface(std::string_view file); //SDL_LoadPNG
 		Surface(Font& font, std::string_view text, SDL_Color fg); //TTF_RenderText_Solid();
 		Surface(const Surface&) = delete;
-		Surface(Surface&&) = delete;
+		Surface(Surface&& surface);
 		Surface& operator=(const Surface&) = delete;
-		Surface& operator=(Surface&&) = delete;
+		Surface& operator=(Surface&& surface);
 		~Surface(); //SDL_DestroySurface
 
 		SDL_Surface* fetch() const;

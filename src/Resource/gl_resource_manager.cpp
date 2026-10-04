@@ -1,5 +1,5 @@
 #include "gl_resource_manager.h"
-#include "Logging/logging.h"
+//#include "Logging/logging.h"
 #include "Resource/model.h"
 
 #include <string>

@@ -61,6 +61,12 @@ void Text::set_scale(glm::vec2 scale)
 	scale_ = scale;
 }
 
+void Text::edit_text(std::string_view new_text)
+{
+	surface_ = sdl::Surface(font_, new_text, {255, 255, 255, 255});
+	resource::get_mesh(mesh_id_)->edit_text_texture(surface_.get_width(), surface_.get_height(), surface_.get_pixels());
+}
+
 glm::mat4 Text::get_model_matrix() const
 {
 	float width = surface_.get_width() * scale_.x;

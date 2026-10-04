@@ -163,6 +163,7 @@ void Mesh::create_textures()
 
 		glTextureStorage2D(t->info_.id_, number_of_texture_levels, GL_RGBA8, width, height);
 		glTextureSubImage2D(t->info_.id_, 0, 0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+
 		if(std::holds_alternative<ImageTexture>(t->texture_))
 		{
 			stbi_image_free(pixels);
@@ -176,6 +177,21 @@ void Mesh::load_mesh()
 	create_vbo();
 	create_vao();
 	create_textures();
+}
+
+void Mesh::edit_text_texture(int new_width, int new_height, void* new_pixels) const
+{
+	Texture* texture = resource::get_texture(mesh_info_.texture_keys_[0]); //le mesh d'un Text ne contient qu'une seule texture
+	int old_width, old_height;
+	glGetTextureLevelParameteriv(texture->info_.id_, 0, GL_TEXTURE_WIDTH, &old_width);
+	glGetTextureLevelParameteriv(texture->info_.id_, 0, GL_TEXTURE_HEIGHT, &old_height);
+	if(new_width != old_width || new_height != old_height)
+	{
+		glDeleteTextures(1, &texture->info_.id_);
+		glCreateTextures(GL_TEXTURE_2D, 1, &texture->info_.id_);
+		glTextureStorage2D(texture->info_.id_, 1, GL_RGBA8, new_width, new_height);
+	}
+	glTextureSubImage2D(texture->info_.id_, 0, 0, 0, new_width, new_height, GL_RGBA, GL_UNSIGNED_BYTE, new_pixels);
 }
 
 void Mesh::render() const

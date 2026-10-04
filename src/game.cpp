@@ -117,12 +117,12 @@ void Game::render()
 	test_image_.render();
 	test_image_2_.render();*/
 
-	/*if(ShaderProgram* shader_program_text = resource::bind_shader("Text"); shader_program_text != nullptr)
+	if(ShaderProgram* shader_program_text = resource::bind_shader("Text"); shader_program_text != nullptr)
 	{
 		shader_program_text->set_uniform_matrix_4fv("projection_matrix_", glm::value_ptr(projection::get_orthographic_matrix(float(window_size.x), float(window_size.y))));
 	}
 	test_text_.render();
-	test_text_2_.render();*/
+	test_text_2_.render();
 
 	if(ShaderProgram* shader_program_phong = resource::bind_shader("Phong"); shader_program_phong != nullptr)
 	{
@@ -162,4 +162,35 @@ void Game::update(float delta_time)
 	camera_.update(delta_time);
 	player_.update(delta_time, camera_.get_camera_forward(), camera_.get_camera_left());
 	input_manager_.update(delta_time);
+
+	/*static Uint64 t = 0;
+	Uint64 now = SDL_GetTicks();
+	static std::string s(1, 'a');
+	if(now > t + 1000)
+	{
+		test_text_2_.edit_text(s);
+		t = now;
+	}*/
+
+	/*static char c = 'a';
+	static Uint64 t = 0;
+	Uint64 now = SDL_GetTicks();
+	static std::string s(1, c);
+	if(now > t + 1000)
+	{
+		c += 1;
+		s = c;
+		test_text_2_.edit_text(s);
+		t = now;
+	}*/
+
+	/*static Uint64 t = 0;
+	Uint64 now = SDL_GetTicks();
+	static std::string s = "a";
+	if(now > t + 1000)
+	{
+		s += 'a';
+		test_text_2_.edit_text(s);
+		t = now;
+	}*/
 }

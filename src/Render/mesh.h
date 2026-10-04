@@ -1,6 +1,7 @@
 #pragma once
 
 #include "vertices.h"
+#include "texture.h"
 
 class Mesh
 {
@@ -32,6 +33,7 @@ class Mesh
 		~Mesh();
 
 		void render() const;
+		void edit_text_texture(int new_width, int new_height, void* new_pixels) const;
 
 	private:
 		void load_vertex_attribute(GLuint vbo_binding_index, attribute::Name attribute_name);

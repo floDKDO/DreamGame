@@ -15,6 +15,7 @@ class Text
 		void set_position(glm::vec2 position);
 		void set_angle(float angle);
 		void set_scale(glm::vec2 scale);
+		void edit_text(std::string_view new_text);
 		void render() const;
 
 	private:

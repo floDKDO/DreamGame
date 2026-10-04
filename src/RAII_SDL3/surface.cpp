@@ -20,6 +20,29 @@ Surface::Surface(Font& font, std::string_view text, SDL_Color fg)
 	convert_to_rgba8();
 }
 
+Surface::Surface(Surface&& surface)
+	: surface_(surface.surface_)
+{
+	surface.surface_ = nullptr;
+}
+
+Surface& Surface::operator=(Surface&& surface)
+{
+	if(this == &surface)
+	{
+		return *this;
+	}
+
+	if(surface_ != nullptr)
+	{
+		SDL_DestroySurface(surface_);
+	}
+
+	surface_ = surface.surface_;
+	surface.surface_ = nullptr;
+	return *this;
+}
+
 Surface::~Surface() //SDL_DestroySurface
 {
 	if(surface_ != nullptr)
