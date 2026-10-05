@@ -1,7 +1,6 @@
 #pragma once
 
 #include "vertices.h"
-#include "texture.h"
 
 class Mesh
 {

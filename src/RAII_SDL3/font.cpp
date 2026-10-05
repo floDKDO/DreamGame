@@ -62,4 +62,12 @@ void Font::set_style(int style) const
 	TTF_SetFontStyle(font_, style);
 }
 
+void Font::set_size(float size) const
+{
+	if(!TTF_SetFontSize(font_, size))
+	{
+		SDL_Log("(TTF_SetFontSize) %s\n", SDL_GetError());
+	}
+}
+
 }

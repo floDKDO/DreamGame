@@ -22,7 +22,6 @@ Game::Game()
 {
 	std::size_t gizmo_model_id = resource::add_model("resources/models/axis_gizmo.glb");
 	gizmo_ = resource::get_model(gizmo_model_id);
-	test_text_2_.set_scale(glm::vec2(5.0f));
 }
 
 void Game::run()
@@ -162,35 +161,4 @@ void Game::update(float delta_time)
 	camera_.update(delta_time);
 	player_.update(delta_time, camera_.get_camera_forward(), camera_.get_camera_left());
 	input_manager_.update(delta_time);
-
-	/*static Uint64 t = 0;
-	Uint64 now = SDL_GetTicks();
-	static std::string s(1, 'a');
-	if(now > t + 1000)
-	{
-		test_text_2_.edit_text(s);
-		t = now;
-	}*/
-
-	/*static char c = 'a';
-	static Uint64 t = 0;
-	Uint64 now = SDL_GetTicks();
-	static std::string s(1, c);
-	if(now > t + 1000)
-	{
-		c += 1;
-		s = c;
-		test_text_2_.edit_text(s);
-		t = now;
-	}*/
-
-	/*static Uint64 t = 0;
-	Uint64 now = SDL_GetTicks();
-	static std::string s = "a";
-	if(now > t + 1000)
-	{
-		s += 'a';
-		test_text_2_.edit_text(s);
-		t = now;
-	}*/
 }

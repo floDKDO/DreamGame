@@ -128,7 +128,6 @@ void Mesh::create_textures()
 		glTextureParameteri(t->info_.id_, GL_TEXTURE_WRAP_T, t->info_.wrap_t_);
 		glTextureParameteri(t->info_.id_, GL_TEXTURE_MAG_FILTER, t->info_.mag_filter_);
 		glTextureParameteri(t->info_.id_, GL_TEXTURE_MIN_FILTER, t->info_.min_filter_);
-		glGenerateTextureMipmap(t->info_.id_);
 
 		int width = 0, height = 0, channels = 0;
 		unsigned char* pixels = nullptr;
@@ -162,6 +161,7 @@ void Mesh::create_textures()
 		}
 
 		glTextureStorage2D(t->info_.id_, number_of_texture_levels, GL_RGBA8, width, height);
+		glGenerateTextureMipmap(t->info_.id_);
 		glTextureSubImage2D(t->info_.id_, 0, 0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
 
 		if(std::holds_alternative<ImageTexture>(t->texture_))

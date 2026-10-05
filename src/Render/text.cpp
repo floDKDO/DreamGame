@@ -4,10 +4,10 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <SDL3_ttf/SDL_ttf.h>
 
-Text::Text(std::string_view text, SDL_Color color, glm::vec2 position, glm::vec2 scale, float angle)
-	: color_(color), font_("resources/fonts/Aller_Rg.ttf", 20.0f), //TODO : hardcodé 
+Text::Text(std::string_view text, SDL_Color color, glm::vec2 position, float font_size, float angle)
+	: color_(color), font_("resources/fonts/Aller_Rg.ttf", font_size), //TODO : police hardcodée
 	surface_(font_, text, {255, 255, 255, 255}), //cette valeur n'est pas hardcodée : elle est nécessaire pour que la multiplication via text_color_ fonctionne
-	text_(text), position_(position), scale_(scale), angle_(angle)
+	text_(text), position_(position), font_size_(font_size), angle_(angle)
 {
 	std::string text_str = std::string(text);
 	
@@ -51,26 +51,30 @@ void Text::set_position(glm::vec2 position)
 	position_ = position;
 }
 
+void Text::set_font_size(float font_size)
+{
+	font_.set_size(font_size);
+	font_size_ = font_size;
+	surface_ = sdl::Surface(font_, text_, {255, 255, 255, 255});
+	resource::get_mesh(mesh_id_)->edit_text_texture(surface_.get_width(), surface_.get_height(), surface_.get_pixels());
+}
+
 void Text::set_angle(float angle)
 {
 	angle_ = angle;
 }
 
-void Text::set_scale(glm::vec2 scale)
-{
-	scale_ = scale;
-}
-
 void Text::edit_text(std::string_view new_text)
 {
 	surface_ = sdl::Surface(font_, new_text, {255, 255, 255, 255});
+	text_ = new_text;
 	resource::get_mesh(mesh_id_)->edit_text_texture(surface_.get_width(), surface_.get_height(), surface_.get_pixels());
 }
 
 glm::mat4 Text::get_model_matrix() const
 {
-	float width = surface_.get_width() * scale_.x;
-	float height = surface_.get_height() * scale_.y;
+	float width = float(surface_.get_width());
+	float height = float(surface_.get_height());
 
 	glm::mat4 model_matrix(1.0f);
 	model_matrix = glm::translate(model_matrix, glm::vec3(position_, 0.0f));
