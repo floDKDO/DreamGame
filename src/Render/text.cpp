@@ -6,9 +6,11 @@
 
 Text::Text(std::string_view text, SDL_Color color, glm::vec2 position, float font_size, float angle)
 	: color_(color), font_("resources/fonts/Aller_Rg.ttf", font_size), //TODO : police hardcodée
-	surface_(font_, text, {255, 255, 255, 255}), //cette valeur n'est pas hardcodée : elle est nécessaire pour que la multiplication via text_color_ fonctionne
 	text_(text), position_(position), font_size_(font_size), angle_(angle)
 {
+	surface_.render_text_solid(font_, text, {255, 255, 255, 255}); //TODO : le choix de "solid" est hardcodé (à garder pour l'instant car "blended" bug (affiche un fond bleu) 
+	//la valeur "{255, 255, 255, 255}" n'est pas hardcodée : elle est nécessaire pour que la multiplication via text_color_ fonctionne
+
 	std::string text_str = std::string(text);
 	
 	std::vector<GLushort> ebo_values{0, 1, 2, 0, 3, 1};
@@ -55,7 +57,7 @@ void Text::set_font_size(float font_size)
 {
 	font_.set_size(font_size);
 	font_size_ = font_size;
-	surface_ = sdl::Surface(font_, text_, {255, 255, 255, 255});
+	surface_.render_text_solid(font_, text_, {255, 255, 255, 255});//TODO : le choix de "solid" est hardcodé (à garder pour l'instant car "blended" bug (affiche un fond bleu) 
 	resource::get_mesh(mesh_id_)->edit_text_texture(surface_.get_width(), surface_.get_height(), surface_.get_pixels());
 }
 
@@ -66,7 +68,7 @@ void Text::set_angle(float angle)
 
 void Text::edit_text(std::string_view new_text)
 {
-	surface_ = sdl::Surface(font_, new_text, {255, 255, 255, 255});
+	surface_.render_text_solid(font_, new_text, {255, 255, 255, 255}); //TODO : le choix de "solid" est hardcodé (à garder pour l'instant car "blended" bug (affiche un fond bleu) 
 	text_ = new_text;
 	resource::get_mesh(mesh_id_)->edit_text_texture(surface_.get_width(), surface_.get_height(), surface_.get_pixels());
 }

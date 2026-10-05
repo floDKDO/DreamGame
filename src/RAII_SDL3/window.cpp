@@ -7,8 +7,10 @@ namespace sdl
 {
 
 Window::Window() 
-	: window_icon_("resources/images/icon.png")
+	: window_icon_()
 {
+	window_icon_.load_png("resources/images/icon.png");
+
 	set_opengl_attributes();
 
 	if((window_ = SDL_CreateWindow("DreamGame, FPS: ", 1280, 720, /*SDL_WINDOW_RESIZABLE | SDL_WINDOW_MAXIMIZED |*/ SDL_WINDOW_OPENGL)) == nullptr)

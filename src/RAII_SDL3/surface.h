@@ -11,15 +11,21 @@ namespace sdl
 class Surface
 {
 	public:
-		explicit Surface(std::string_view file); //SDL_LoadPNG
-		Surface(Font& font, std::string_view text, SDL_Color fg); //TTF_RenderText_Solid();
+		Surface();
 		Surface(const Surface&) = delete;
 		Surface(Surface&& surface);
 		Surface& operator=(const Surface&) = delete;
 		Surface& operator=(Surface&& surface);
-		~Surface(); //SDL_DestroySurface
+		~Surface();
+
+		void load_png(std::string_view file);
+		void render_text_solid(Font& font, std::string_view text, SDL_Color fg);
+		void render_text_solid_wrapped(Font& font, std::string_view text, SDL_Color fg, int wrap_width);
+		void render_text_blended(Font& font, std::string_view text, SDL_Color fg);
+		void render_text_blended_wrapped(Font& font, std::string_view text, SDL_Color fg, int wrap_width);
 
 		SDL_Surface* fetch() const;
+		void clear();
 		void convert_to_rgba8();
 		int get_width() const;
 		int get_height() const;
