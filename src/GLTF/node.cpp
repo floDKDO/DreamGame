@@ -1,11 +1,9 @@
 #include "node.h"
 #include "gltf.h"
-//#include "gl_resource_manager.h"
+#include "Resource/gl_resource_manager.h"
 
 #include <glm/gtc/type_ptr.hpp>
 #include <iostream>
-#define GLM_ENABLE_EXPERIMENTAL
-#include <glm/gtx/io.hpp>
 
 namespace gltf
 {

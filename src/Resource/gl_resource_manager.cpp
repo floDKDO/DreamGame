@@ -26,11 +26,15 @@ ShaderProgram* get_shader(std::string_view name);
 std::string add_texture(Texture texture)
 {
 	std::string texture_key;
-
 	if(std::holds_alternative<ImageTexture>(texture.texture_))
 	{
 		ImageTexture& image_texture = std::get<ImageTexture>(texture.texture_);
-		if(image_texture.image_path_.empty())
+		if(std::holds_alternative<ImagePath>(image_texture.image_value_))
+		{
+			texture_key = std::get<ImagePath>(image_texture.image_value_);
+			textures_.insert({texture_key, texture});
+		}
+		else
 		{
 			//Comme les images "embedded glTF" n'ont pas de path, la clef étant "", elle ne serait pas unique pour plusieurs images sans path
 			//Pour assurer que chacune de ces images aient un path fictif unique, je lui ajoute un entier (incrémenté à chaque ajout) => le path n'étant pas consulté donc la valeur de cette clef n'a aucune importance
@@ -39,11 +43,6 @@ std::string add_texture(Texture texture)
 			texture_key = "Empty path " + std::to_string(empty_path_counter);
 			textures_.insert({texture_key, texture});
 			empty_path_counter += 1;
-		}
-		else
-		{
-			texture_key = image_texture.image_path_;
-			textures_.insert({texture_key, texture});
 		}
 	}
 	else if(std::holds_alternative<TextTexture>(texture.texture_))

@@ -38,7 +38,7 @@ Image::Image(std::string_view path, glm::vec2 position, glm::vec2 size, float an
 	vertices.add_color_attributes(color_vector);
 	vertices.add_texcoord_attributes(texcoord_vector);
 
-	Texture texture{TextureInfo{}, ImageTexture{path_str}};
+	Texture texture{TextureInfo{}, ImageTexture{path_str}, false};
 	std::string texture_key = resource::add_texture(texture);
 
 	mesh_id_ = resource::add_mesh(Mesh::Id{path_str, -1}, Mesh::Info{ebo_values, vertices, {texture_key}, GL_TRIANGLES});

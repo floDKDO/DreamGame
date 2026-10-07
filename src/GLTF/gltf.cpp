@@ -264,6 +264,64 @@ std::string get_wrap_str(int32_t wrap)
 	return wrap_str;
 }
 
+GLenum get_sized_enum_from_channels(int channels)
+{
+	GLenum enum_channel;
+	switch(channels)
+	{
+		case 4:
+			enum_channel = GL_RGBA8;
+			break;
+
+		case 3:
+			enum_channel = GL_RGB8;
+			break;
+
+		case 2:
+			enum_channel = GL_RG8;
+			break;
+
+		case 1:
+			enum_channel = GL_R8;
+			break;
+
+		default:
+			enum_channel = GL_RGBA8;
+			logging::log("In get_sized_enum_from_channels(), the requested sized enum does not exist!", logging::Severity::WARNING);
+			break;
+	}
+	return enum_channel;
+}
+
+GLenum get_base_enum_from_channels(int channels)
+{
+	GLenum enum_channel;
+	switch(channels)
+	{
+		case 4:
+			enum_channel = GL_RGBA;
+			break;
+
+		case 3:
+			enum_channel = GL_RGB;
+			break;
+
+		case 2:
+			enum_channel = GL_RG;
+			break;
+
+		case 1:
+			enum_channel = GL_RED;
+			break;
+
+		default:
+			enum_channel = GL_RGBA;
+			logging::log("In get_base_enum_from_channels(), the requested base enum does not exist!", logging::Severity::WARNING);
+			break;
+	}
+	return enum_channel;
+}
+
 std::vector<glm::vec4> vec3_to_vec4_colors(std::vector<glm::vec3> vector)
 {
 	std::vector<glm::vec4> vector_vec4;

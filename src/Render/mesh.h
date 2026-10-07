@@ -1,6 +1,7 @@
 #pragma once
 
 #include "vertices.h"
+#include "texture.h"
 
 class Mesh
 {
@@ -40,6 +41,9 @@ class Mesh
 		void create_vbo();
 		void create_vao();
 		void destroy_all_buffers();
+		void init_texture(Texture* texture, int width, int height) const;
+		void set_texture_parameters(const Texture* texture) const;
+		void set_texture_content(Texture* texture, int width, int height, void* pixels) const;
 		void create_textures();
 		void load_mesh();
 

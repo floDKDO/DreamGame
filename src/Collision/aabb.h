@@ -1,7 +1,6 @@
 #pragma once
 
-#include "Resource/gl_resource_manager.h"
-
+#include <glm/vec3.hpp>
 #include <vector>
 
 class AABB

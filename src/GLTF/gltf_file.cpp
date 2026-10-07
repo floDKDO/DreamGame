@@ -558,9 +558,9 @@ std::vector<std::string> get_textures(const tg3_model& model_tg3)
 		tg3_image image_tg3 = model_tg3.images[texture_tg3.source];
 
 		Texture mesh_texture;
-		ImageTexture& image_texture = std::get<ImageTexture>(mesh_texture.texture_);
 		mesh_texture.info_.texture_unit_ = i;
 
+		ImageTexture& image_texture = std::get<ImageTexture>(mesh_texture.texture_); //un fichier glTF ne peut contenir que des textures "image" et non des textures "texte"
 		if(image_tg3.buffer_view == -1)
 		{
 			std::string image_str;
@@ -571,31 +571,34 @@ std::vector<std::string> get_textures(const tg3_model& model_tg3)
 
 			if(tg3_is_data_uri(image_tg3.uri.data, image_tg3.uri.len))
 			{
-				image_texture.image_path_ = "";
 				std::string image_data_base64 = image_str.substr(image_str.find(',') + 1); //+1 pour ne pas prendre la virgule
 				std::string image_data_decoded = utils::base64_decode(image_data_base64.data(), image_data_base64.size());
-				image_texture.image_data_.reserve(image_data_base64.size());
+
+				image_texture.image_value_ = ImageData();
+				ImageData& image_data = std::get<ImageData>(image_texture.image_value_);
+				image_data.reserve(image_data_base64.size());
 				for(std::size_t j = 0ULL; j < image_data_decoded.size(); ++j)
 				{
-					image_texture.image_data_.push_back(image_data_decoded[j]);
+					image_data.push_back(image_data_decoded[j]);
 				}
 			}
 			else
 			{
-				image_texture.image_path_ = "resources/models/" + image_str;
+				image_texture.image_value_ = "resources/models/" + image_str;
 			}
 		}
 		else
 		{
-			image_texture.image_path_ = "";
+			image_texture.image_value_ = ImageData();
+			ImageData& image_data = std::get<ImageData>(image_texture.image_value_);
 			tg3_buffer_view buffer_view_tg3 = model_tg3.buffer_views[image_tg3.buffer_view];
 			tg3_buffer buffer_tg3 = model_tg3.buffers[buffer_view_tg3.buffer];
-			image_texture.image_data_.reserve(buffer_view_tg3.byte_length);
+			image_data.reserve(buffer_view_tg3.byte_length);
 
 			//std::copy(buffer.data.data, buffer.data.data + buffer_view.byte_length, std::back_inserter(mesh_texture.image_data_)); //TODO : mieux que la boucle for suivante ?
 			for(uint64_t j = 0ULL; j < buffer_view_tg3.byte_length; ++j)
 			{
-				image_texture.image_data_.push_back(buffer_tg3.data.data[buffer_view_tg3.byte_offset + j]);
+				image_data.push_back(buffer_tg3.data.data[buffer_view_tg3.byte_offset + j]);
 			}
 		}
 

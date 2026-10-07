@@ -1,5 +1,7 @@
 #include "aabb.h"
 
+#include <glm/glm.hpp>
+
 AABB::AABB(glm::vec3 min_values, glm::vec3 max_values)
 	: min_values_(min_values), max_values_(max_values)
 {}

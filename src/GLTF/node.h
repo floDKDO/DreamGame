@@ -2,8 +2,9 @@
 
 #include "Collision/aabb.h"
 #include "Common/transform.h"
-#include "Resource/gl_resource_manager.h"
+#include "Render/mesh.h"
 
+#include <memory>
 #include <optional>
 
 namespace gltf

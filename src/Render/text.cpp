@@ -42,7 +42,7 @@ Text::Text(std::string_view text, SDL_Color color, glm::vec2 position, float fon
 	//vertices.add_color_attributes(color_vector);
 	vertices.add_texcoord_attributes(texcoord_vector);
 
-	Texture texture{TextureInfo{}, TextTexture{surface_.get_width(), surface_.get_height(), surface_.get_pixels()}};
+	Texture texture{TextureInfo{}, TextTexture{surface_.get_width(), surface_.get_height(), surface_.get_pixels()}, false};
 	std::string texture_key = resource::add_texture(texture);
 
 	mesh_id_ = resource::add_mesh(Mesh::Id{text_str, -1}, Mesh::Info{ebo_values, vertices, {texture_key}, GL_TRIANGLES});

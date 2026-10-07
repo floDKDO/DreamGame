@@ -1,11 +1,9 @@
 #include "mesh.h"
 #include "Logging/logging.h"
 #include "Resource/gl_resource_manager.h"
-#include "RAII_SDL3/font.h"
-#include "RAII_SDL3/surface.h"
+#include "glTF/gltf.h"
 
 #include <stb/stb_image.h>
-#include <SDL3_ttf/SDL_ttf.h>
 #include <iostream>
 
 Mesh::Mesh(const Id& mesh_id, const Info& mesh_info)
@@ -109,35 +107,68 @@ void Mesh::destroy_all_buffers()
 	vao_ = 0;
 }
 
+void Mesh::init_texture(Texture* texture, int width, int height) const
+{
+	glCreateTextures(GL_TEXTURE_2D, 1, &texture->info_.id_);
+	glBindTextureUnit(texture->info_.texture_unit_, texture->info_.id_);
+	set_texture_parameters(texture);
+
+	GLenum internal_format = GL_RGBA8;
+	if(std::holds_alternative<ImageTexture>(texture->texture_))
+	{
+		ImageTexture& image_texture = std::get<ImageTexture>(texture->texture_);
+		internal_format = gltf::get_sized_enum_from_channels(image_texture.channels_);
+	}
+	
+	GLsizei number_of_texture_levels = texture->should_have_mipmaps_ ? 1 + int(std::floor(std::log2(std::max(width, height)))) : 1;
+	glTextureStorage2D(texture->info_.id_, number_of_texture_levels, internal_format, width, height); //ici (cas .png), il faut mettre GL_RGBA8 et non GL_RGBA car il faut mettre un "Sized Internal Format" (voir https://registry.khronos.org/OpenGL-Refpages/gl4/html/glTexStorage2D.xhtml)
+}
+
+void Mesh::set_texture_parameters(const Texture* texture) const
+{
+	glTextureParameteri(texture->info_.id_, GL_TEXTURE_WRAP_S, texture->info_.wrap_s_);
+	glTextureParameteri(texture->info_.id_, GL_TEXTURE_WRAP_T, texture->info_.wrap_t_);
+	glTextureParameteri(texture->info_.id_, GL_TEXTURE_MAG_FILTER, texture->info_.mag_filter_);
+	glTextureParameteri(texture->info_.id_, GL_TEXTURE_MIN_FILTER, texture->info_.min_filter_);
+}
+
+void Mesh::set_texture_content(Texture* texture, int width, int height, void* pixels) const
+{
+	GLenum format = GL_RGBA;
+	if(std::holds_alternative<ImageTexture>(texture->texture_))
+	{
+		ImageTexture& image_texture = std::get<ImageTexture>(texture->texture_);
+		format = gltf::get_base_enum_from_channels(image_texture.channels_);
+	}
+
+	GLint texture_level = 0; //on ne spécifie que la texture de niveau 0 et on génère automatiquement les mipmaps avec glGenerateTextureMipmap()
+	glTextureSubImage2D(texture->info_.id_, texture_level, 0, 0, width, height, format, GL_UNSIGNED_BYTE, pixels); //ici (cas .png), il faut mettre GL_RGBA et non GL_RGBA8, ce dernier n'étant pas supporté pour ce paramètre
+	glGenerateTextureMipmap(texture->info_.id_);
+}
+
 void Mesh::create_textures()
 {
-	int desired_channels = 4;
-	GLsizei number_of_texture_levels = 1; //TODO : utiliser une autre valeur ?
-
 	for(std::string& texture_key : mesh_info_.texture_keys_)
 	{
-		Texture* t = resource::get_texture(texture_key);
-		if(t == nullptr)
+		Texture* texture = resource::get_texture(texture_key);
+		if(texture == nullptr)
 		{
 			logging::log("The texture is nullptr!", logging::Severity::WARNING);
 			continue;
 		}
-		glCreateTextures(GL_TEXTURE_2D, 1, &t->info_.id_);
-		glBindTextureUnit(t->info_.texture_unit_, t->info_.id_);
-		glTextureParameteri(t->info_.id_, GL_TEXTURE_WRAP_S, t->info_.wrap_s_);
-		glTextureParameteri(t->info_.id_, GL_TEXTURE_WRAP_T, t->info_.wrap_t_);
-		glTextureParameteri(t->info_.id_, GL_TEXTURE_MAG_FILTER, t->info_.mag_filter_);
-		glTextureParameteri(t->info_.id_, GL_TEXTURE_MIN_FILTER, t->info_.min_filter_);
-
-		int width = 0, height = 0, channels = 0;
+		
+		int width, height;
 		unsigned char* pixels = nullptr;
 
-		if(std::holds_alternative<ImageTexture>(t->texture_))
+		if(std::holds_alternative<ImageTexture>(texture->texture_))
 		{
-			ImageTexture& image_texture = std::get<ImageTexture>(t->texture_);
-			if(!image_texture.image_path_.empty())
+			ImageTexture& image_texture = std::get<ImageTexture>(texture->texture_);
+			int channels;
+
+			if(std::holds_alternative<ImagePath>(image_texture.image_value_))
 			{
-				if((pixels = stbi_load(image_texture.image_path_.c_str(), &width, &height, &channels, desired_channels)) == nullptr) //4 pour que ça crashe pas pour une image RGB uniquement (ex : .jpg)
+				ImagePath& image_path = std::get<ImagePath>(image_texture.image_value_);
+				if((pixels = stbi_load(image_path.c_str(), &width, &height, &channels, 0)) == nullptr)
 				{
 					logging::log("stbi_load() returned nullptr: " + std::string(stbi_failure_reason()), logging::Severity::CRITICAL);
 					exit(EXIT_FAILURE);
@@ -145,26 +176,32 @@ void Mesh::create_textures()
 			}
 			else
 			{
-				if((pixels = stbi_load_from_memory(image_texture.image_data_.data(), int(image_texture.image_data_.size()), &width, &height, &channels, desired_channels)) == nullptr) //4 pour que ça crashe pas pour une image RGB uniquement (ex : .jpg)
+				ImageData& image_data = std::get<ImageData>(image_texture.image_value_);
+				if((pixels = stbi_load_from_memory(image_data.data(), int(image_data.size()), &width, &height, &channels, 0)) == nullptr)
 				{
 					logging::log("stbi_load_from_memory() returned nullptr: " + std::string(stbi_failure_reason()), logging::Severity::CRITICAL);
 					exit(EXIT_FAILURE);
 				}
 			}
+			image_texture.channels_ = channels;
 		}
-		else if(std::holds_alternative<TextTexture>(t->texture_))
+		else if(std::holds_alternative<TextTexture>(texture->texture_))
 		{
-			TextTexture& text_texture = std::get<TextTexture>(t->texture_);
+			TextTexture& text_texture = std::get<TextTexture>(texture->texture_);
 			pixels = static_cast<unsigned char*>(text_texture.pixels_);
 			width = text_texture.width_;
 			height = text_texture.height_;
 		}
+		else
+		{
+			width = 0;
+			height = 0;
+		}
 
-		glTextureStorage2D(t->info_.id_, number_of_texture_levels, GL_RGBA8, width, height);
-		glGenerateTextureMipmap(t->info_.id_);
-		glTextureSubImage2D(t->info_.id_, 0, 0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+		init_texture(texture, width, height);
+		set_texture_content(texture, width, height, pixels);
 
-		if(std::holds_alternative<ImageTexture>(t->texture_))
+		if(std::holds_alternative<ImageTexture>(texture->texture_))
 		{
 			stbi_image_free(pixels);
 		}
@@ -182,16 +219,23 @@ void Mesh::load_mesh()
 void Mesh::edit_text_texture(int new_width, int new_height, void* new_pixels) const
 {
 	Texture* texture = resource::get_texture(mesh_info_.texture_keys_[0]); //le mesh d'un Text ne contient qu'une seule texture
+	TextTexture& texture_text = std::get<TextTexture>(texture->texture_);
+
 	int old_width, old_height;
 	glGetTextureLevelParameteriv(texture->info_.id_, 0, GL_TEXTURE_WIDTH, &old_width);
 	glGetTextureLevelParameteriv(texture->info_.id_, 0, GL_TEXTURE_HEIGHT, &old_height);
+
 	if(new_width != old_width || new_height != old_height)
 	{
+		texture_text.width_ = new_width;
+		texture_text.height_ = new_height;
+
 		glDeleteTextures(1, &texture->info_.id_);
-		glCreateTextures(GL_TEXTURE_2D, 1, &texture->info_.id_);
-		glTextureStorage2D(texture->info_.id_, 1, GL_RGBA8, new_width, new_height);
+		init_texture(texture, new_width, new_height);
 	}
-	glTextureSubImage2D(texture->info_.id_, 0, 0, 0, new_width, new_height, GL_RGBA, GL_UNSIGNED_BYTE, new_pixels);
+
+	texture_text.pixels_ = new_pixels;
+	set_texture_content(texture, new_width, new_height, new_pixels);
 }
 
 void Mesh::render() const
