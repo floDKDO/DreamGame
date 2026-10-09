@@ -21,8 +21,8 @@ class Surface
 		void load_png(std::string_view file);
 		void render_text_solid(Font& font, std::string_view text, SDL_Color fg);
 		void render_text_solid_wrapped(Font& font, std::string_view text, SDL_Color fg, int wrap_width);
-		void render_text_blended(Font& font, std::string_view text, SDL_Color fg);
-		void render_text_blended_wrapped(Font& font, std::string_view text, SDL_Color fg, int wrap_width);
+		void render_text_lcd(Font& font, std::string_view text, SDL_Color fg);
+		void render_text_lcd_wrapped(Font& font, std::string_view text, SDL_Color fg, int wrap_width);
 
 		SDL_Surface* fetch() const;
 		void clear();

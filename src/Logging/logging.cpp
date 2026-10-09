@@ -35,7 +35,7 @@ void destroy()
 
 void log(std::string_view message, Severity severity)
 {
-	if(output_ != nullptr && max_severity_ <= severity)
+	if(output_ != nullptr && max_severity_ >= severity)
 	{
 		std::ostream& output_ref = *output_;
 

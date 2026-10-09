@@ -1,5 +1,5 @@
 #include "map_file.h"
-#include "Resource/gl_resource_manager.h"
+#include "Resource/resource_manager.h"
 //#include "Logging/logging.h"
 
 #include <fstream>

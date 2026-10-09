@@ -1,6 +1,6 @@
 #include "mesh.h"
 #include "Logging/logging.h"
-#include "Resource/gl_resource_manager.h"
+#include "Resource/resource_manager.h"
 #include "glTF/gltf.h"
 
 #include <stb/stb_image.h>

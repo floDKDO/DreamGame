@@ -1,6 +1,6 @@
 #include "game.h"
 #include "OpenAL/openal.h"
-#include "Resource/gl_resource_manager.h"
+#include "Resource/resource_manager.h"
 #include "Projection/projection.h"
 
 //#include <imgui/imgui.h>
@@ -17,11 +17,14 @@ Game::Game()
 	running_(true), test_map_("resources/maps/corridor.gltf"),
 	gizmo_(nullptr), test_image_("resources/images/nakazato.jpg", glm::vec2(500.0f, 50.0f), glm::vec2(200.0f), 90.0f),
 	test_image_2_("resources/images/yuri_tea.png", glm::vec2(800.0f, 300.0f), glm::vec2(200.0f), 0.0f),
-	test_text_("C'est un texte de test !", {0, 255, 255, 255}),
-	test_text_2_("INITIAL D !", {255, 255, 255, 255}, glm::vec2(200.0f))
+	test_text_("C'est un texte de test !", 24, {0, 255, 255, 255}),
+	test_text_2_("INITIAL D !", 24, {255, 255, 255, 255})
 {
 	std::size_t gizmo_model_id = resource::add_model("resources/models/axis_gizmo.glb");
 	gizmo_ = resource::get_model(gizmo_model_id);
+
+	test_text_2_.set_font_size(86.0f);
+	test_text_2_.set_position(glm::vec2(300.0f, 200.0f));
 }
 
 void Game::run()

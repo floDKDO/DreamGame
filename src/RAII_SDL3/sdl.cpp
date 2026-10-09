@@ -1,4 +1,5 @@
 #include "sdl.h"
+#include "Logging/logging.h"
 
 #include <SDL3/SDL.h>
 #include <iostream>
@@ -12,6 +13,7 @@ SDL::SDL()
 	{
 		SDL_Log("(SDL_Init) %s\n", SDL_GetError());
 	}
+	logging::log("** Init SDL **", logging::Severity::DEBUG);
 
 	//TODO : SteamAPI_InitEx()
 }
@@ -19,6 +21,7 @@ SDL::SDL()
 SDL::~SDL()
 {
 	SDL_Quit();
+	logging::log("** Quit SDL **", logging::Severity::DEBUG);
 }
 
 }

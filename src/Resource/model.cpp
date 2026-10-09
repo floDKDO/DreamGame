@@ -1,5 +1,5 @@
 #include "model.h"
-#include "gl_resource_manager.h"
+#include "resource_manager.h"
 
 #include <iostream>
 

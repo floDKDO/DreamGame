@@ -1,4 +1,5 @@
 #include "font.h"
+#include "Logging/logging.h"
 
 #include <iostream>
 
@@ -11,6 +12,12 @@ Font::Font(std::string_view file, float ptsize) //TTF_OpenFont
 	{
 		SDL_Log("(TTF_OpenFont) %s\n", SDL_GetError());
 	}
+}
+
+Font::Font(TTF_Font* copied_font, float ptsize)
+{
+	font_ = copied_font;
+	set_size(ptsize);
 }
 
 Font::Font(Font&& font)
@@ -28,6 +35,10 @@ Font& Font::operator=(Font&& font)
 
 	if(font_ != nullptr)
 	{
+		if(!TTF_WasInit())
+		{
+			logging::log("TTF is not initalized before a call to TTF_CloseFont()!", logging::Severity::CRITICAL);
+		}
 		TTF_CloseFont(font_);
 	}
 
@@ -40,6 +51,10 @@ Font::~Font() //TTF_CloseFont
 {
 	if(font_ != nullptr)
 	{
+		if(!TTF_WasInit())
+		{
+			logging::log("TTF is not initalized before a call to TTF_CloseFont()!\n", logging::Severity::CRITICAL);
+		}
 		TTF_CloseFont(font_);
 	}
 }
@@ -47,14 +62,6 @@ Font::~Font() //TTF_CloseFont
 TTF_Font* Font::fetch() const
 {
 	return font_;
-}
-
-void Font::size_UTF8(std::string_view text, int* w, int* h) const
-{
-	if(!TTF_GetStringSize(font_, text.data(), text.size(), w, h))
-	{
-		SDL_Log("(TTF_GetStringSize) %s\n", SDL_GetError());
-	}
 }
 
 void Font::set_style(int style) const
@@ -68,6 +75,16 @@ void Font::set_size(float size) const
 	{
 		SDL_Log("(TTF_SetFontSize) %s\n", SDL_GetError());
 	}
+}
+
+TTF_Font* Font::copy() const
+{
+	TTF_Font* font = nullptr;
+	if((font = TTF_CopyFont(font_)) == nullptr)
+	{
+		SDL_Log("(TTF_CopyFont) %s\n", SDL_GetError());
+	}
+	return font;
 }
 
 }

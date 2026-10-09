@@ -10,6 +10,7 @@ class Font
 {
 	public:
 		Font(std::string_view file, float ptsize); //TTF_OpenFont
+		Font(TTF_Font* copied_font, float ptsize);
 		Font(const Font& font) = delete;
 		Font(Font&& font);
 		Font& operator=(const Font& font) = delete;
@@ -17,9 +18,9 @@ class Font
 		~Font(); //TTF_CloseFont
 
 		TTF_Font* fetch() const;
-		void size_UTF8(std::string_view text, int* w, int* h) const;
 		void set_style(int style) const;
 		void set_size(float size) const;
+		TTF_Font* copy() const;
 
 	private:
 		TTF_Font* font_;

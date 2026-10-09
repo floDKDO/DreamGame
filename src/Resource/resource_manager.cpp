@@ -1,4 +1,4 @@
-#include "gl_resource_manager.h"
+#include "resource_manager.h"
 //#include "Logging/logging.h"
 #include "Resource/model.h"
 
@@ -14,6 +14,7 @@ std::unordered_map<Mesh::Id, Mesh> meshes_;
 std::unordered_map<Mesh::Id, Mesh> aabb_meshes_;
 std::unordered_map<std::string, ShaderProgram> shader_programs_;
 std::unordered_map<std::size_t, Model> models_;
+std::unordered_map<Text::FontId, sdl::Font> fonts_;
 
 //Conteneur de texture, texture id 
 // => cas texture dont l'image possède un path : la clef est le path (= chemin de la texture)
@@ -22,6 +23,16 @@ std::unordered_map<std::string, Texture> textures_;
 
 //Cette méthode est placée là (donc pas dans le header) car elle est utilisée uniquement dans ce fichier .cpp
 ShaderProgram* get_shader(std::string_view name);
+
+void destroy_all_resources()
+{
+	meshes_.clear();
+	aabb_meshes_.clear();
+	shader_programs_.clear();
+	models_.clear();
+	fonts_.clear();
+	textures_.clear();
+}
 
 std::string add_texture(Texture texture)
 {
@@ -191,6 +202,39 @@ ShaderProgram* get_currently_bound_shader()
 		}
 	}
 	return nullptr;
+}
+
+Text::FontId add_font(std::string_view font_path, float font_size)
+{
+	for(auto& [font_id, font] : fonts_)
+	{
+		if(font_path == font_id.font_path_)
+		{
+			if(font_size != font_id.font_size_)
+			{
+				fonts_.insert({Text::FontId{std::string(font_path), font_size}, sdl::Font(font.copy(), font_size)});
+			}
+			return Text::FontId{font_id.font_path_, font_size};
+		}
+	}
+	Text::FontId font_id = {std::string(font_path), font_size};
+	fonts_.insert({font_id, sdl::Font(font_path, font_size)});
+	return font_id;
+}
+
+//TODO : peut éventuellement retourner une police par défaut
+sdl::Font* get_font(std::string_view font_path, float font_size)
+{
+	std::string font_path_str = std::string(font_path);
+	Text::FontId font_id = Text::FontId{font_path_str, font_size};
+	if(fonts_.count(font_id))
+	{
+		return &fonts_.at(font_id);
+	}
+	else
+	{
+		return nullptr;
+	}
 }
 
 }

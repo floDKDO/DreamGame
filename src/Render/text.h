@@ -10,7 +10,24 @@
 class Text
 {
 	public:
-	explicit Text(std::string_view text, SDL_Color color = {255, 255, 255, 255}, glm::vec2 position = glm::vec2(0.0f), float font_size = 24.0f, float angle = 0.0f);
+		enum class Quality
+		{
+			SOLID,
+			LCD
+		};
+
+		struct FontId
+		{
+			std::string font_path_;
+			float font_size_;
+
+			bool operator==(const FontId& other) const
+			{
+				return (font_path_ == other.font_path_ && font_size_ == other.font_size_);
+			}
+		};
+
+		explicit Text(std::string_view text, float font_size = 24.0f, SDL_Color color = {255, 255, 255, 255}, Quality quality = Quality::SOLID);
 
 		void set_position(glm::vec2 position);
 		void set_font_size(float font_size);
@@ -20,12 +37,23 @@ class Text
 
 	private:
 		glm::mat4 get_model_matrix() const;
+		void init_surface_from_text();
 
 		SDL_Color color_;
-		sdl::Font font_;
+		Quality quality_;
+		FontId font_id_;
 		sdl::Surface surface_;
 		std::string text_;
 		glm::vec2 position_;
-		float font_size_, angle_;
+		float angle_;
 		Mesh::Id mesh_id_;
+};
+
+template <>
+struct std::hash<Text::FontId>
+{
+	std::size_t operator()(const Text::FontId& font_id) const
+	{
+		return (std::hash<std::string>()(font_id.font_path_) ^ (std::hash<float>()(font_id.font_size_) << 1));
+	}
 };

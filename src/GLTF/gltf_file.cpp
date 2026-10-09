@@ -4,7 +4,7 @@
 #include "Collision/aabb.h"
 #include "Common/utils.h"
 #include "Logging/logging.h"
-#include "Resource/gl_resource_manager.h"
+#include "Resource/resource_manager.h"
 
 #include <iostream>
 

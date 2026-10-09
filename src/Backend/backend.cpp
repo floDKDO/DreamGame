@@ -1,6 +1,6 @@
 #include "backend.h"
 #include "Common/utils.h"
-#include "Resource/gl_resource_manager.h"
+#include "Resource/resource_manager.h"
 #include "Logging/logging.h"
 
 #include <imgui/imgui.h>
@@ -14,8 +14,6 @@
 Backend::Backend()
 	: sdl_(), sdl_ttf_(), window_(), glew_(glewInit())
 {
-	logging::create(logging::Severity::CRITICAL);
-
 	init_shaders();
 
 	int w, h;
@@ -42,6 +40,7 @@ Backend::~Backend()
 {
 	destroy_openal();
 	//destroy_imgui();
+	resource::destroy_all_resources();
 }
 
 void Backend::handle_events(const SDL_Event& e)
