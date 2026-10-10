@@ -27,12 +27,16 @@ class Text
 			}
 		};
 
-		explicit Text(std::string_view text, float font_size = 24.0f, SDL_Color color = {255, 255, 255, 255}, Quality quality = Quality::SOLID);
+		explicit Text(std::string_view text);
+		Text(std::string_view text, int wrap_length);
 
+		void set_wrapped(int wrap_length);
 		void set_position(glm::vec2 position);
 		void set_font_size(float font_size);
 		void set_angle(float angle);
 		void edit_text(std::string_view new_text);
+		void clear();
+		void add_char(char c);
 		void render() const;
 
 	private:
@@ -40,6 +44,10 @@ class Text
 		void init_surface_from_text();
 
 		SDL_Color color_;
+
+		bool is_wrapped_;
+		int wrap_length_;
+
 		Quality quality_;
 		FontId font_id_;
 		sdl::Surface surface_;

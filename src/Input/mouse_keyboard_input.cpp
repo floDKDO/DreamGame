@@ -36,6 +36,10 @@ void MouseKeyboard::handle_events(const SDL_Event& e)
 			{
 				set_key_direction_active(Direction::RIGHT);
 			}
+			if(e.key.key == SDLK_SPACE)
+			{
+				input_info_.space_pressed_ = true;
+			}
 			//}
 			break;
 
@@ -55,6 +59,24 @@ void MouseKeyboard::handle_events(const SDL_Event& e)
 			if(e.key.key == SDLK_RIGHT || e.key.scancode == SDL_SCANCODE_D)
 			{
 				set_key_direction_inactive(Direction::RIGHT);
+			}
+			if(e.key.key == SDLK_SPACE)
+			{
+				input_info_.space_pressed_ = false;
+			}
+			break;
+
+		case SDL_EVENT_MOUSE_BUTTON_DOWN:
+			if(e.button.button == SDL_BUTTON_LEFT)
+			{
+				input_info_.left_click_pressed_ = true;
+			}
+			break;
+
+		case SDL_EVENT_MOUSE_BUTTON_UP:
+			if(e.button.button == SDL_BUTTON_LEFT)
+			{
+				input_info_.left_click_pressed_ = false;
 			}
 			break;
 

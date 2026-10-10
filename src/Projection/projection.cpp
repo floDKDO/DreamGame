@@ -1,18 +1,19 @@
 #include "projection.h"
+#include "Common/utils.h"
 
 #include <glm/gtc/matrix_transform.hpp>
 
 namespace projection
 {
 
-glm::mat4 get_perspective_matrix(float aspect)
+glm::mat4 get_perspective_matrix()
 {
-	return glm::perspective(glm::radians(45.0f), aspect, 0.1f, 100.0f);
+	return glm::perspective(glm::radians(45.0f), float(utils::get_viewport_width()) / float(utils::get_viewport_height()), 0.1f, 100.0f);
 }
 
-glm::mat4 get_orthographic_matrix(float window_width, float window_height)
+glm::mat4 get_orthographic_matrix()
 {
-	return glm::ortho(0.0f, window_width, window_height, 0.0f, -1.0f, 1.0f);
+	return glm::ortho(0.0f, float(utils::get_viewport_width()), float(utils::get_viewport_height()), 0.0f, -1.0f, 1.0f);
 }
 
 }

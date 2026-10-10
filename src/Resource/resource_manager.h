@@ -3,7 +3,7 @@
 #include "Resource/shader_program.h"
 #include "Render/mesh.h"
 #include "Render/texture.h"
-#include "Render/text.h"
+#include "UI/text.h"
 #include "Common/transform.h"
 #include "RAII_SDL3/font.h"
 

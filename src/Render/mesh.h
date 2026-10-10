@@ -33,7 +33,10 @@ class Mesh
 		~Mesh();
 
 		void render() const;
+		void clear_text_texture() const;
 		void edit_text_texture(int new_width, int new_height, void* new_pixels) const;
+		int get_initial_texture_width() const;
+		int get_initial_texture_height() const;
 
 	private:
 		void load_vertex_attribute(GLuint vbo_binding_index, attribute::Name attribute_name);

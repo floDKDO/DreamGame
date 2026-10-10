@@ -3,8 +3,8 @@
 
 #include <glm/gtc/type_ptr.hpp>
 
-Image::Image(std::string_view path, glm::vec2 position, glm::vec2 size, float angle)
-	: position_(position), size_(size), angle_(angle)
+Image::Image(std::string_view path)
+	: position_(glm::vec2(0.0f)), angle_(0.0f)
 {
 	std::string path_str = std::string(path);
 
@@ -42,6 +42,26 @@ Image::Image(std::string_view path, glm::vec2 position, glm::vec2 size, float an
 	std::string texture_key = resource::add_texture(texture);
 
 	mesh_id_ = resource::add_mesh(Mesh::Id{path_str, -1}, Mesh::Info{ebo_values, vertices, {texture_key}, GL_TRIANGLES});
+
+	const Mesh* mesh = resource::get_mesh(mesh_id_);
+	initial_texture_width_ = mesh->get_initial_texture_width();
+	initial_texture_height_ = mesh->get_initial_texture_height();
+	size_ = glm::vec2(initial_texture_width_, initial_texture_height_);
+}
+
+glm::vec2 Image::get_position() const
+{
+	return position_;
+}
+
+float Image::get_width() const
+{
+	return size_.x;
+}
+
+float Image::get_height() const
+{
+	return size_.y;
 }
 
 void Image::set_position(glm::vec2 position)

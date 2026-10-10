@@ -15,16 +15,13 @@ Game::Game()
 	player_(input_manager_),
 	camera_(input_manager_, player_.get_model()->get_position()),
 	running_(true), test_map_("resources/maps/corridor.gltf"),
-	gizmo_(nullptr), test_image_("resources/images/nakazato.jpg", glm::vec2(500.0f, 50.0f), glm::vec2(200.0f), 90.0f),
-	test_image_2_("resources/images/yuri_tea.png", glm::vec2(800.0f, 300.0f), glm::vec2(200.0f), 0.0f),
-	test_text_("C'est un texte de test !", 24, {0, 255, 255, 255}),
-	test_text_2_("INITIAL D !", 24, {255, 255, 255, 255})
+	gizmo_(nullptr), test_image_("resources/images/nakazato.jpg"),
+	test_image_2_("resources/images/yuri_tea.png"),
+	textbox_(input_manager_)
 {
 	std::size_t gizmo_model_id = resource::add_model("resources/models/axis_gizmo.glb");
 	gizmo_ = resource::get_model(gizmo_model_id);
-
-	test_text_2_.set_font_size(86.0f);
-	test_text_2_.set_position(glm::vec2(300.0f, 200.0f));
+	textbox_.set_dialogues({{"Yuri", "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."}, {"Unknown", "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."}});
 }
 
 void Game::run()
@@ -112,23 +109,17 @@ void Game::render()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glm::ivec2 window_size = backend_.get_window_size();
 
-	/*if(ShaderProgram* shader_program_2d = resource::bind_shader("2d"); shader_program_2d != nullptr)
+	if(ShaderProgram* shader_program_2d = resource::bind_shader("2d"); shader_program_2d != nullptr)
 	{
-		shader_program_2d->set_uniform_matrix_4fv("projection_matrix_", glm::value_ptr(projection::get_orthographic_matrix(float(window_size.x), float(window_size.y))));
+		shader_program_2d->set_uniform_matrix_4fv("projection_matrix_", glm::value_ptr(projection::get_orthographic_matrix()));
 	}
-	test_image_.render();
+	textbox_.render();
+	/*test_image_.render();
 	test_image_2_.render();*/
-
-	if(ShaderProgram* shader_program_text = resource::bind_shader("Text"); shader_program_text != nullptr)
-	{
-		shader_program_text->set_uniform_matrix_4fv("projection_matrix_", glm::value_ptr(projection::get_orthographic_matrix(float(window_size.x), float(window_size.y))));
-	}
-	test_text_.render();
-	test_text_2_.render();
 
 	if(ShaderProgram* shader_program_phong = resource::bind_shader("Phong"); shader_program_phong != nullptr)
 	{
-		shader_program_phong->set_uniform_matrix_4fv("projection_matrix_", glm::value_ptr(projection::get_perspective_matrix(float(window_size.x) / float(window_size.y))));
+		shader_program_phong->set_uniform_matrix_4fv("projection_matrix_", glm::value_ptr(projection::get_perspective_matrix()));
 	}
 	for(auto& [model_id, model] : resource::get_models())
 	{

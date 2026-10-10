@@ -103,6 +103,11 @@ void ShaderProgram::link() const
 	}
 }
 
+std::string ShaderProgram::get_shader_program_name() const
+{
+	return shader_program_name_;
+}
+
 GLuint ShaderProgram::get_shader_program_id() const
 {
 	return shader_program_id_;

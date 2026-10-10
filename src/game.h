@@ -7,7 +7,7 @@
 #include "Player/player.h"
 #include "Input/input_manager.h"
 #include "Render/image.h"
-#include "Render/text.h"
+#include "UI/textbox.h"
 
 class Game
 {
@@ -32,6 +32,5 @@ class Game
 		Model* gizmo_;
 		Image test_image_;
 		Image test_image_2_;
-		Text test_text_;
-		Text test_text_2_;
+		Textbox textbox_;
 };

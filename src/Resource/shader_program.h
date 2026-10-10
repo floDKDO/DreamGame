@@ -18,6 +18,7 @@ class ShaderProgram
 		ShaderProgram& operator=(ShaderProgram&& shader_program);
 		~ShaderProgram();
 
+		std::string get_shader_program_name() const;
 		GLuint get_shader_program_id() const;
 		void use() const;
 

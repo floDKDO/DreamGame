@@ -20,6 +20,7 @@ using ImageData = std::vector<unsigned char>; //std::vector<unsigned char> = don
 struct ImageTexture
 {
 	std::variant<ImagePath, ImageData> image_value_;
+	int initial_width_, initial_height_;
 	int channels_ = 4;
 };
 

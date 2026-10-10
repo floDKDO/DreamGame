@@ -119,17 +119,20 @@ void Mesh::init_texture(Texture* texture, int width, int height) const
 		ImageTexture& image_texture = std::get<ImageTexture>(texture->texture_);
 		internal_format = gltf::get_sized_enum_from_channels(image_texture.channels_);
 	}
-	
+	//std::cout << "STORAGE\n";
 	GLsizei number_of_texture_levels = texture->should_have_mipmaps_ ? 1 + int(std::floor(std::log2(std::max(width, height)))) : 1;
 	glTextureStorage2D(texture->info_.id_, number_of_texture_levels, internal_format, width, height); //ici (cas .png), il faut mettre GL_RGBA8 et non GL_RGBA car il faut mettre un "Sized Internal Format" (voir https://registry.khronos.org/OpenGL-Refpages/gl4/html/glTexStorage2D.xhtml)
+	//std::cout << "STORAGE END\n";
 }
 
 void Mesh::set_texture_parameters(const Texture* texture) const
 {
+	//std::cout << "PARAMETERS\n";
 	glTextureParameteri(texture->info_.id_, GL_TEXTURE_WRAP_S, texture->info_.wrap_s_);
 	glTextureParameteri(texture->info_.id_, GL_TEXTURE_WRAP_T, texture->info_.wrap_t_);
 	glTextureParameteri(texture->info_.id_, GL_TEXTURE_MAG_FILTER, texture->info_.mag_filter_);
 	glTextureParameteri(texture->info_.id_, GL_TEXTURE_MIN_FILTER, texture->info_.min_filter_);
+	//std::cout << "PARAMETERS END\n";
 }
 
 void Mesh::set_texture_content(Texture* texture, int width, int height, void* pixels) const
@@ -141,9 +144,11 @@ void Mesh::set_texture_content(Texture* texture, int width, int height, void* pi
 		format = gltf::get_base_enum_from_channels(image_texture.channels_);
 	}
 
+	//std::cout << "CONTENT\n";
 	GLint texture_level = 0; //on ne spécifie que la texture de niveau 0 et on génère automatiquement les mipmaps avec glGenerateTextureMipmap()
 	glTextureSubImage2D(texture->info_.id_, texture_level, 0, 0, width, height, format, GL_UNSIGNED_BYTE, pixels); //ici (cas .png), il faut mettre GL_RGBA et non GL_RGBA8, ce dernier n'étant pas supporté pour ce paramètre
 	glGenerateTextureMipmap(texture->info_.id_);
+	//std::cout << "CONTENT END\n";
 }
 
 void Mesh::create_textures()
@@ -155,6 +160,20 @@ void Mesh::create_textures()
 		{
 			logging::log("The texture is nullptr!", logging::Severity::WARNING);
 			continue;
+		}
+		else if(std::holds_alternative<TextTexture>(texture->texture_))
+		{
+			TextTexture& text_texture = std::get<TextTexture>(texture->texture_); 
+			if(text_texture.width_ == 0 && text_texture.height_ == 0 && text_texture.pixels_ == nullptr)
+			{
+				logging::log("The text texture is empty!", logging::Severity::DEBUG);
+
+				//TODO : à encapsuler dans une fonction
+				glCreateTextures(GL_TEXTURE_2D, 1, &texture->info_.id_); 
+				glBindTextureUnit(texture->info_.texture_unit_, texture->info_.id_);
+
+				continue;
+			}
 		}
 		
 		int width, height;
@@ -184,6 +203,8 @@ void Mesh::create_textures()
 				}
 			}
 			image_texture.channels_ = channels;
+			image_texture.initial_width_ = width;
+			image_texture.initial_height_ = height;
 		}
 		else if(std::holds_alternative<TextTexture>(texture->texture_))
 		{
@@ -216,14 +237,25 @@ void Mesh::load_mesh()
 	create_textures();
 }
 
+void Mesh::clear_text_texture() const
+{
+	Texture* texture = resource::get_texture(mesh_info_.texture_keys_[0]); //le mesh d'un Text ne contient qu'une seule texture
+	TextTexture& texture_text = std::get<TextTexture>(texture->texture_);
+	texture_text.width_ = 0;
+	texture_text.height_ = 0;
+	texture_text.pixels_ = nullptr;
+}
+
 void Mesh::edit_text_texture(int new_width, int new_height, void* new_pixels) const
 {
 	Texture* texture = resource::get_texture(mesh_info_.texture_keys_[0]); //le mesh d'un Text ne contient qu'une seule texture
 	TextTexture& texture_text = std::get<TextTexture>(texture->texture_);
 
+	//std::cout << "TEXTURE LEVEL PARAM\n";
 	int old_width, old_height;
 	glGetTextureLevelParameteriv(texture->info_.id_, 0, GL_TEXTURE_WIDTH, &old_width);
 	glGetTextureLevelParameteriv(texture->info_.id_, 0, GL_TEXTURE_HEIGHT, &old_height);
+	//std::cout << "TEXTURE LEVEL PARAM END\n";
 
 	if(new_width != old_width || new_height != old_height)
 	{
@@ -238,6 +270,20 @@ void Mesh::edit_text_texture(int new_width, int new_height, void* new_pixels) co
 	set_texture_content(texture, new_width, new_height, new_pixels);
 }
 
+int Mesh::get_initial_texture_width() const
+{
+	Texture* texture = resource::get_texture(mesh_info_.texture_keys_[0]); //le mesh d'une Image ne contient qu'une seule texture
+	ImageTexture& texture_image = std::get<ImageTexture>(texture->texture_);
+	return texture_image.initial_width_;
+}
+
+int Mesh::get_initial_texture_height() const
+{
+	Texture* texture = resource::get_texture(mesh_info_.texture_keys_[0]); //le mesh d'une Image ne contient qu'une seule texture
+	ImageTexture& texture_image = std::get<ImageTexture>(texture->texture_);
+	return texture_image.initial_height_;
+}
+
 void Mesh::render() const
 {
 	if(ShaderProgram* shader_program = resource::get_currently_bound_shader(); shader_program != nullptr)
@@ -249,7 +295,10 @@ void Mesh::render() const
 			{
 				logging::log("Only one texture by mesh for now!", logging::Severity::WARNING);
 			}
+			//std::cout << "BIND\n";
 			glBindTextureUnit(texture->info_.texture_unit_, texture->info_.id_);
+			//std::cout << "END BIND\n";
+			//std::cout << "SAMPLER: " << shader_program->get_shader_program_name() << ", num: " << mesh_info_.texture_keys_.size() << std::endl;
 			shader_program->set_uniform_1i("texture_sampler0_", texture->info_.texture_unit_);
 		}
 	}

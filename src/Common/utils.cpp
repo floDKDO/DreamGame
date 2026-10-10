@@ -118,4 +118,18 @@ std::string base64_decode(const void* data, const std::size_t len)
 	return str;
 }
 
+int get_viewport_width()
+{
+	GLint viewport_data[4];
+	glGetIntegerv(GL_VIEWPORT, viewport_data);
+	return viewport_data[2];
+}
+
+int get_viewport_height()
+{
+	GLint viewport_data[4];
+	glGetIntegerv(GL_VIEWPORT, viewport_data);
+	return viewport_data[3];
+}
+
 }

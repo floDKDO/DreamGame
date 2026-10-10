@@ -19,41 +19,53 @@ void Surface::load_png(std::string_view file)
 void Surface::render_text_solid(Font& font, std::string_view text, SDL_Color fg)
 {
 	clear();
-	if((surface_ = TTF_RenderText_Solid(font.fetch(), text.data(), text.size(), fg)) == nullptr)
+	if(!text.empty())
 	{
-		SDL_Log("(TTF_RenderText_Solid) %s\n", SDL_GetError());
+		if((surface_ = TTF_RenderText_Solid(font.fetch(), text.data(), text.size(), fg)) == nullptr)
+		{
+			SDL_Log("(TTF_RenderText_Solid) %s\n", SDL_GetError());
+		}
+		convert_to_rgba8();
 	}
-	convert_to_rgba8();
 }
 
 void Surface::render_text_solid_wrapped(Font& font, std::string_view text, SDL_Color fg, int wrap_width)
 {
 	clear();
-	if((surface_ = TTF_RenderText_Solid_Wrapped(font.fetch(), text.data(), text.size(), fg, wrap_width)) == nullptr)
+	if(!text.empty())
 	{
-		SDL_Log("(TTF_RenderText_Solid_Wrapped) %s\n", SDL_GetError());
+		if((surface_ = TTF_RenderText_Solid_Wrapped(font.fetch(), text.data(), text.size(), fg, wrap_width)) == nullptr)
+		{
+			SDL_Log("(TTF_RenderText_Solid_Wrapped) %s\n", SDL_GetError());
+		}
+		convert_to_rgba8();
 	}
-	convert_to_rgba8();
 }
 
 void Surface::render_text_lcd(Font& font, std::string_view text, SDL_Color fg)
 {
 	clear();
-	if((surface_ = TTF_RenderText_LCD(font.fetch(), text.data(), text.size(), fg, {0, 0, 0, 255})) == nullptr)
+	if(!text.empty())
 	{
-		SDL_Log("(TTF_RenderText_LCD) %s\n", SDL_GetError());
+		if((surface_ = TTF_RenderText_LCD(font.fetch(), text.data(), text.size(), fg, {0, 0, 0, 255})) == nullptr)
+		{
+			SDL_Log("(TTF_RenderText_LCD) %s\n", SDL_GetError());
+		}
+		convert_to_rgba8();
 	}
-	convert_to_rgba8();
 }
 
 void Surface::render_text_lcd_wrapped(Font& font, std::string_view text, SDL_Color fg, int wrap_width)
 {
 	clear();
-	if((surface_ = TTF_RenderText_LCD_Wrapped(font.fetch(), text.data(), text.size(), fg, {0, 0, 0, 255}, wrap_width)) == nullptr)
+	if(!text.empty())
 	{
-		SDL_Log("(TTF_RenderText_LCD_Wrapped) %s\n", SDL_GetError());
+		if((surface_ = TTF_RenderText_LCD_Wrapped(font.fetch(), text.data(), text.size(), fg, {0, 0, 0, 255}, wrap_width)) == nullptr)
+		{
+			SDL_Log("(TTF_RenderText_LCD_Wrapped) %s\n", SDL_GetError());
+		}
+		convert_to_rgba8();
 	}
-	convert_to_rgba8();
 }
 
 Surface::Surface(Surface&& surface)
@@ -94,6 +106,7 @@ void Surface::clear()
 	if(surface_ != nullptr)
 	{
 		SDL_DestroySurface(surface_);
+		surface_ = nullptr;
 	}
 }
 

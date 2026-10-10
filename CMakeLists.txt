@@ -20,7 +20,7 @@ set(STB_DIR "${CMAKE_SOURCE_DIR}/third_party/stb")
 set(IMGUI_DIR "${CMAKE_SOURCE_DIR}/third_party/imgui") 
 set(TINYGLTF_DIR "${CMAKE_SOURCE_DIR}/third_party/tinygltf") 
 
-file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS 
+file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS
 	src/*.cpp src/*.h 
 	${STB_DIR}/*.cpp ${STB_DIR}/*.h 
 	${IMGUI_DIR}/*.cpp ${IMGUI_DIR}/*.h 
