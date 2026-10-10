@@ -39,18 +39,21 @@ void Node::render() const
 		shader_program->set_uniform_matrix_4fv("model_matrix_", glm::value_ptr(compute_model()));
 	}
 
-	if(const Mesh* mesh = resource::get_mesh(node_info_.mesh_id_); mesh != nullptr)
+	if(!node_info_.is_empty_node_)
 	{
-		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-		mesh->render();
-	}
-
-	if(node_info_.aabb_.second.has_value())
-	{
-		if(const Mesh* aabb_mesh = resource::get_aabb_mesh(node_info_.aabb_.first); aabb_mesh != nullptr)
+		if(const Mesh* mesh = resource::get_mesh(node_info_.mesh_id_); mesh != nullptr)
 		{
-			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); //affichage wireframe pour AABB
-			aabb_mesh->render();
+			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+			mesh->render();
+		}
+
+		if(node_info_.aabb_.second.has_value())
+		{
+			if(const Mesh* aabb_mesh = resource::get_aabb_mesh(node_info_.aabb_.first); aabb_mesh != nullptr)
+			{
+				glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); //affichage wireframe pour AABB
+				aabb_mesh->render();
+			}
 		}
 	}
 

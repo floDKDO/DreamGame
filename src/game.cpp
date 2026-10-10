@@ -17,10 +17,12 @@ Game::Game()
 	running_(true), test_map_("resources/maps/corridor.gltf"),
 	gizmo_(nullptr), test_image_("resources/images/nakazato.jpg"),
 	test_image_2_("resources/images/yuri_tea.png"),
+	test_text_("C'est le message !"),
 	textbox_(input_manager_)
 {
 	std::size_t gizmo_model_id = resource::add_model("resources/models/axis_gizmo.glb");
 	gizmo_ = resource::get_model(gizmo_model_id);
+	test_text_.set_position(glm::vec2(200.0f, 200.0f));
 	textbox_.set_dialogues({{"Yuri", "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."}, {"Unknown", "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."}});
 }
 
@@ -114,6 +116,7 @@ void Game::render()
 		shader_program_2d->set_uniform_matrix_4fv("projection_matrix_", glm::value_ptr(projection::get_orthographic_matrix()));
 	}
 	textbox_.render();
+	test_text_.render();
 	/*test_image_.render();
 	test_image_2_.render();*/
 
@@ -155,4 +158,20 @@ void Game::update(float delta_time)
 	camera_.update(delta_time);
 	player_.update(delta_time, camera_.get_camera_forward(), camera_.get_camera_left());
 	input_manager_.update(delta_time);
+
+	static Uint64 t = 0;
+	Uint64 now = SDL_GetTicks();
+	static std::string s = "";
+	if(now > t + 500)
+	{
+		s += 'a';
+		test_text_.edit_text(s);
+		t = now;
+
+		if(s.size() > 10)
+		{
+			//test_text_.clear();
+			s = "";
+		}
+	}
 }

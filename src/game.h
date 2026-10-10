@@ -32,5 +32,6 @@ class Game
 		Model* gizmo_;
 		Image test_image_;
 		Image test_image_2_;
+		Text test_text_;
 		Textbox textbox_;
 };

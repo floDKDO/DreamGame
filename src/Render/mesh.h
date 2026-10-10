@@ -33,7 +33,6 @@ class Mesh
 		~Mesh();
 
 		void render() const;
-		void clear_text_texture() const;
 		void edit_text_texture(int new_width, int new_height, void* new_pixels) const;
 		int get_initial_texture_width() const;
 		int get_initial_texture_height() const;
@@ -44,7 +43,9 @@ class Mesh
 		void create_vbo();
 		void create_vao();
 		void destroy_all_buffers();
-		void init_texture(Texture* texture, int width, int height) const;
+		void init_texture(Texture* texture) const;
+		void create_and_bind_texture(Texture* texture) const;
+		void set_texture_storage(Texture* texture, int width, int height) const;
 		void set_texture_parameters(const Texture* texture) const;
 		void set_texture_content(Texture* texture, int width, int height, void* pixels) const;
 		void create_textures();

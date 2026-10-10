@@ -27,15 +27,13 @@ class Text
 			}
 		};
 
-		explicit Text(std::string_view text);
-		Text(std::string_view text, int wrap_length);
+		explicit Text(std::string_view text, int wrap_length = 0);
 
-		void set_wrapped(int wrap_length);
 		void set_position(glm::vec2 position);
 		void set_font_size(float font_size);
 		void set_angle(float angle);
 		void edit_text(std::string_view new_text);
-		void clear();
+		//void clear();
 		void add_char(char c);
 		void render() const;
 

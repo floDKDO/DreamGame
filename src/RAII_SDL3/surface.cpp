@@ -81,11 +81,7 @@ Surface& Surface::operator=(Surface&& surface)
 		return *this;
 	}
 
-	if(surface_ != nullptr)
-	{
-		SDL_DestroySurface(surface_);
-	}
-
+	clear();
 	surface_ = surface.surface_;
 	surface.surface_ = nullptr;
 	return *this;

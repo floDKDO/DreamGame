@@ -55,4 +55,16 @@ Info InputManager::get_input_info() const
 	return input_info_;
 }
 
+bool InputManager::is_interacting() const
+{
+	if(gamepad_input_.cross_pressed_ || (mouse_keyboard_input_.space_pressed_ || mouse_keyboard_input_.left_click_pressed_))
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
 }

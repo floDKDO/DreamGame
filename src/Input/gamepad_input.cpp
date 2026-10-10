@@ -6,7 +6,7 @@ namespace input
 {
 
 Gamepad::Gamepad()
-	: gamepad_(), is_movement_from_joystick_(false)
+	: gamepad_(), is_movement_from_joystick_(false), cross_pressed_(false)
 {}
 
 void Gamepad::set_pad_direction_active(Direction direction)
@@ -64,6 +64,10 @@ void Gamepad::handle_events(const SDL_Event& e)
 			{
 				set_pad_direction_active(Direction::RIGHT);
 			}
+			if(e.gbutton.button == SDL_GAMEPAD_BUTTON_SOUTH)
+			{
+				cross_pressed_ = true;
+			}
 			break;
 
 		case SDL_EVENT_GAMEPAD_BUTTON_UP:
@@ -82,6 +86,10 @@ void Gamepad::handle_events(const SDL_Event& e)
 			if(e.gbutton.button == SDL_GAMEPAD_BUTTON_DPAD_RIGHT)
 			{
 				set_pad_direction_inactive(Direction::RIGHT);
+			}
+			if(e.gbutton.button == SDL_GAMEPAD_BUTTON_SOUTH)
+			{
+				cross_pressed_ = false;
 			}
 			break;
 

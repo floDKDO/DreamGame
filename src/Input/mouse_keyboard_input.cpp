@@ -9,7 +9,7 @@ namespace input
 const float MouseKeyboard::max_mouse_rel_value_ = 10.0f;
 
 MouseKeyboard::MouseKeyboard()
-	: mouse_motion_last_time_(0)
+	: mouse_motion_last_time_(0), space_pressed_(false), left_click_pressed_(false)
 {}
 
 void MouseKeyboard::handle_events(const SDL_Event& e)
@@ -38,7 +38,7 @@ void MouseKeyboard::handle_events(const SDL_Event& e)
 			}
 			if(e.key.key == SDLK_SPACE)
 			{
-				input_info_.space_pressed_ = true;
+				space_pressed_ = true;
 			}
 			//}
 			break;
@@ -62,21 +62,21 @@ void MouseKeyboard::handle_events(const SDL_Event& e)
 			}
 			if(e.key.key == SDLK_SPACE)
 			{
-				input_info_.space_pressed_ = false;
+				space_pressed_ = false;
 			}
 			break;
 
 		case SDL_EVENT_MOUSE_BUTTON_DOWN:
 			if(e.button.button == SDL_BUTTON_LEFT)
 			{
-				input_info_.left_click_pressed_ = true;
+				left_click_pressed_ = true;
 			}
 			break;
 
 		case SDL_EVENT_MOUSE_BUTTON_UP:
 			if(e.button.button == SDL_BUTTON_LEFT)
 			{
-				input_info_.left_click_pressed_ = false;
+				left_click_pressed_ = false;
 			}
 			break;
 

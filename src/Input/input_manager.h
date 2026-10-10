@@ -14,6 +14,7 @@ class InputManager
 		void handle_events(const SDL_Event& e);
 		void update(float delta_time);
 		Info get_input_info() const;
+		bool is_interacting() const;
 
 	private:
 		bool is_input_active(Info input_info) const;

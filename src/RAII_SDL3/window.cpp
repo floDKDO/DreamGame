@@ -13,7 +13,7 @@ Window::Window()
 
 	set_opengl_attributes();
 
-	if((window_ = SDL_CreateWindow("DreamGame, FPS: ", 1280, 720, SDL_WINDOW_RESIZABLE | /*SDL_WINDOW_MAXIMIZED |*/ SDL_WINDOW_OPENGL)) == nullptr)
+	if((window_ = SDL_CreateWindow("DreamGame, FPS: ", 1280, 720, /*SDL_WINDOW_RESIZABLE | SDL_WINDOW_MAXIMIZED |*/ SDL_WINDOW_OPENGL)) == nullptr)
 	{
 		SDL_Log("(SDL_CreateWindow) %s\n", SDL_GetError());
 	}
@@ -32,6 +32,7 @@ Window::~Window()
 			SDL_Log("(SDL_GL_DestroyContext) %s\n", SDL_GetError());
 		}
 		SDL_DestroyWindow(window_);
+		window_ = nullptr;
 	}
 }
 

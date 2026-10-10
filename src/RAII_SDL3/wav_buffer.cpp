@@ -18,6 +18,7 @@ WAVBuffer::WAVBuffer(std::string_view path)
 WAVBuffer::~WAVBuffer()
 {
 	SDL_free(audio_data_);
+	audio_data_ = nullptr;
 }
 
 const Uint8* WAVBuffer::get_audio_data() const

@@ -23,6 +23,8 @@ class Font
 		TTF_Font* copy() const;
 
 	private:
+		void close();
+
 		TTF_Font* font_;
 };
 

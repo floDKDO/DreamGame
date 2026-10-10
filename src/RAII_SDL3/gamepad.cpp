@@ -16,6 +16,7 @@ Gamepad::~Gamepad() //SDL_CloseGamepad
 	if(gamepad_ != nullptr)
 	{
 		SDL_CloseGamepad(gamepad_);
+		gamepad_ = nullptr;
 	}
 }
 

@@ -28,6 +28,7 @@ class Gamepad //le fichier se nomme gamepad_input pour ne pas entrer en collisio
 		sdl::Gamepad gamepad_;
 		bool is_movement_from_joystick_;
 		Info input_info_;
+		bool cross_pressed_;
 };
 
 }

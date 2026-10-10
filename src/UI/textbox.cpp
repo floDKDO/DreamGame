@@ -36,7 +36,6 @@ Textbox::Textbox(const input::InputManager& input_manager)
 
 void Textbox::set_dialogues(std::vector<std::pair<std::string, std::string>> dialogues)
 {
-	text_.clear();
 	text_.edit_text(dialogues[0].first + ": ");
 	for(const std::pair<std::string, std::string>& dialogue : dialogues)
 	{
@@ -59,18 +58,16 @@ void Textbox::render()
 	{
 		shader_program_2d->set_uniform_matrix_4fv("projection_matrix_", glm::value_ptr(projection::get_orthographic_matrix()));
 	}
-
-	if(end_dialogue_)
-	{
-		end_dialogue_indicator_.render();
-	}
 	if(!hide_textbox_)
 	{
+		if(end_dialogue_)
+		{
+			end_dialogue_indicator_.render();
+		}
 		textbox_.render();
 	}
 
 	//TODO : faire au propre et éventuellement le mettre dans une méthode update() ??
-	input::Info input_info = input_manager_.get_input_info();
 	static Uint64 t = 0;
 	static std::size_t i = 0;
 	static std::size_t dialogue_index = 0;
@@ -94,13 +91,14 @@ void Textbox::render()
 			else
 			{
 				end_dialogue_ = true;
-				if(input_info.space_pressed_ || input_info.left_click_pressed_)
+				if(input_manager_.is_interacting())
 				{
 					dialogue_index += 1;
 					i = 0;
 					if(dialogue_index < dialogues_.size())
 					{
-						text_.clear();
+						end_dialogue_ = false;
+						//text_.clear();
 						text_.edit_text(dialogues_[dialogue_index].first + ": ");
 					}
 				}

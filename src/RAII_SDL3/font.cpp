@@ -33,21 +33,23 @@ Font& Font::operator=(Font&& font)
 		return *this;
 	}
 
-	if(font_ != nullptr)
-	{
-		if(!TTF_WasInit())
-		{
-			logging::log("TTF is not initalized before a call to TTF_CloseFont()!", logging::Severity::CRITICAL);
-		}
-		TTF_CloseFont(font_);
-	}
-
+	close();
 	font_ = font.font_;
 	font.font_ = nullptr;
 	return *this;
 }
 
 Font::~Font() //TTF_CloseFont
+{
+	close();
+}
+
+TTF_Font* Font::fetch() const
+{
+	return font_;
+}
+
+void Font::close()
 {
 	if(font_ != nullptr)
 	{
@@ -56,12 +58,8 @@ Font::~Font() //TTF_CloseFont
 			logging::log("TTF is not initalized before a call to TTF_CloseFont()!\n", logging::Severity::CRITICAL);
 		}
 		TTF_CloseFont(font_);
+		font_ = nullptr;
 	}
-}
-
-TTF_Font* Font::fetch() const
-{
-	return font_;
 }
 
 void Font::set_style(int style) const

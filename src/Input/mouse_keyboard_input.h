@@ -27,6 +27,7 @@ class MouseKeyboard //le fichier se nomme mouse_keyboard_input pour garder la co
 		const static float max_mouse_rel_value_;
 		Info input_info_;
 		Uint64 mouse_motion_last_time_;
+		bool space_pressed_, left_click_pressed_;
 };
 
 }

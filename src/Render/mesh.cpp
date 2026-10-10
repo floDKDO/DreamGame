@@ -107,12 +107,20 @@ void Mesh::destroy_all_buffers()
 	vao_ = 0;
 }
 
-void Mesh::init_texture(Texture* texture, int width, int height) const
+void Mesh::init_texture(Texture* texture) const
+{
+	create_and_bind_texture(texture);
+	set_texture_parameters(texture);
+}
+
+void Mesh::create_and_bind_texture(Texture* texture) const
 {
 	glCreateTextures(GL_TEXTURE_2D, 1, &texture->info_.id_);
 	glBindTextureUnit(texture->info_.texture_unit_, texture->info_.id_);
-	set_texture_parameters(texture);
+}
 
+void Mesh::set_texture_storage(Texture* texture, int width, int height) const
+{
 	GLenum internal_format = GL_RGBA8;
 	if(std::holds_alternative<ImageTexture>(texture->texture_))
 	{
@@ -162,16 +170,11 @@ void Mesh::create_textures()
 			continue;
 		}
 		else if(std::holds_alternative<TextTexture>(texture->texture_))
-		{
-			TextTexture& text_texture = std::get<TextTexture>(texture->texture_); 
-			if(text_texture.width_ == 0 && text_texture.height_ == 0 && text_texture.pixels_ == nullptr)
+		{ 
+			if(TextTexture& text_texture = std::get<TextTexture>(texture->texture_); text_texture.width_ == 0 && text_texture.height_ == 0 && text_texture.pixels_ == nullptr)
 			{
 				logging::log("The text texture is empty!", logging::Severity::DEBUG);
-
-				//TODO : à encapsuler dans une fonction
-				glCreateTextures(GL_TEXTURE_2D, 1, &texture->info_.id_); 
-				glBindTextureUnit(texture->info_.texture_unit_, texture->info_.id_);
-
+				init_texture(texture);
 				continue;
 			}
 		}
@@ -219,7 +222,8 @@ void Mesh::create_textures()
 			height = 0;
 		}
 
-		init_texture(texture, width, height);
+		init_texture(texture);
+		set_texture_storage(texture, width, height);
 		set_texture_content(texture, width, height, pixels);
 
 		if(std::holds_alternative<ImageTexture>(texture->texture_))
@@ -235,15 +239,6 @@ void Mesh::load_mesh()
 	create_vbo();
 	create_vao();
 	create_textures();
-}
-
-void Mesh::clear_text_texture() const
-{
-	Texture* texture = resource::get_texture(mesh_info_.texture_keys_[0]); //le mesh d'un Text ne contient qu'une seule texture
-	TextTexture& texture_text = std::get<TextTexture>(texture->texture_);
-	texture_text.width_ = 0;
-	texture_text.height_ = 0;
-	texture_text.pixels_ = nullptr;
 }
 
 void Mesh::edit_text_texture(int new_width, int new_height, void* new_pixels) const
@@ -263,7 +258,8 @@ void Mesh::edit_text_texture(int new_width, int new_height, void* new_pixels) co
 		texture_text.height_ = new_height;
 
 		glDeleteTextures(1, &texture->info_.id_);
-		init_texture(texture, new_width, new_height);
+		init_texture(texture);
+		set_texture_storage(texture, new_width, new_height);
 	}
 
 	texture_text.pixels_ = new_pixels;
