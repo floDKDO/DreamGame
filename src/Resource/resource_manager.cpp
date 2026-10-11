@@ -1,6 +1,6 @@
 #include "resource_manager.h"
+#include "model.h"
 //#include "Logging/logging.h"
-#include "Resource/model.h"
 
 #include <string>
 #include <iostream>

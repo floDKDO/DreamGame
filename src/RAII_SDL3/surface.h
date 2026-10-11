@@ -1,9 +1,9 @@
 #pragma once
 
-#include <SDL3/SDL.h>
-#include <string_view>
-
 #include "font.h"
+
+#include <SDL3/SDL_surface.h>
+#include <string_view>
 
 namespace sdl
 {

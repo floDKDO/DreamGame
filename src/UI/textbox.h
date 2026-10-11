@@ -1,6 +1,6 @@
 #pragma once
 
-#include "UI/text.h"
+#include "text.h"
 #include "Render/image.h"
 #include "Input/input_manager.h"
 

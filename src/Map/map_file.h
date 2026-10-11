@@ -2,8 +2,8 @@
 
 #include "Resource/model.h"
 
-#include <string_view>
 #include <nlohmann/json.hpp>
+#include <string_view>
 
 using json = nlohmann::json;
 

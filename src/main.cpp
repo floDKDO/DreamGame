@@ -3,7 +3,7 @@
 
 int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
 {
-	logging::create(logging::Severity::DEBUG); //TODO : mettre dans game.init() ?
+	logging::create(logging::Severity::DEBUG);
 	Game game; //TODO : renommer en Engine ?
 	game.run();
 	return 0;

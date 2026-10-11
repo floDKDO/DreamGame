@@ -1,5 +1,6 @@
 #include "gamepad.h"
 
+#include <SDL3/SDL.h>
 #include <iostream>
 
 namespace sdl

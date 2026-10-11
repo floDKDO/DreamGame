@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Render/mesh.h"
+#include "mesh.h"
 
 #include <glm/mat4x4.hpp>
 #include <string_view>

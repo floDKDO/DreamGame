@@ -2,6 +2,7 @@
 #include "Logging/logging.h"
 
 #include <AL/al.h>
+#include <SDL3/SDL.h>
 #include <iostream>
 
 namespace sdl

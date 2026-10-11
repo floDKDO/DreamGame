@@ -1,13 +1,11 @@
 #include "game.h"
 #include "OpenAL/openal.h"
 #include "Resource/resource_manager.h"
-#include "Projection/projection.h"
 
 //#include <imgui/imgui.h>
 //#include <imgui/imgui_impl_sdl3.h>
 //#include <imgui/imgui_impl_opengl3.h>
 
-#include <glm/gtc/type_ptr.hpp>
 #include <iostream>
 
 Game::Game()

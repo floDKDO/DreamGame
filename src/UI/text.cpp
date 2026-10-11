@@ -2,7 +2,6 @@
 #include "Resource/resource_manager.h"
 
 #include <glm/gtc/type_ptr.hpp>
-#include <SDL3_ttf/SDL_ttf.h>
 
 Text::Text(std::string_view text, int wrap_length)
 	: color_({255, 255, 255, 255}), is_wrapped_(wrap_length == 0 ? false : true), wrap_length_(wrap_length), quality_(Quality::SOLID),

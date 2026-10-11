@@ -1,10 +1,6 @@
 #include "textbox.h"
-#include "Resource/shader_program.h"
 #include "Resource/resource_manager.h"
-#include "Projection/projection.h"
 #include "Common/utils.h"
-
-#include <glm/gtc/type_ptr.hpp>
 
 const int Textbox::textbox_x_delta_ = 30;
 const int Textbox::textbox_y_delta_ = 20;
