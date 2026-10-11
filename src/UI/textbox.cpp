@@ -72,19 +72,13 @@ void Textbox::set_members_to_end_condition()
 
 void Textbox::render()
 {
-	if(ShaderProgram* shader_program_text = resource::bind_shader("Text"); shader_program_text != nullptr)
-	{
-		shader_program_text->set_uniform_matrix_4fv("projection_matrix_", glm::value_ptr(projection::get_orthographic_matrix()));
-	}
+	resource::bind_shader("Text");
 	if(!all_dialogues_shown_)
 	{
 		text_.render();
 	}
 
-	if(ShaderProgram* shader_program_2d = resource::bind_shader("2d"); shader_program_2d != nullptr)
-	{
-		shader_program_2d->set_uniform_matrix_4fv("projection_matrix_", glm::value_ptr(projection::get_orthographic_matrix()));
-	}
+	resource::bind_shader("2d");
 	if(!all_dialogues_shown_)
 	{
 		if(current_dialogue_info_.dialogue_finished_)

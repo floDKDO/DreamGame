@@ -20,7 +20,7 @@ class ShaderProgram
 
 		std::string get_shader_program_name() const;
 		GLuint get_shader_program_id() const;
-		void use() const;
+		void use();
 
 		void insert_uniform(const GLchar* name);
 		void set_uniform_1f(const GLchar* name, GLfloat value);
@@ -32,6 +32,7 @@ class ShaderProgram
 	private:
 		void create_shader(GLenum shader_type, std::string_view shader_path);
 		void link() const;
+		void set_projection_matrix();
 
 		GLuint shader_program_id_;
 		std::string shader_program_name_;

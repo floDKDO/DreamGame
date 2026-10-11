@@ -106,18 +106,12 @@ void Game::render()
 	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	if(ShaderProgram* shader_program_2d = resource::bind_shader("2d"); shader_program_2d != nullptr)
-	{
-		shader_program_2d->set_uniform_matrix_4fv("projection_matrix_", glm::value_ptr(projection::get_orthographic_matrix()));
-	}
+	resource::bind_shader("2d");
 	textbox_.render();
 	/*test_image_.render();
 	test_image_2_.render();*/
 
-	if(ShaderProgram* shader_program_phong = resource::bind_shader("Phong"); shader_program_phong != nullptr)
-	{
-		shader_program_phong->set_uniform_matrix_4fv("projection_matrix_", glm::value_ptr(projection::get_perspective_matrix()));
-	}
+	resource::bind_shader("Phong");
 	for(auto& [model_id, model] : resource::get_models())
 	{
 		model.render();

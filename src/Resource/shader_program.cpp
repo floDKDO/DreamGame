@@ -1,7 +1,9 @@
 #include "shader_program.h"
 #include "Common/utils.h"
 #include "Logging/logging.h"
+#include "Projection/projection.h"
 
+#include <glm/gtc/type_ptr.hpp>
 #include <filesystem>
 #include <iostream>
 
@@ -103,6 +105,20 @@ void ShaderProgram::link() const
 	}
 }
 
+void ShaderProgram::set_projection_matrix()
+{
+	glm::mat4 projection_matrix(1.0f);
+	if(shader_program_name_ == "Phong")
+	{
+		projection_matrix = projection::get_perspective_matrix();
+	}
+	else if(shader_program_name_ == "Text" || shader_program_name_ == "2d") //TODO : ne pas oublier d'ajouter les prochains shaders !
+	{
+		projection_matrix = projection::get_orthographic_matrix();
+	}
+	set_uniform_matrix_4fv("projection_matrix_", glm::value_ptr(projection_matrix));
+}
+
 std::string ShaderProgram::get_shader_program_name() const
 {
 	return shader_program_name_;
@@ -113,9 +129,10 @@ GLuint ShaderProgram::get_shader_program_id() const
 	return shader_program_id_;
 }
 
-void ShaderProgram::use() const
+void ShaderProgram::use()
 {
 	glUseProgram(shader_program_id_);
+	set_projection_matrix(); //permet de ne plus avoir besoin de positionner la variable uniforme "projection_matrix_" à chaque fois qu'on bind un shader
 }
 
 void ShaderProgram::insert_uniform(const GLchar* name)
