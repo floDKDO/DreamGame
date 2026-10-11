@@ -26,8 +26,6 @@ Game::Game()
 
 void Game::run()
 {
-	glm::ivec2 window_size = backend_.get_window_size();
-
 	std::string temp_model_name("test"); //ici, "test" serait le nom du modèle
 	audio::set_listener_position(player_.get_model()->get_position());
 	audio::set_listener_orientation(camera_.get_camera_forward(), camera_.get_camera_up());
@@ -107,7 +105,6 @@ void Game::render()
 {
 	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glm::ivec2 window_size = backend_.get_window_size();
 
 	if(ShaderProgram* shader_program_2d = resource::bind_shader("2d"); shader_program_2d != nullptr)
 	{

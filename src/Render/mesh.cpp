@@ -49,31 +49,40 @@ Mesh::~Mesh()
 void Mesh::load_vertex_attribute(GLuint vbo_binding_index, attribute::Name attribute_name)
 {
 	attribute::Info attribute_info = Vertex::get_attribute_info(attribute_name);
+
+	glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 1, -1, "Entering VAO's attribute code.");
 	glEnableVertexArrayAttrib(vao_, attribute_info.index_);
 	glVertexArrayAttribFormat(vao_, attribute_info.index_, attribute_info.component_count_, GL_FLOAT, attribute_info.normalized_, GLuint(attribute_info.offset_));
 	glVertexArrayAttribBinding(vao_, attribute_info.index_, vbo_binding_index);
+	glPopDebugGroup();
 }
 
 void Mesh::create_ebo()
 {
+	glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 1, -1, "Entering EBO creation and storage code.");
 	glCreateBuffers(1, &ebo_);
 	glNamedBufferStorage(ebo_, mesh_info_.ebo_values_.size() * sizeof(mesh_info_.ebo_values_[0]), mesh_info_.ebo_values_.data(), GL_DYNAMIC_STORAGE_BIT); //TODO : voir pour le dernier argument
+	glPopDebugGroup();
 }
 
 void Mesh::create_vbo()
 {
+	glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 1, -1, "Entering VBO creation and storage code.");
 	glCreateBuffers(1, &vbo_);
 	glNamedBufferStorage(vbo_, mesh_info_.vertices_.get_vertices_number() * sizeof(Vertex), mesh_info_.vertices_.get_vertices_data(), GL_DYNAMIC_STORAGE_BIT); //TODO : voir pour le dernier argument
+	glPopDebugGroup();
 }
 
 void Mesh::create_vao()
 {
 	const GLuint vbo_binding_index = 0;
 
+	glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 1, -1, "Entering VAO creation, binding and content code.");
 	glCreateVertexArrays(1, &vao_);
 	glBindVertexArray(vao_);
 	glVertexArrayVertexBuffer(vao_, vbo_binding_index, vbo_, 0, GLsizei(sizeof(Vertex)));
 	glVertexArrayElementBuffer(vao_, ebo_);
+	glPopDebugGroup();
 
 	if(mesh_info_.vertices_.has_position_attribute())
 	{
@@ -98,9 +107,11 @@ void Mesh::create_vao()
 
 void Mesh::destroy_all_buffers()
 {
+	glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 1, -1, "Entering EBO, VBO and VAO deletion code.");
 	glDeleteBuffers(1, &ebo_);
 	glDeleteBuffers(1, &vbo_);
 	glDeleteVertexArrays(1, &vao_); //Attention : si j'utilise glDeleteBuffers() pour le vao, je vais avoir des problèmes !
+	glPopDebugGroup();
 
 	ebo_ = 0;
 	vbo_ = 0;
@@ -115,8 +126,10 @@ void Mesh::init_texture(Texture* texture) const
 
 void Mesh::create_and_bind_texture(Texture* texture) const
 {
+	glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 1, -1, "Entering texture creation and binding code.");
 	glCreateTextures(GL_TEXTURE_2D, 1, &texture->info_.id_);
 	glBindTextureUnit(texture->info_.texture_unit_, texture->info_.id_);
+	glPopDebugGroup();
 }
 
 void Mesh::set_texture_storage(Texture* texture, int width, int height) const
@@ -127,20 +140,21 @@ void Mesh::set_texture_storage(Texture* texture, int width, int height) const
 		ImageTexture& image_texture = std::get<ImageTexture>(texture->texture_);
 		internal_format = gltf::get_sized_enum_from_channels(image_texture.channels_);
 	}
-	//std::cout << "STORAGE\n";
+	
 	GLsizei number_of_texture_levels = texture->should_have_mipmaps_ ? 1 + int(std::floor(std::log2(std::max(width, height)))) : 1;
+	glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 1, -1, "Entering texture storage code.");
 	glTextureStorage2D(texture->info_.id_, number_of_texture_levels, internal_format, width, height); //ici (cas .png), il faut mettre GL_RGBA8 et non GL_RGBA car il faut mettre un "Sized Internal Format" (voir https://registry.khronos.org/OpenGL-Refpages/gl4/html/glTexStorage2D.xhtml)
-	//std::cout << "STORAGE END\n";
+	glPopDebugGroup();
 }
 
 void Mesh::set_texture_parameters(const Texture* texture) const
 {
-	//std::cout << "PARAMETERS\n";
+	glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 1, -1, "Entering texture parameters code.");
 	glTextureParameteri(texture->info_.id_, GL_TEXTURE_WRAP_S, texture->info_.wrap_s_);
 	glTextureParameteri(texture->info_.id_, GL_TEXTURE_WRAP_T, texture->info_.wrap_t_);
 	glTextureParameteri(texture->info_.id_, GL_TEXTURE_MAG_FILTER, texture->info_.mag_filter_);
 	glTextureParameteri(texture->info_.id_, GL_TEXTURE_MIN_FILTER, texture->info_.min_filter_);
-	//std::cout << "PARAMETERS END\n";
+	glPopDebugGroup();
 }
 
 void Mesh::set_texture_content(Texture* texture, int width, int height, void* pixels) const
@@ -152,11 +166,11 @@ void Mesh::set_texture_content(Texture* texture, int width, int height, void* pi
 		format = gltf::get_base_enum_from_channels(image_texture.channels_);
 	}
 
-	//std::cout << "CONTENT\n";
 	GLint texture_level = 0; //on ne spécifie que la texture de niveau 0 et on génère automatiquement les mipmaps avec glGenerateTextureMipmap()
+	glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 1, -1, "Entering texture content code.");
 	glTextureSubImage2D(texture->info_.id_, texture_level, 0, 0, width, height, format, GL_UNSIGNED_BYTE, pixels); //ici (cas .png), il faut mettre GL_RGBA et non GL_RGBA8, ce dernier n'étant pas supporté pour ce paramètre
 	glGenerateTextureMipmap(texture->info_.id_);
-	//std::cout << "CONTENT END\n";
+	glPopDebugGroup();
 }
 
 void Mesh::create_textures()
@@ -246,11 +260,11 @@ void Mesh::edit_text_texture(int new_width, int new_height, void* new_pixels) co
 	Texture* texture = resource::get_texture(mesh_info_.texture_keys_[0]); //le mesh d'un Text ne contient qu'une seule texture
 	TextTexture& texture_text = std::get<TextTexture>(texture->texture_);
 
-	//std::cout << "TEXTURE LEVEL PARAM\n";
 	int old_width, old_height;
+	glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 1, -1, "Entering texture level parameters code.");
 	glGetTextureLevelParameteriv(texture->info_.id_, 0, GL_TEXTURE_WIDTH, &old_width);
 	glGetTextureLevelParameteriv(texture->info_.id_, 0, GL_TEXTURE_HEIGHT, &old_height);
-	//std::cout << "TEXTURE LEVEL PARAM END\n";
+	glPopDebugGroup();
 
 	if(new_width != old_width || new_height != old_height)
 	{
@@ -298,7 +312,9 @@ void Mesh::render() const
 			shader_program->set_uniform_1i("texture_sampler0_", texture->info_.texture_unit_);
 		}
 	}
+	glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 1, -1, "Entering binding VAO and drawing code.");
 	glBindVertexArray(vao_);
 	glDrawElements(mesh_info_.render_mode_, GLsizei(mesh_info_.ebo_values_.size()), GL_UNSIGNED_SHORT, 0);
 	//glBindVertexArray(0); //= unbind, commenté car provoque des erreurs
+	glPopDebugGroup();
 }
