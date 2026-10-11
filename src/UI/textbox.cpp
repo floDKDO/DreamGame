@@ -12,14 +12,15 @@ const int Textbox::end_dialogue_indicator_x_delta_ = -30;
 const int Textbox::end_dialogue_indicator_y_delta_ = 115;
 const int Textbox::text_x_delta_ = 30;
 const int Textbox::text_y_delta_ = 20;
+const Uint64 Textbox::time_between_char_ = 25ULL; //valeur en ms
 
 Textbox::Textbox(const input::InputManager& input_manager)
 	: input_manager_(input_manager), textbox_("resources/images/yuri_textbox.png"), end_dialogue_indicator_("resources/images/textbox_end_dialogue_indicator.png"),
-	text_("", int(textbox_.get_width()) - (text_x_delta_ * 2)), end_dialogue_(false), hide_textbox_(false)
+	text_("", int(textbox_.get_width()) - (text_x_delta_ * 2)), all_dialogues_shown_(false), current_dialogue_info_{}, last_time_(0ULL)
 {
 	textbox_.set_position(
 		glm::vec2(
-			(float(utils::get_viewport_width()) - textbox_.get_width()) / 2,
+			(float(utils::get_viewport_width()) - textbox_.get_width()) / 2.0f,
 			float(utils::get_viewport_height()) - textbox_.get_height() - float(textbox_y_delta_)
 		)
 	);
@@ -34,13 +35,39 @@ Textbox::Textbox(const input::InputManager& input_manager)
 	text_.set_position({textbox_.get_position().x + text_x_delta_, textbox_.get_position().y + text_y_delta_});
 }
 
-void Textbox::set_dialogues(std::vector<std::pair<std::string, std::string>> dialogues)
+void Textbox::set_dialogues(const std::vector<Dialogue>& dialogues)
 {
-	text_.edit_text(dialogues[0].first + ": ");
-	for(const std::pair<std::string, std::string>& dialogue : dialogues)
+	text_.edit_text(dialogues[0].speaker_name_ + ": ");
+	set_members_to_start_condition();
+
+	for(const Dialogue& dialogue : dialogues)
 	{
 		dialogues_.push_back(dialogue);
 	}
+}
+
+void Textbox::show_next_dialogue()
+{
+	current_dialogue_info_.char_index_ = 0ULL;
+	current_dialogue_info_.dialogue_finished_ = false;
+	text_.edit_text(dialogues_[current_dialogue_info_.dialogue_index_].speaker_name_ + ": ");
+}
+
+void Textbox::set_members_to_start_condition()
+{
+	dialogues_.clear();
+	current_dialogue_info_ = CurrentDialogueInfo{};
+	all_dialogues_shown_ = false;
+	last_time_ = 0ULL;
+}
+
+void Textbox::set_members_to_end_condition()
+{
+	current_dialogue_info_.dialogue_index_ = 0ULL;
+	current_dialogue_info_.char_index_ = 0ULL;
+	current_dialogue_info_.dialogue_finished_ = true;
+	all_dialogues_shown_ = true;
+	last_time_ = 0ULL;
 }
 
 void Textbox::render()
@@ -49,7 +76,7 @@ void Textbox::render()
 	{
 		shader_program_text->set_uniform_matrix_4fv("projection_matrix_", glm::value_ptr(projection::get_orthographic_matrix()));
 	}
-	if(!hide_textbox_)
+	if(!all_dialogues_shown_)
 	{
 		text_.render();
 	}
@@ -58,52 +85,42 @@ void Textbox::render()
 	{
 		shader_program_2d->set_uniform_matrix_4fv("projection_matrix_", glm::value_ptr(projection::get_orthographic_matrix()));
 	}
-	if(!hide_textbox_)
+	if(!all_dialogues_shown_)
 	{
-		if(end_dialogue_)
+		if(current_dialogue_info_.dialogue_finished_)
 		{
 			end_dialogue_indicator_.render();
 		}
 		textbox_.render();
 	}
+}
 
-	//TODO : faire au propre et éventuellement le mettre dans une méthode update() ??
-	static Uint64 t = 0;
-	static std::size_t i = 0;
-	static std::size_t dialogue_index = 0;
+void Textbox::update([[maybe_unused]] float delta_time)
+{
 	Uint64 now = SDL_GetTicks();
-	if(now > t + 25)
+	if(now > last_time_ + time_between_char_)
 	{
-		if(dialogue_index >= dialogues_.size())
+		if(const Dialogue& current_dialogue = dialogues_[current_dialogue_info_.dialogue_index_]; current_dialogue_info_.char_index_ < current_dialogue.dialogue_text_.size())
 		{
-			end_dialogue_ = true;
-			hide_textbox_ = true;
-			dialogue_index = 0;
-			i = 0;
+			text_.add_char(current_dialogue.dialogue_text_[current_dialogue_info_.char_index_]);
+			current_dialogue_info_.char_index_ += 1;
 		}
 		else
 		{
-			if(i < dialogues_[dialogue_index].second.size())
+			current_dialogue_info_.dialogue_finished_ = true;
+			if(input_manager_.is_interacting())
 			{
-				text_.add_char(dialogues_[dialogue_index].second[i]);
-				i += 1;
-			}
-			else
-			{
-				end_dialogue_ = true;
-				if(input_manager_.is_interacting())
+				current_dialogue_info_.dialogue_index_ += 1;
+				if(current_dialogue_info_.dialogue_index_ < dialogues_.size())
 				{
-					dialogue_index += 1;
-					i = 0;
-					if(dialogue_index < dialogues_.size())
-					{
-						end_dialogue_ = false;
-						//text_.clear();
-						text_.edit_text(dialogues_[dialogue_index].first + ": ");
-					}
+					show_next_dialogue();
+				}
+				else //condition d'arrêt
+				{
+					set_members_to_end_condition();
 				}
 			}
 		}
-		t = now;
+		last_time_ = now;
 	}
 }
