@@ -1,5 +1,6 @@
 #include "utils.h"
 #include "Logging/logging.h"
+#include "Resource/resource_manager.h"
 
 #include <fstream>
 #include <sstream>
@@ -7,6 +8,9 @@
 
 namespace utils
 {
+
+std::vector<GLushort> get_2d_ebo_values(); //placer ici car ne doit pas être accessible depuis l'extérieur de ce fichier
+Vertices get_2d_vertices(); //placer ici car ne doit pas être accessible depuis l'extérieur de ce fichier
 
 std::string get_string_from_bool(bool b)
 {
@@ -130,6 +134,58 @@ int get_viewport_height()
 	GLint viewport_data[4];
 	glGetIntegerv(GL_VIEWPORT, viewport_data);
 	return viewport_data[3];
+}
+
+std::vector<GLushort> get_2d_ebo_values()
+{
+	return std::vector<GLushort>{0, 1, 2, 0, 3, 1};
+}
+
+Vertices get_2d_vertices()
+{
+	std::vector<glm::vec3> position_vector //on simule un vec2 avec un vec3 => la composante z vaut donc 0.0f
+	{
+		glm::vec3(0.0f, 1.0f, 0.0f),
+		glm::vec3(1.0f, 0.0f, 0.0f),
+		glm::vec3(0.0f, 0.0f, 0.0f),
+		glm::vec3(1.0f, 1.0f, 0.0f)
+	};
+	std::vector<glm::vec4> color_vector
+	{
+		glm::vec4(1.0f, 1.0f, 1.0f, 1.0f),
+		glm::vec4(1.0f, 1.0f, 1.0f, 1.0f),
+		glm::vec4(1.0f, 1.0f, 1.0f, 1.0f),
+		glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)
+	};
+	std::vector<glm::vec2> texcoord_vector
+	{
+		glm::vec2(0.0f, 1.0f),
+		glm::vec2(1.0f, 0.0f),
+		glm::vec2(0.0f, 0.0f),
+		glm::vec2(1.0f, 1.0f)
+	};
+
+	Vertices vertices(4);
+	vertices.add_position_attributes(position_vector);
+	vertices.add_color_attributes(color_vector);
+	vertices.add_texcoord_attributes(texcoord_vector);
+
+	return vertices;
+}
+
+Mesh::Id create_2d_text(std::string_view text, const sdl::Surface& surface)
+{
+	Texture texture{TextureInfo{}, text.empty() ? TextTexture{} : TextTexture{surface.get_width(), surface.get_height(), surface.get_pixels()}, false};
+	std::string texture_key = resource::add_texture(texture);
+	return resource::add_mesh(Mesh::Id{std::string(text), -1}, Mesh::Info{get_2d_ebo_values(), get_2d_vertices(), {texture_key}, GL_TRIANGLES});
+}
+
+Mesh::Id create_2d_image(std::string_view path)
+{
+	std::string path_str = std::string(path);
+	Texture texture{TextureInfo{}, ImageTexture{path_str}, false};
+	std::string texture_key = resource::add_texture(texture);
+	return resource::add_mesh(Mesh::Id{path_str, -1}, Mesh::Info{get_2d_ebo_values(), get_2d_vertices(), {texture_key}, GL_TRIANGLES});
 }
 
 }

@@ -1,5 +1,8 @@
 #pragma once
 
+#include "Render/mesh.h"
+#include "RAII_SDL3/surface.h"
+
 #include <GL/glew.h>
 #include <glm/mat4x4.hpp>
 #include <glm/vec3.hpp>
@@ -33,5 +36,7 @@ glm::quat get_rotation_from_model_matrix(glm::mat4 model_matrix);
 std::string base64_decode(const void* data, const std::size_t len);
 int get_viewport_width();
 int get_viewport_height();
+Mesh::Id create_2d_text(std::string_view text, const sdl::Surface& surface);
+Mesh::Id create_2d_image(std::string_view path);
 
 }

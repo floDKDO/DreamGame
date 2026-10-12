@@ -171,7 +171,7 @@ std::vector<glm::vec3> Node::get_aabb_from_position() const
 
 	for(const glm::vec3& aabb_point : aabb_points)
 	{
-		glm::vec3 world_position_attribute = glm::vec4(aabb_point, 1.0f) * compute_model();
+		glm::vec3 world_position_attribute = glm::vec3(glm::vec4(aabb_point, 1.0f) * compute_model());
 		min_values = glm::min(world_position_attribute, min_values);
 		max_values = glm::max(world_position_attribute, max_values);
 	}

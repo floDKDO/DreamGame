@@ -1,5 +1,6 @@
 #include "text.h"
 #include "Resource/resource_manager.h"
+#include "Common/utils.h"
 
 #include <glm/gtc/type_ptr.hpp>
 
@@ -9,52 +10,7 @@ Text::Text(std::string_view text, int wrap_length)
 	text_(text), position_(glm::vec2(0.0f)), angle_(0.0f)
 {
 	init_surface_from_text();
-
-	std::string text_str = std::string(text);
-
-	std::vector<GLushort> ebo_values{0, 1, 2, 0, 3, 1};
-
-	std::vector<glm::vec3> position_vector //on simule un vec2 avec un vec3 => la composante z vaut donc 0.0f
-	{
-		glm::vec3(0.0f, 1.0f, 0.0f),
-		glm::vec3(1.0f, 0.0f, 0.0f),
-		glm::vec3(0.0f, 0.0f, 0.0f),
-		glm::vec3(1.0f, 1.0f, 0.0f)
-	};
-	/*std::vector<glm::vec4> color_vector //TODO : à décommenter si je souhaite une couleur de fond pour le texte
-	{
-		glm::vec4(1.0f, 1.0f, 1.0f, 0.0f),
-		glm::vec4(1.0f, 1.0f, 1.0f, 0.0f),
-		glm::vec4(1.0f, 1.0f, 1.0f, 0.0f),
-		glm::vec4(1.0f, 1.0f, 1.0f, 0.0f)
-	};*/
-	std::vector<glm::vec2> texcoord_vector
-	{
-		glm::vec2(0.0f, 1.0f),
-		glm::vec2(1.0f, 0.0f),
-		glm::vec2(0.0f, 0.0f),
-		glm::vec2(1.0f, 1.0f)
-	};
-
-	Vertices vertices(4);
-	vertices.add_position_attributes(position_vector);
-	//vertices.add_color_attributes(color_vector);
-	vertices.add_texcoord_attributes(texcoord_vector);
-
-	if(!text.empty())
-	{
-		Texture texture{TextureInfo{}, TextTexture{surface_.get_width(), surface_.get_height(), surface_.get_pixels()}, false};
-		std::string texture_key = resource::add_texture(texture);
-
-		mesh_id_ = resource::add_mesh(Mesh::Id{text_str, -1}, Mesh::Info{ebo_values, vertices, {texture_key}, GL_TRIANGLES});
-	}
-	else
-	{
-		Texture texture{TextureInfo{}, TextTexture{}, false};
-		std::string texture_key = resource::add_texture(texture);
-
-		mesh_id_ = resource::add_mesh(Mesh::Id{text_str, -1}, Mesh::Info{ebo_values, vertices, {texture_key}, GL_TRIANGLES});
-	}
+	mesh_id_ = utils::create_2d_text(text, surface_);
 }
 
 void Text::init_surface_from_text()

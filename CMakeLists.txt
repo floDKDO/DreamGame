@@ -75,3 +75,5 @@ target_link_libraries(${PROJECT_NAME} PUBLIC
   glew32s
   nlohmann_json
 )
+
+target_compile_definitions(${PROJECT_NAME} PUBLIC GLM_FORCE_EXPLICIT_CTOR)

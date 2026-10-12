@@ -16,7 +16,7 @@ class Mesh
 
 		struct Id
 		{
-			std::string file_name_ = "";
+			std::string file_name_;
 			int32_t mesh_index_ = -1;
 
 			bool operator==(const Id& other) const
