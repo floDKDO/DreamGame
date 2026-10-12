@@ -20,7 +20,7 @@ Vertices get_vertices(const tg3_model& model_tg3, const tg3_primitive& primitive
 Vertices get_aabb_vertices(const tg3_model& model_tg3, const tg3_primitive& primitive_tg3);
 Transform get_transform(const tg3_node& node_tg3);
 Mesh::Id get_mesh(std::string_view path, const tg3_model& model_tg3, const tg3_node& node_tg3);
-Mesh::Id get_aabb_mesh(Mesh::Id mesh_id, Mesh::Info mesh_info);
+Mesh::Id get_aabb_mesh(std::string_view file_name, int32_t mesh_index, Mesh::Info mesh_info);
 std::optional<tg3_accessor> get_accessor_from_attribute(std::string_view attribute, const tg3_model& model_tg3, const tg3_primitive& primitive_tg3);
 glm::vec3 get_min_values(const tg3_model& model_tg3, const tg3_primitive& primitive_tg3);
 glm::vec3 get_max_values(const tg3_model& model_tg3, const tg3_primitive& primitive_tg3);
@@ -448,19 +448,19 @@ Mesh::Id get_mesh(std::string_view path, const tg3_model& model_tg3, const tg3_n
 		if(has_textures(model_tg3))
 		{
 			std::vector<std::string> texture_keys = get_textures(model_tg3);
-			mesh_id = resource::add_mesh(Mesh::Id{std::string(path), mesh_index}, Mesh::Info{ebo_values, vertices, texture_keys, GLenum(primitive_tg3.mode)});
+			mesh_id = resource::add_mesh(path, mesh_index, Mesh::Info{ebo_values, vertices, texture_keys, GLenum(primitive_tg3.mode)});
 		}
 		else
 		{
-			mesh_id = resource::add_mesh(Mesh::Id{std::string(path), mesh_index}, Mesh::Info{ebo_values, vertices, {}, GLenum(primitive_tg3.mode)});
+			mesh_id = resource::add_mesh(path, mesh_index, Mesh::Info{ebo_values, vertices, {}, GLenum(primitive_tg3.mode)});
 		}
 	}
 	return mesh_id;
 }
 
-Mesh::Id get_aabb_mesh(Mesh::Id mesh_id, Mesh::Info mesh_info)
+Mesh::Id get_aabb_mesh(std::string_view file_name, int32_t mesh_index, Mesh::Info mesh_info)
 {
-	return resource::add_aabb_mesh(mesh_id, mesh_info);
+	return resource::add_aabb_mesh(file_name, mesh_index, mesh_info);
 }
 
 std::optional<tg3_accessor> get_accessor_from_attribute(std::string_view attribute, const tg3_model& model_tg3, const tg3_primitive& primitive_tg3)
@@ -539,7 +539,7 @@ std::pair<Mesh::Id, std::optional<AABB>> get_aabb(std::string_view path, const t
 		};
 		glm::vec3 min_values = get_min_values(model_tg3, primitive_tg3);
 		glm::vec3 max_values = get_max_values(model_tg3, primitive_tg3);
-		Mesh::Id mesh_id = get_aabb_mesh(Mesh::Id{std::string(path), mesh_index}, Mesh::Info{ebo_values, vertices, {}, GLenum(primitive_tg3.mode)});
+		Mesh::Id mesh_id = get_aabb_mesh(path, mesh_index, Mesh::Info{ebo_values, vertices, {}, GLenum(primitive_tg3.mode)});
 
 		//un AABB n'a pas de texture
 		return {mesh_id, AABB(min_values, max_values)};

@@ -79,8 +79,9 @@ Texture* get_texture(std::string_view texture_key)
 	}
 }
 
-Mesh::Id add_mesh(Mesh::Id mesh_id, Mesh::Info mesh_info)
+Mesh::Id add_mesh(std::string_view file_name, int32_t mesh_index, Mesh::Info mesh_info)
 {
+	Mesh::Id mesh_id{std::string(file_name), mesh_index};
 	meshes_.insert(std::make_pair(mesh_id, Mesh(mesh_id, mesh_info)));
 	return mesh_id;
 }
@@ -97,8 +98,9 @@ const Mesh* get_mesh(Mesh::Id mesh_id)
 	}
 }
 
-Mesh::Id add_aabb_mesh(Mesh::Id mesh_id, Mesh::Info mesh_info)
+Mesh::Id add_aabb_mesh(std::string_view file_name, int32_t mesh_index, Mesh::Info mesh_info)
 {
+	Mesh::Id mesh_id{std::string(file_name), mesh_index};
 	aabb_meshes_.insert(std::make_pair(mesh_id, Mesh(mesh_id, mesh_info)));
 	return mesh_id;
 }

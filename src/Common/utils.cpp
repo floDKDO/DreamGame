@@ -177,15 +177,14 @@ Mesh::Id create_2d_text(std::string_view text, const sdl::Surface& surface)
 {
 	Texture texture{TextureInfo{}, text.empty() ? TextTexture{} : TextTexture{surface.get_width(), surface.get_height(), surface.get_pixels()}, false};
 	std::string texture_key = resource::add_texture(texture);
-	return resource::add_mesh(Mesh::Id{std::string(text), -1}, Mesh::Info{get_2d_ebo_values(), get_2d_vertices(), {texture_key}, GL_TRIANGLES});
+	return resource::add_mesh(text, -1, Mesh::Info{get_2d_ebo_values(), get_2d_vertices(), {texture_key}, GL_TRIANGLES});
 }
 
 Mesh::Id create_2d_image(std::string_view path)
 {
-	std::string path_str = std::string(path);
-	Texture texture{TextureInfo{}, ImageTexture{path_str}, false};
+	Texture texture{TextureInfo{}, ImageTexture{std::string(path)}, false};
 	std::string texture_key = resource::add_texture(texture);
-	return resource::add_mesh(Mesh::Id{path_str, -1}, Mesh::Info{get_2d_ebo_values(), get_2d_vertices(), {texture_key}, GL_TRIANGLES});
+	return resource::add_mesh(path, -1, Mesh::Info{get_2d_ebo_values(), get_2d_vertices(), {texture_key}, GL_TRIANGLES});
 }
 
 }
