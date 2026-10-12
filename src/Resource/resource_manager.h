@@ -21,6 +21,8 @@ std::string add_texture(Texture texture);
 Texture* get_texture(std::string_view texture_key); //ne retourne pas de const Texture* car la fonction glCreateTextures() modifie son troisième paramètre
 
 Mesh::Id add_mesh(std::string_view file_name, int32_t mesh_index, Mesh::Info mesh_info);
+Mesh::Id add_2d_text(std::string_view text, const sdl::Surface& surface);
+Mesh::Id add_2d_image(std::string_view path);
 const Mesh* get_mesh(Mesh::Id mesh_id);
 
 Mesh::Id add_aabb_mesh(std::string_view file_name, int32_t mesh_index, Mesh::Info aabb_mesh_info);

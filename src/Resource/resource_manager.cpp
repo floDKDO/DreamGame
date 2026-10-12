@@ -1,5 +1,6 @@
 #include "resource_manager.h"
 #include "model.h"
+#include "Common/utils.h"
 //#include "Logging/logging.h"
 
 #include <string>
@@ -84,6 +85,20 @@ Mesh::Id add_mesh(std::string_view file_name, int32_t mesh_index, Mesh::Info mes
 	Mesh::Id mesh_id{std::string(file_name), mesh_index};
 	meshes_.insert(std::make_pair(mesh_id, Mesh(mesh_id, mesh_info)));
 	return mesh_id;
+}
+
+Mesh::Id add_2d_text(std::string_view text, const sdl::Surface& surface)
+{
+	Texture texture{TextureInfo{}, text.empty() ? TextTexture{} : TextTexture{surface.get_width(), surface.get_height(), surface.get_pixels()}, false};
+	std::string texture_key = resource::add_texture(texture);
+	return resource::add_mesh(text, -1, Mesh::Info{utils::get_2d_ebo_values(), utils::get_2d_vertices(), {texture_key}, GL_TRIANGLES});
+}
+
+Mesh::Id add_2d_image(std::string_view path)
+{
+	Texture texture{TextureInfo{}, ImageTexture{std::string(path)}, false};
+	std::string texture_key = resource::add_texture(texture);
+	return resource::add_mesh(path, -1, Mesh::Info{utils::get_2d_ebo_values(), utils::get_2d_vertices(), {texture_key}, GL_TRIANGLES});
 }
 
 const Mesh* get_mesh(Mesh::Id mesh_id)

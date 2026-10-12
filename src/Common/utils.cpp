@@ -1,6 +1,5 @@
 #include "utils.h"
 #include "Logging/logging.h"
-#include "Resource/resource_manager.h"
 
 #include <fstream>
 #include <sstream>
@@ -8,9 +7,6 @@
 
 namespace utils
 {
-
-std::vector<GLushort> get_2d_ebo_values(); //placer ici car ne doit pas être accessible depuis l'extérieur de ce fichier
-Vertices get_2d_vertices(); //placer ici car ne doit pas être accessible depuis l'extérieur de ce fichier
 
 std::string get_string_from_bool(bool b)
 {
@@ -171,20 +167,6 @@ Vertices get_2d_vertices()
 	vertices.add_texcoord_attributes(texcoord_vector);
 
 	return vertices;
-}
-
-Mesh::Id create_2d_text(std::string_view text, const sdl::Surface& surface)
-{
-	Texture texture{TextureInfo{}, text.empty() ? TextTexture{} : TextTexture{surface.get_width(), surface.get_height(), surface.get_pixels()}, false};
-	std::string texture_key = resource::add_texture(texture);
-	return resource::add_mesh(text, -1, Mesh::Info{get_2d_ebo_values(), get_2d_vertices(), {texture_key}, GL_TRIANGLES});
-}
-
-Mesh::Id create_2d_image(std::string_view path)
-{
-	Texture texture{TextureInfo{}, ImageTexture{std::string(path)}, false};
-	std::string texture_key = resource::add_texture(texture);
-	return resource::add_mesh(path, -1, Mesh::Info{get_2d_ebo_values(), get_2d_vertices(), {texture_key}, GL_TRIANGLES});
 }
 
 }

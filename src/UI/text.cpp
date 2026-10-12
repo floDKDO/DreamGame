@@ -1,6 +1,5 @@
 #include "text.h"
 #include "Resource/resource_manager.h"
-#include "Common/utils.h"
 
 #include <glm/gtc/type_ptr.hpp>
 
@@ -10,7 +9,7 @@ Text::Text(std::string_view text, int wrap_length)
 	text_(text), position_(glm::vec2(0.0f)), angle_(0.0f)
 {
 	init_surface_from_text();
-	mesh_id_ = utils::create_2d_text(text, surface_);
+	mesh_id_ = resource::add_2d_text(text, surface_);
 }
 
 void Text::init_surface_from_text()
