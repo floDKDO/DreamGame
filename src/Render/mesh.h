@@ -10,7 +10,7 @@ class Mesh
 		{
 			std::vector<GLushort> ebo_values_;
 			Vertices vertices_;
-			std::vector<std::string> texture_keys_ = {}; //garder l'init à vide pour l'instant (à retirer quand tout les meshes utiliseront des textures)
+			std::vector<std::size_t> texture_ids_ = {};
 			GLenum render_mode_ = GL_TRIANGLES;
 		};
 

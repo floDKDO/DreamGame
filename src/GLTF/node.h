@@ -1,9 +1,10 @@
 #pragma once
 
-#include "Collision/aabb.h"
+#include "Collision/aabb_info.h"
 #include "Common/transform.h"
-#include "Render/mesh.h"
 
+#include <string>
+#include <string_view>
 #include <memory>
 #include <optional>
 
@@ -17,8 +18,8 @@ class Node
 		{
 			Transform transform_;
 			glm::mat4 parent_matrix_;
-			Mesh::Id mesh_id_;
-			std::pair<Mesh::Id, std::optional<AABB>> aabb_;
+			std::size_t mesh_id_ = std::numeric_limits<std::size_t>::max();
+			AABBInfo aabb_info_;
 			bool is_empty_node_ = false; //<=> empty node sur Blender (le noeud n'a pas de mesh ni d'AABB)
 		};
 

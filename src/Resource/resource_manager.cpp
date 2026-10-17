@@ -2,6 +2,7 @@
 #include "model.h"
 #include "Common/utils.h"
 //#include "Logging/logging.h"
+#include "resources.h"
 
 #include <string>
 #include <iostream>
@@ -9,21 +10,17 @@
 namespace resource
 {
 
-static std::size_t global_model_id_ = 0ULL;
+std::unordered_map<std::string, ShaderProgram> shader_programs_; //pas besoin d'id de type std::size_t
+Resources<std::size_t, Model> models_; //template specialization (voir "resources.h")
+Resources<Mesh::Id, Mesh> meshes_;
+Resources<Mesh::Id, Mesh> aabb_meshes_;
+Resources<sdl::Font::Id, sdl::Font> fonts_;
+Resources<std::string, Texture> textures_; //si la texture possède un path, sa clef est le path ; si la texture est au format embedded glTF, toujours l'insérer cas peu commun et pas vraiment possible d'identifer de manière unique ce type de texture sans lire tout leur contenu)
 
-std::unordered_map<Mesh::Id, Mesh> meshes_;
-std::unordered_map<Mesh::Id, Mesh> aabb_meshes_;
-std::unordered_map<std::string, ShaderProgram> shader_programs_;
-std::unordered_map<std::size_t, Model> models_;
-std::unordered_map<Text::FontId, sdl::Font> fonts_;
-
-//Conteneur de texture, texture id 
-// => cas texture dont l'image possède un path : la clef est le path (= chemin de la texture)
-// => cas texture dont l'image a ses données en base64 : (toujours insérer la texture car cas peu commun et pas vraiment possible d'identifer de manière unique ce type de texture sans lire tout leur contenu)
-std::unordered_map<std::string, Texture> textures_;
-
-//Cette méthode est placée là (donc pas dans le header) car elle est utilisée uniquement dans ce fichier .cpp
+//Ces méthodes sont placées là (donc pas dans le header) car elles sont utilisées uniquement dans ce fichier .cpp
 ShaderProgram* get_shader(std::string_view name);
+std::size_t get_id_from_font_id(sdl::Font::Id font_id);
+
 
 void destroy_all_resources()
 {
@@ -35,7 +32,7 @@ void destroy_all_resources()
 	textures_.clear();
 }
 
-std::string add_texture(Texture texture)
+std::size_t add_texture(Texture texture)
 {
 	std::string texture_key;
 	if(std::holds_alternative<ImageTexture>(texture.texture_))
@@ -44,123 +41,101 @@ std::string add_texture(Texture texture)
 		if(std::holds_alternative<ImagePath>(image_texture.image_value_))
 		{
 			texture_key = std::get<ImagePath>(image_texture.image_value_);
-			textures_.insert({texture_key, texture});
 		}
 		else
 		{
 			//Comme les images "embedded glTF" n'ont pas de path, la clef étant "", elle ne serait pas unique pour plusieurs images sans path
-			//Pour assurer que chacune de ces images aient un path fictif unique, je lui ajoute un entier (incrémenté à chaque ajout) => le path n'étant pas consulté donc la valeur de cette clef n'a aucune importance
-			//De toute façon, pour ce type d'images, aucune vérification n'est effectuée : elles sont ajoutées dans tous les cas dans textures_
-			static std::size_t empty_path_counter = 0ULL;
-			texture_key = "Empty path " + std::to_string(empty_path_counter);
-			textures_.insert({texture_key, texture});
-			empty_path_counter += 1;
+			//Pour assurer que chacune de ces images aient un path fictif unique, je lui ajoute la valeur du compteur global (incrémenté à chaque ajout) => le path n'étant pas consulté donc la valeur de cette clef n'a aucune importance
+			//De toute façon, pour ce type d'image, aucune vérification n'est effectuée : elles sont ajoutées dans tous les cas dans textures_
+			texture_key = "Empty path " + std::to_string(GlobalId::get());
 		}
 	}
 	else if(std::holds_alternative<TextTexture>(texture.texture_))
 	{
-		static std::size_t text_counter = 0ULL;
-		texture_key = "Text " + std::to_string(text_counter);
-		textures_.insert({texture_key, texture});
-		text_counter += 1;
+		//Idem ici pour les textures de type "text"
+		texture_key = "Text " + std::to_string(GlobalId::get());
 	}
-	return texture_key;
+
+	return textures_.insert_resource(texture_key, std::move(texture));
 }
 
-Texture* get_texture(std::string_view texture_key)
+Texture* get_texture(std::size_t id)
 {
-	std::string texture_key_str = std::string(texture_key);
-	if(textures_.count(texture_key_str))
+	if(textures_.ids_.count(id))
 	{
-		return &textures_.at(texture_key_str);
+		if(std::string texture_string = textures_.ids_.at(id); textures_.resources_.count(texture_string))
+		{
+			return &textures_.resources_.at(texture_string);
+		}
 	}
-	else
-	{
-		return nullptr;
-	}
+	return nullptr;
 }
 
-Mesh::Id add_mesh(std::string_view file_name, int32_t mesh_index, Mesh::Info mesh_info)
+std::size_t add_mesh(std::string_view file_name, int32_t mesh_index, Mesh::Info mesh_info)
 {
 	Mesh::Id mesh_id{std::string(file_name), mesh_index};
-	meshes_.insert(std::make_pair(mesh_id, Mesh(mesh_id, mesh_info)));
-	return mesh_id;
+	return meshes_.insert_resource(mesh_id, Mesh(mesh_id, mesh_info));
 }
 
-Mesh::Id add_2d_text(std::string_view text, const sdl::Surface& surface)
+std::size_t add_2d_text(std::string_view text, const sdl::Surface& surface)
 {
 	Texture texture{TextureInfo{}, text.empty() ? TextTexture{} : TextTexture{surface.get_width(), surface.get_height(), surface.get_pixels()}, false};
-	std::string texture_key = resource::add_texture(texture);
-	return resource::add_mesh(text, -1, Mesh::Info{utils::get_2d_ebo_values(), utils::get_2d_vertices(), {texture_key}, GL_TRIANGLES});
+	std::size_t texture_id = add_texture(texture);
+	return add_mesh(text, -1, Mesh::Info{utils::get_2d_ebo_values(), utils::get_2d_vertices(), {texture_id}, GL_TRIANGLES});
 }
 
-Mesh::Id add_2d_image(std::string_view path)
+std::size_t add_2d_image(std::string_view path)
 {
 	Texture texture{TextureInfo{}, ImageTexture{std::string(path)}, false};
-	std::string texture_key = resource::add_texture(texture);
-	return resource::add_mesh(path, -1, Mesh::Info{utils::get_2d_ebo_values(), utils::get_2d_vertices(), {texture_key}, GL_TRIANGLES});
+	std::size_t texture_id = add_texture(texture);
+	return add_mesh(path, -1, Mesh::Info{utils::get_2d_ebo_values(), utils::get_2d_vertices(), {texture_id}, GL_TRIANGLES});
 }
 
-const Mesh* get_mesh(Mesh::Id mesh_id)
+const Mesh* get_mesh(std::size_t id)
 {
-	if(meshes_.count(mesh_id))
+	if(meshes_.ids_.count(id))
 	{
-		return &meshes_.at(mesh_id);
+		if(Mesh::Id mesh_id = meshes_.ids_.at(id); meshes_.resources_.count(mesh_id))
+		{
+			return &meshes_.resources_.at(mesh_id);
+		}
 	}
-	else
-	{
-		return nullptr;
-	}
+	return nullptr;
 }
 
-Mesh::Id add_aabb_mesh(std::string_view file_name, int32_t mesh_index, Mesh::Info mesh_info)
+std::size_t add_aabb_mesh(std::string_view file_name, int32_t mesh_index, Mesh::Info mesh_info)
 {
 	Mesh::Id mesh_id{std::string(file_name), mesh_index};
-	aabb_meshes_.insert(std::make_pair(mesh_id, Mesh(mesh_id, mesh_info)));
-	return mesh_id;
+	return aabb_meshes_.insert_resource(mesh_id, Mesh(mesh_id, mesh_info));
 }
 
-const Mesh* get_aabb_mesh(Mesh::Id aabb_mesh_id)
+const Mesh* get_aabb_mesh(std::size_t id)
 {
-	if(aabb_meshes_.count(aabb_mesh_id))
+	if(aabb_meshes_.ids_.count(id))
 	{
-		return &aabb_meshes_.at(aabb_mesh_id);
+		if(Mesh::Id mesh_id = aabb_meshes_.ids_.at(id); aabb_meshes_.resources_.count(mesh_id))
+		{
+			return &aabb_meshes_.resources_.at(mesh_id);
+		}
 	}
-	else
-	{
-		return nullptr;
-	}
+	return nullptr;
 }
 
 std::size_t add_model(std::string_view path, Transform transform)
 {
-	std::size_t local_model_id = global_model_id_;
-	auto pair = models_.insert({local_model_id, Model(path, transform)});
-	//std::cout << "ADD => " << path << ", " << local_model_id << std::endl;
-	if(pair.second)
-	{
-		global_model_id_ += 1;
-	}
-	return local_model_id;
+	return models_.insert_resource(Model(path, transform));
 }
 
 std::size_t add_model(std::string_view path)
 {
-	std::size_t local_model_id = global_model_id_;
-	auto pair = models_.insert({local_model_id, Model(path)});
-	//std::cout << "ADD => " << path << ", " << local_model_id << std::endl;
-	if(pair.second)
-	{
-		global_model_id_ += 1;
-	}
-	return local_model_id;
+	return models_.insert_resource(Model(path));
 }
 
-Model* get_model(std::size_t model_id)
+Model* get_model(std::size_t id)
 {
-	if(models_.count(model_id))
+	if(models_.resources_.count(id))
 	{
-		return &models_.at(model_id);
+		return &models_.resources_.at(id);
 	}
 	else
 	{
@@ -170,7 +145,7 @@ Model* get_model(std::size_t model_id)
 
 std::unordered_map<std::size_t, Model>& get_models()
 {
-	return models_;
+	return models_.resources_;
 }
 
 void add_shader(std::string_view name, std::vector<std::string> shader_paths)
@@ -221,37 +196,50 @@ ShaderProgram* get_currently_bound_shader()
 	return nullptr;
 }
 
-Text::FontId add_font(std::string_view font_path, float font_size)
+std::size_t get_id_from_font_id(sdl::Font::Id font_id)
 {
-	for(auto& [font_id, font] : fonts_)
+	for(auto& [res_id, res_font_id] : fonts_.ids_)
 	{
-		if(font_path == font_id.font_path_)
+		if(res_font_id == font_id)
 		{
-			if(font_size != font_id.font_size_)
-			{
-				fonts_.insert({Text::FontId{std::string(font_path), font_size}, sdl::Font(font.copy(), font_size)});
-			}
-			return Text::FontId{font_id.font_path_, font_size};
+			return res_id;
 		}
 	}
-	Text::FontId font_id = {std::string(font_path), font_size};
-	fonts_.insert({font_id, sdl::Font(font_path, font_size)});
-	return font_id;
+	return std::numeric_limits<std::size_t>::max();
+}
+
+std::size_t add_font(std::string_view font_path, float font_size)
+{
+	for(auto& [res_font_id, res_font] : fonts_.resources_)
+	{
+		if(font_path == res_font_id.font_path_)
+		{
+			sdl::Font::Id font_id{res_font_id.font_path_, font_size};
+			if(font_size != res_font_id.font_size_)
+			{
+				return fonts_.insert_resource(font_id, sdl::Font(res_font.copy(), font_size));
+			}
+			else
+			{
+				return get_id_from_font_id(font_id);
+			}
+		}
+	}
+	sdl::Font::Id font_id{std::string(font_path), font_size};
+	return fonts_.insert_resource(font_id, sdl::Font(font_path, font_size));
 }
 
 //TODO : peut éventuellement retourner une police par défaut
-sdl::Font* get_font(std::string_view font_path, float font_size)
+sdl::Font* get_font(std::size_t id)
 {
-	std::string font_path_str = std::string(font_path);
-	Text::FontId font_id = Text::FontId{font_path_str, font_size};
-	if(fonts_.count(font_id))
+	if(fonts_.ids_.count(id))
 	{
-		return &fonts_.at(font_id);
+		if(sdl::Font::Id font_id = fonts_.ids_.at(id); fonts_.resources_.count(font_id))
+		{
+			return &fonts_.resources_.at(font_id);
+		}
 	}
-	else
-	{
-		return nullptr;
-	}
+	return nullptr;
 }
 
 }

@@ -3,7 +3,7 @@
 #include "input_common.h"
 #include "RAII_SDL3/gamepad.h"
 
-#include <SDL3/SDL.h>
+#include <SDL3/SDL_events.h>
 
 namespace input
 {

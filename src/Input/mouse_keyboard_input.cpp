@@ -1,5 +1,6 @@
 #include "mouse_keyboard_input.h"
 
+#include <SDL3/SDL_timer.h>
 #include <algorithm>
 #include <iostream>
 

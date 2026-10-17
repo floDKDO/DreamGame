@@ -14,7 +14,7 @@ Text::Text(std::string_view text, int wrap_length)
 
 void Text::init_surface_from_text()
 {
-	sdl::Font* font = resource::get_font(font_id_.font_path_, font_id_.font_size_);
+	sdl::Font* font = resource::get_font(font_id_);
 
 	//la valeur "{255, 255, 255, 255}" n'est pas hardcodée : elle est nécessaire pour que la multiplication via text_color_ fonctionne
 	if(quality_ == Quality::SOLID)
@@ -48,7 +48,7 @@ void Text::set_position(glm::vec2 position)
 
 void Text::set_font_size(float font_size)
 {
-	font_id_ = resource::add_font(font_id_.font_path_, font_size);
+	font_id_ = resource::add_font("resources/fonts/Aller_Rg.ttf", font_size); //TODO : police hardcodée
 	init_surface_from_text();
 	//std::cout << "SET FONT SIZE\n";
 	resource::get_mesh(mesh_id_)->edit_text_texture(surface_.get_width(), surface_.get_height(), surface_.get_pixels());

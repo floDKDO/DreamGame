@@ -4,6 +4,8 @@
 #include "Render/image.h"
 #include "Input/input_manager.h"
 
+#include <vector>
+
 class Textbox
 {
 	public:

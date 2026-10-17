@@ -1,7 +1,6 @@
 #include "gltf_file.h"
 #include "gltf.h"
 #include "node.h"
-#include "Collision/aabb.h"
 #include "Common/utils.h"
 #include "Logging/logging.h"
 #include "Resource/resource_manager.h"
@@ -19,13 +18,13 @@ uint64_t get_attributes_count(const tg3_model& model_tg3, const tg3_primitive& p
 Vertices get_vertices(const tg3_model& model_tg3, const tg3_primitive& primitive_tg3);
 Vertices get_aabb_vertices(const tg3_model& model_tg3, const tg3_primitive& primitive_tg3);
 Transform get_transform(const tg3_node& node_tg3);
-Mesh::Id get_mesh(std::string_view path, const tg3_model& model_tg3, const tg3_node& node_tg3);
-Mesh::Id get_aabb_mesh(std::string_view file_name, int32_t mesh_index, Mesh::Info mesh_info);
+std::size_t get_mesh(std::string_view path, const tg3_model& model_tg3, const tg3_node& node_tg3);
+std::size_t get_aabb_mesh(std::string_view file_name, int32_t mesh_index, Mesh::Info mesh_info);
 std::optional<tg3_accessor> get_accessor_from_attribute(std::string_view attribute, const tg3_model& model_tg3, const tg3_primitive& primitive_tg3);
 glm::vec3 get_min_values(const tg3_model& model_tg3, const tg3_primitive& primitive_tg3);
 glm::vec3 get_max_values(const tg3_model& model_tg3, const tg3_primitive& primitive_tg3);
-std::pair<Mesh::Id, std::optional<AABB>> get_aabb(std::string_view path, const tg3_model& model_tg3, const tg3_node& node_tg3);
-std::vector<std::string> get_textures(const tg3_model& model_tg3);
+AABBInfo get_aabb(std::string_view path, const tg3_model& model_tg3, const tg3_node& node_tg3);
+std::vector<std::size_t> get_textures(const tg3_model& model_tg3);
 std::vector<GLushort> get_ebo_values(const tg3_model& model_tg3, const tg3_primitive& primitive_tg3);
 std::vector<glm::vec4> get_vec4_color_attribute(const tg3_model& model_tg3, const tg3_str_int_pair& attribute_tg3);
 bool has_textures(const tg3_model& model_tg3);
@@ -430,10 +429,10 @@ Transform get_transform(const tg3_node& node_tg3)
 	return transform;
 }
 
-Mesh::Id get_mesh(std::string_view path, const tg3_model& model_tg3, const tg3_node& node_tg3)
+std::size_t get_mesh(std::string_view path, const tg3_model& model_tg3, const tg3_node& node_tg3)
 {
 	int32_t mesh_index = node_tg3.mesh;
-	Mesh::Id mesh_id;
+	std::size_t id = std::numeric_limits<std::size_t>::max();
 	if(mesh_index != -1)
 	{
 		tg3_mesh mesh_tg3 = model_tg3.meshes[mesh_index];
@@ -447,18 +446,18 @@ Mesh::Id get_mesh(std::string_view path, const tg3_model& model_tg3, const tg3_n
 		Vertices vertices = get_vertices(model_tg3, primitive_tg3);
 		if(has_textures(model_tg3))
 		{
-			std::vector<std::string> texture_keys = get_textures(model_tg3);
-			mesh_id = resource::add_mesh(path, mesh_index, Mesh::Info{ebo_values, vertices, texture_keys, GLenum(primitive_tg3.mode)});
+			std::vector<std::size_t> texture_ids = get_textures(model_tg3);
+			id = resource::add_mesh(path, mesh_index, Mesh::Info{ebo_values, vertices, texture_ids, GLenum(primitive_tg3.mode)});
 		}
 		else
 		{
-			mesh_id = resource::add_mesh(path, mesh_index, Mesh::Info{ebo_values, vertices, {}, GLenum(primitive_tg3.mode)});
+			id = resource::add_mesh(path, mesh_index, Mesh::Info{ebo_values, vertices, {}, GLenum(primitive_tg3.mode)});
 		}
 	}
-	return mesh_id;
+	return id;
 }
 
-Mesh::Id get_aabb_mesh(std::string_view file_name, int32_t mesh_index, Mesh::Info mesh_info)
+std::size_t get_aabb_mesh(std::string_view file_name, int32_t mesh_index, Mesh::Info mesh_info)
 {
 	return resource::add_aabb_mesh(file_name, mesh_index, mesh_info);
 }
@@ -515,7 +514,7 @@ glm::vec3 get_max_values(const tg3_model& model_tg3, const tg3_primitive& primit
 	return max_values;
 }
 
-std::pair<Mesh::Id, std::optional<AABB>> get_aabb(std::string_view path, const tg3_model& model_tg3, const tg3_node& node_tg3)
+AABBInfo get_aabb(std::string_view path, const tg3_model& model_tg3, const tg3_node& node_tg3)
 {
 	int32_t mesh_index = node_tg3.mesh;
 	if(mesh_index != -1)
@@ -539,19 +538,19 @@ std::pair<Mesh::Id, std::optional<AABB>> get_aabb(std::string_view path, const t
 		};
 		glm::vec3 min_values = get_min_values(model_tg3, primitive_tg3);
 		glm::vec3 max_values = get_max_values(model_tg3, primitive_tg3);
-		Mesh::Id mesh_id = get_aabb_mesh(path, mesh_index, Mesh::Info{ebo_values, vertices, {}, GLenum(primitive_tg3.mode)});
+		std::size_t id = get_aabb_mesh(path, mesh_index, Mesh::Info{ebo_values, vertices, {}, GLenum(primitive_tg3.mode)});
 
 		//un AABB n'a pas de texture
-		return {mesh_id, AABB(min_values, max_values)};
+		return {id, AABB(min_values, max_values)};
 	}
 	std::string node_name = (node_tg3.name.len > 0) ? std::string(node_tg3.name.data) : "";
 	logging::log("get_aabb() returned std::nullopt (the node \"" + node_name + "\" does not have a AABB)", logging::Severity::NOTICE);
-	return {Mesh::Id{}, std::nullopt}; //cas où le node ne possède pas de aabb
+	return {std::numeric_limits<std::size_t>::max(), std::nullopt}; //cas où le node ne possède pas de aabb
 }
 
-std::vector<std::string> get_textures(const tg3_model& model_tg3)
+std::vector<std::size_t> get_textures(const tg3_model& model_tg3)
 {
-	std::vector<std::string> texture_keys;
+	std::vector<std::size_t> texture_ids;
 	for(uint32_t i = 0; i < model_tg3.textures_count; ++i)
 	{
 		tg3_texture texture_tg3 = model_tg3.textures[i];
@@ -608,9 +607,9 @@ std::vector<std::string> get_textures(const tg3_model& model_tg3)
 		mesh_texture.info_.wrap_s_ = sampler_tg3.wrap_s;
 		mesh_texture.info_.wrap_t_ = sampler_tg3.wrap_t;
 
-		texture_keys.push_back(resource::add_texture(mesh_texture));
+		texture_ids.push_back(resource::add_texture(mesh_texture));
 	}
-	return texture_keys;
+	return texture_ids;
 }
 
 std::vector<GLushort> get_ebo_values(const tg3_model& model_tg3, const tg3_primitive& primitive_tg3)

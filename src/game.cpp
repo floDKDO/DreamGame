@@ -106,8 +106,8 @@ void Game::render()
 
 	resource::bind_shader("2d");
 	textbox_.render();
-	/*test_image_.render();
-	test_image_2_.render();*/
+	//test_image_.render();
+	//test_image_2_.render();
 
 	resource::bind_shader("Phong");
 	for(auto& [model_id, model] : resource::get_models())

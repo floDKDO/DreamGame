@@ -1,5 +1,6 @@
 #include "node.h"
 #include "gltf.h"
+#include "Render/mesh.h"
 #include "Resource/resource_manager.h"
 
 #include <glm/gtc/type_ptr.hpp>
@@ -47,9 +48,9 @@ void Node::render() const
 			mesh->render();
 		}
 
-		if(node_info_.aabb_.second.has_value())
+		if(node_info_.aabb_info_.mesh_id_ != std::numeric_limits<std::size_t>::max())
 		{
-			if(const Mesh* aabb_mesh = resource::get_aabb_mesh(node_info_.aabb_.first); aabb_mesh != nullptr)
+			if(const Mesh* aabb_mesh = resource::get_aabb_mesh(node_info_.aabb_info_.mesh_id_); aabb_mesh != nullptr)
 			{
 				glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); //affichage wireframe pour AABB
 				aabb_mesh->render();
@@ -165,7 +166,8 @@ std::string Node::get_name() const
 
 std::vector<glm::vec3> Node::get_aabb_from_position() const
 {
-	std::vector<glm::vec3> aabb_points = node_info_.aabb_.second.value().get_corners();
+	AABB aabb = node_info_.aabb_info_.aabb_.value();
+	std::vector<glm::vec3> aabb_points = aabb.get_corners();
 	glm::vec3 min_values(std::numeric_limits<float>::max());
 	glm::vec3 max_values(std::numeric_limits<float>::lowest());
 
@@ -195,7 +197,7 @@ std::vector<glm::vec3> Node::get_aabb_from_position() const
 
 std::optional<AABB> Node::get_world_aabb() const
 {
-	if(!node_info_.aabb_.second.has_value())
+	if(!node_info_.aabb_info_.aabb_.has_value())
 	{
 		return std::nullopt;
 	}

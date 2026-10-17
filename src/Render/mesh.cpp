@@ -175,9 +175,9 @@ void Mesh::set_texture_content(Texture* texture, int width, int height, void* pi
 
 void Mesh::create_textures()
 {
-	for(std::string& texture_key : mesh_info_.texture_keys_)
+	for(std::size_t texture_id : mesh_info_.texture_ids_)
 	{
-		Texture* texture = resource::get_texture(texture_key);
+		Texture* texture = resource::get_texture(texture_id);
 		if(texture == nullptr)
 		{
 			logging::log("The texture is nullptr!", logging::Severity::WARNING);
@@ -257,7 +257,7 @@ void Mesh::load_mesh()
 
 void Mesh::edit_text_texture(int new_width, int new_height, void* new_pixels) const
 {
-	Texture* texture = resource::get_texture(mesh_info_.texture_keys_[0]); //le mesh d'un Text ne contient qu'une seule texture
+	Texture* texture = resource::get_texture(mesh_info_.texture_ids_[0]); //le mesh d'un Text ne contient qu'une seule texture
 	TextTexture& texture_text = std::get<TextTexture>(texture->texture_);
 
 	int old_width, old_height;
@@ -282,14 +282,14 @@ void Mesh::edit_text_texture(int new_width, int new_height, void* new_pixels) co
 
 int Mesh::get_initial_texture_width() const
 {
-	Texture* texture = resource::get_texture(mesh_info_.texture_keys_[0]); //le mesh d'une Image ne contient qu'une seule texture
+	Texture* texture = resource::get_texture(mesh_info_.texture_ids_[0]); //le mesh d'une Image ne contient qu'une seule texture
 	ImageTexture& texture_image = std::get<ImageTexture>(texture->texture_);
 	return texture_image.initial_width_;
 }
 
 int Mesh::get_initial_texture_height() const
 {
-	Texture* texture = resource::get_texture(mesh_info_.texture_keys_[0]); //le mesh d'une Image ne contient qu'une seule texture
+	Texture* texture = resource::get_texture(mesh_info_.texture_ids_[0]); //le mesh d'une Image ne contient qu'une seule texture
 	ImageTexture& texture_image = std::get<ImageTexture>(texture->texture_);
 	return texture_image.initial_height_;
 }
@@ -298,9 +298,9 @@ void Mesh::render() const
 {
 	if(ShaderProgram* shader_program = resource::get_currently_bound_shader(); shader_program != nullptr)
 	{
-		for(const std::string& texture_key : mesh_info_.texture_keys_)
+		for(std::size_t texture_id : mesh_info_.texture_ids_)
 		{
-			Texture* texture = resource::get_texture(texture_key);
+			Texture* texture = resource::get_texture(texture_id);
 			if(texture->info_.texture_unit_ > 0)
 			{
 				logging::log("Only one texture by mesh for now!", logging::Severity::WARNING);

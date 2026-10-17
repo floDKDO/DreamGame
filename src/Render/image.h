@@ -1,7 +1,6 @@
 #pragma once
 
-#include "mesh.h"
-
+#include <glm/vec2.hpp>
 #include <glm/mat4x4.hpp>
 #include <string_view>
 
@@ -25,5 +24,5 @@ class Image
 		int initial_texture_width_, initial_texture_height_;
 		glm::vec2 position_, size_;
 		float angle_;
-		Mesh::Id mesh_id_;
+		std::size_t mesh_id_;
 };
