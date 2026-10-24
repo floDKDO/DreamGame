@@ -108,11 +108,11 @@ void ShaderProgram::link() const
 void ShaderProgram::set_projection_matrix()
 {
 	glm::mat4 projection_matrix(1.0f);
-	if(shader_program_name_ == "Phong")
+	if(shader_program_name_ == "Phong" || shader_program_name_ == "Skybox")
 	{
 		projection_matrix = projection::get_perspective_matrix();
 	}
-	else if(shader_program_name_ == "Text" || shader_program_name_ == "2d") //TODO : ne pas oublier d'ajouter les prochains shaders !
+	else //if(shader_program_name_ == "Text" || shader_program_name_ == "2d") //TODO : ne pas oublier d'ajouter les prochains shaders !
 	{
 		projection_matrix = projection::get_orthographic_matrix();
 	}

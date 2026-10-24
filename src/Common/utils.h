@@ -23,6 +23,7 @@ double lerp(Arithmetic1 a, Arithmetic2 b, Arithmetic3 t) //TODO : à terme, rempl
 	return a_d + t_d * (b_d - a_d);
 }
 
+std::vector<std::string> get_files_from_directory(std::string_view directory_path);
 std::string get_string_from_bool(bool b);
 std::string get_string_from_unsigned_char_ptr(const unsigned char* ptr);
 std::string get_string_from_file(std::string_view path);
@@ -37,5 +38,7 @@ int get_viewport_width();
 int get_viewport_height();
 std::vector<GLushort> get_2d_ebo_values();
 Vertices get_2d_vertices();
+std::vector<GLushort> get_3d_ebo_values();
+Vertices get_3d_vertices();
 
 }

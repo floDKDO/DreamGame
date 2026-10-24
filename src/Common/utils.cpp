@@ -1,12 +1,23 @@
 #include "utils.h"
 #include "Logging/logging.h"
 
+#include <filesystem>
 #include <fstream>
 #include <sstream>
 #include <iostream>
 
 namespace utils
 {
+
+std::vector<std::string> get_files_from_directory(std::string_view directory_path)
+{
+	std::vector<std::string> files;
+	for(const auto& file : std::filesystem::directory_iterator(directory_path))
+	{
+		files.push_back(file.path().string());
+	}
+	return files;
+}
 
 std::string get_string_from_bool(bool b)
 {
@@ -83,7 +94,7 @@ glm::quat get_rotation_from_model_matrix(glm::mat4 model_matrix)
 //Credit: https://stackoverflow.com/questions/180947/base64-decode-snippet-in-c/13935718
 std::string base64_decode(const void* data, const std::size_t len)
 {
-	static const int base64_index[256] = {
+	const int base64_index[256] = {
 	0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
 	0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
 	0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 62, 63, 62, 62, 63, 52, 53, 54, 55,
@@ -166,6 +177,41 @@ Vertices get_2d_vertices()
 	vertices.add_color_attributes(color_vector);
 	vertices.add_texcoord_attributes(texcoord_vector);
 
+	return vertices;
+}
+
+std::vector<GLushort> get_3d_ebo_values()
+{
+	return std::vector<GLushort> //ex du rubix cube avec la face verte au-dessus et la face rouge face à nous
+	{
+		0, 1, 4, 4, 5, 1, //face rouge
+		6, 2, 0, 6, 4, 0, //face jaune
+		7, 3, 1, 7, 5, 1, //face blanche
+		2, 3, 6, 6, 7, 3, //face orange
+		6, 4, 5, 6, 7, 5, //face verte
+		0, 1, 2, 2, 3, 1 //face bleue
+	};
+}
+
+Vertices get_3d_vertices()
+{
+	std::vector<glm::vec3> position_vector //ex du rubix cube avec la face verte au-dessus et la face rouge face à nous
+	{
+		//face bleue
+		glm::vec3(-0.5f, -0.5f,  0.5f), //0 : en bas à gauche
+		glm::vec3( 0.5f, -0.5f,  0.5f), //1 : en bas à droite
+		glm::vec3(-0.5f, -0.5f, -0.5f), //2 : en haut à gauche
+		glm::vec3( 0.5f, -0.5f, -0.5f), //3 : en haut à droite
+		
+		//face verte
+		glm::vec3(-0.5f, 0.5f,  0.5f), //4 : en bas à gauche
+		glm::vec3( 0.5f, 0.5f,  0.5f), //5 : en bas à droite
+		glm::vec3(-0.5f, 0.5f, -0.5f), //6 : en haut à gauche
+		glm::vec3( 0.5f, 0.5f, -0.5f), //7 : en haut à droite
+	};
+
+	Vertices vertices(8);
+	vertices.add_position_attributes(position_vector);
 	return vertices;
 }
 

@@ -25,6 +25,13 @@ void Camera::update(float delta_time)
 		shader_program->set_uniform_matrix_4fv("view_matrix_", glm::value_ptr(view_matrix_));
 		shader_program->set_uniform_3f("view_position_", camera_position_);
 	}
+
+	//TODO
+	if(ShaderProgram* shader_program = resource::bind_shader("Skybox"); shader_program != nullptr)
+	{
+		shader_program->set_uniform_matrix_4fv("view_matrix_", glm::value_ptr(glm::mat4(glm::mat3(view_matrix_)))); //le cast sert à retirer la translation de la view matrix
+		//shader_program->set_uniform_3f("view_position_", camera_position_);
+	}
 }
 
 glm::vec3 Camera::get_camera_forward() const

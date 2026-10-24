@@ -45,10 +45,12 @@ void Backend::init_pixel_processing_state() const
 	if(pixel_processing_state_.stencil_test_)
 	{
 		glEnable(GL_STENCIL_TEST);
+		glClearStencil(pixel_processing_state_.stencil_clear_value_);
 	}
 	if(pixel_processing_state_.depth_test_)
 	{
 		glEnable(GL_DEPTH_TEST);
+		glClearDepth(pixel_processing_state_.depth_clear_value_);
 	}
 }
 
@@ -186,6 +188,16 @@ void Backend::depth_test(bool enabled)
 			glDisable(GL_DEPTH_TEST);
 		}
 		pixel_processing_state_.depth_test_ = enabled;
+	}
+}
+
+void Backend::depth_write(bool enabled)
+{
+	GLboolean depth_mask = enabled ? GL_TRUE : GL_FALSE;
+	if(pixel_processing_state_.depth_buffer_writing_ != depth_mask)
+	{
+		glDepthMask(depth_mask);
+		pixel_processing_state_.depth_buffer_writing_ = depth_mask;
 	}
 }
 

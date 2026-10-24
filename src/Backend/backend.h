@@ -22,6 +22,7 @@ class Backend
 		void end_frame() const;
 		void stencil_test(bool enabled);
 		void depth_test(bool enabled);
+		void depth_write(bool enabled);
 		glm::ivec2 get_window_size() const;
 		void swap_window_buffers() const;
 		void update_window_fps(unsigned int frame_count_this_second) const;
@@ -39,10 +40,12 @@ class Backend
 			GLenum stencil_sfail_ = GL_KEEP;
 			GLenum stencil_dpfail_ = GL_KEEP;
 			GLenum stencil_dppass_ = GL_KEEP;
+			GLint stencil_clear_value_ = 0;
 
 			bool depth_test_ = true;
 			GLboolean depth_buffer_writing_ = GL_TRUE;
 			GLenum depth_func_ = GL_LESS;
+			GLclampd depth_clear_value_ = 1.0;
 		};
 
 		void init_pixel_processing_state() const;

@@ -7,12 +7,14 @@
 
 struct TextureInfo
 {
-	GLuint id_ = 0; //id returned when calling glCreateTextures
+	GLuint id_ = 0; //id retourné par la fonction glCreateTextures()
+	GLenum target_ = GL_TEXTURE_2D;
 	GLuint texture_unit_ = 0;
 	GLint mag_filter_ = GL_LINEAR;
 	GLint min_filter_ = GL_NEAREST_MIPMAP_LINEAR;
 	GLint wrap_s_ = GL_REPEAT;
 	GLint wrap_t_ = GL_REPEAT;
+	GLint wrap_r_ = GL_REPEAT;
 };
 
 using ImagePath = std::string; //std::string = chemin de l'image

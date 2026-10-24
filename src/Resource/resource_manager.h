@@ -23,6 +23,7 @@ Texture* get_texture(std::size_t id); //ne retourne pas de const Texture* car la
 std::size_t add_mesh(std::string_view file_name, int32_t mesh_index, Mesh::Info mesh_info);
 std::size_t add_2d_text(std::string_view text, const sdl::Surface& surface);
 std::size_t add_2d_image(std::string_view path);
+std::size_t add_skybox(std::string_view directory_path);
 const Mesh* get_mesh(std::size_t id);
 
 std::size_t add_aabb_mesh(std::string_view file_name, int32_t mesh_index, Mesh::Info aabb_mesh_info);

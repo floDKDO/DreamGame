@@ -415,7 +415,7 @@ Vertices get_aabb_vertices(const tg3_model& model_tg3, const tg3_primitive& prim
 		glm::vec3(min_values.x, max_values.y, max_values.z)  //7 : top face, down left
 	};
 
-	Vertices vertices(vertices_number);
+	Vertices vertices(vertices_number); //TODO : remplacer "vertices_number" par le nombre d'entrées de position_attributes (si oui, le faire partout)
 	vertices.add_position_attributes(position_attributes);
 	return vertices;
 }

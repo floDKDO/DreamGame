@@ -15,7 +15,7 @@ Game::Game()
 	running_(true), test_map_("resources/maps/corridor.gltf"),
 	gizmo_(nullptr), test_image_("resources/images/nakazato.jpg"),
 	test_image_2_("resources/images/yuri_tea.png"),
-	textbox_(input_manager_)
+	textbox_(input_manager_), skybox_("resources/images/skybox")
 {
 	std::size_t gizmo_model_id = resource::add_model("resources/models/axis_gizmo.glb");
 	gizmo_ = resource::get_model(gizmo_model_id);
@@ -104,16 +104,21 @@ void Game::handle_events()
 
 void Game::render()
 {
+	backend_.depth_write(false); //comme les depth values de la skybox sont sûrement plus petites que celles des modèles, on désactive l'écriture dans le depth buffer (il reste rempli de 1.0 donc les modèles pourront s'afficher)
+	resource::bind_shader("Skybox");
+	skybox_.render();
+	backend_.depth_write(true);
+
 	resource::bind_shader("2d");
 	textbox_.render();
 	//test_image_.render();
-	test_image_2_.render();
+	//test_image_2_.render();
 
-	resource::bind_shader("Phong");
+	/*resource::bind_shader("Phong");
 	for(auto& [model_id, model] : resource::get_models())
 	{
 		model.render();
-	}
+	}*/
 
 	audio::set_listener_position(player_.get_model()->get_position());
 	audio::set_listener_orientation(camera_.get_camera_forward(), camera_.get_camera_up());

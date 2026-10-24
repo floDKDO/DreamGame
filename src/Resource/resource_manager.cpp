@@ -91,6 +91,16 @@ std::size_t add_2d_image(std::string_view path)
 	return add_mesh(path, -1, Mesh::Info{utils::get_2d_ebo_values(), utils::get_2d_vertices(), {texture_id}, GL_TRIANGLES});
 }
 
+//TODO : renommer add_cubemap ?
+std::size_t add_skybox(std::string_view directory_path) //TODO : directory_path ou vector de paths ?
+{
+	TextureInfo texture_info{};
+	texture_info.target_ = GL_TEXTURE_CUBE_MAP;
+	Texture texture{texture_info, ImageTexture{std::string(directory_path)}, true}; //TODO : mettre GL_CLAMP_TO_EDGE
+	std::size_t texture_id = add_texture(texture);
+	return add_mesh(directory_path, -1, Mesh::Info{utils::get_3d_ebo_values(), utils::get_3d_vertices(), {texture_id}, GL_TRIANGLES});
+}
+
 const Mesh* get_mesh(std::size_t id)
 {
 	if(meshes_.ids_.count(id))

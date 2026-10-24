@@ -4,10 +4,8 @@
 #include <glm/gtc/type_ptr.hpp>
 
 Image::Image(std::string_view path)
-	: position_(glm::vec2(0.0f)), angle_(0.0f)
+	: position_(glm::vec2(0.0f)), angle_(0.0f), mesh_id_(resource::add_2d_image(path))
 {
-	mesh_id_ = resource::add_2d_image(path);
-
 	const Mesh* mesh = resource::get_mesh(mesh_id_);
 	initial_texture_width_ = mesh->get_initial_texture_width();
 	initial_texture_height_ = mesh->get_initial_texture_height();
