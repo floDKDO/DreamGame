@@ -29,6 +29,7 @@ float Image::get_height() const
 	return size_.y;
 }
 
+//convention : l'origine est en haut à gauche de l'écran
 void Image::set_position(glm::vec2 position)
 {
 	position_ = position;

@@ -18,6 +18,10 @@ class Backend
 		Backend& operator=(const Backend&) = delete;
 		Backend& operator=(Backend&&) = delete;
 
+		void begin_frame() const;
+		void end_frame() const;
+		void stencil_test(bool enabled);
+		void depth_test(bool enabled);
 		glm::ivec2 get_window_size() const;
 		void swap_window_buffers() const;
 		void update_window_fps(unsigned int frame_count_this_second) const;
@@ -25,6 +29,25 @@ class Backend
 		void reset_opengl_states() const;
 
 	private:
+		struct PixelProcessingState
+		{
+			bool stencil_test_ = false;
+			GLuint stencil_buffer_writing_ = 0xFFFFFFFF;
+			GLenum stencil_func_ = GL_ALWAYS;
+			GLint stencil_ref_ = 0;
+			GLuint stencil_mask_ = 0xFFFFFFFF;
+			GLenum stencil_sfail_ = GL_KEEP;
+			GLenum stencil_dpfail_ = GL_KEEP;
+			GLenum stencil_dppass_ = GL_KEEP;
+
+			bool depth_test_ = true;
+			GLboolean depth_buffer_writing_ = GL_TRUE;
+			GLenum depth_func_ = GL_LESS;
+		};
+
+		void init_pixel_processing_state() const;
+		void init_viewport() const;
+		void init_debug() const;
 		void init_shaders() const;
 		void init_imgui() const;
 		void destroy_imgui() const;
@@ -37,6 +60,7 @@ class Backend
 		GLenum glew_;
 		ALCdevice* device_;
 		ALCcontext* context_;
+		PixelProcessingState pixel_processing_state_;
 };
 
 void GLAPIENTRY message_callback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, [[maybe_unused]] const void* user_param);

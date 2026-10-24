@@ -12,30 +12,16 @@
 #include <iostream>
 
 Backend::Backend()
-	: sdl_(), sdl_ttf_(), window_(), glew_(glewInit())
+	: sdl_(), sdl_ttf_(), window_(), glew_(glewInit()), pixel_processing_state_()
 {
 	init_shaders();
-
-	int w, h;
-	window_.get_size(&w, &h);
-	glViewport(0, 0, w, h);
-
-	window_.set_relative_mouse_mode(true);
-
-	//stbi_set_flip_vertically_on_load(true); //TODO : commenté car la texture de la classe Image s'affiche à l'envers quand cette ligne est active
-
-	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_DEBUG_OUTPUT);
-	glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-
-	glDebugMessageCallback(message_callback, nullptr);
-	glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_NOTIFICATION, 0, nullptr, GL_FALSE); //désactiver les messages de sévérité "Notification"
-	//glDebugMessageControl(GL_DONT_CARE, GL_DEBUG_TYPE_PUSH_GROUP, GL_DEBUG_SEVERITY_NOTIFICATION, 0, nullptr, GL_TRUE); //activer les messages "Push Group"
-	//glDebugMessageControl(GL_DONT_CARE, GL_DEBUG_TYPE_POP_GROUP, GL_DEBUG_SEVERITY_NOTIFICATION, 0, nullptr, GL_TRUE); //activer les messages "Pop Group"
-
+	init_viewport();
+	init_pixel_processing_state();
+	init_debug();
 	//init_imgui(); //TODO
 	init_openal();
 
+	//stbi_set_flip_vertically_on_load(true); //TODO : commenté car la texture de la classe Image s'affiche à l'envers quand cette ligne est active => logique car l'origine est en haut à gauche donc pas besoin de flip
 	print_opengl_stuff();
 }
 
@@ -52,6 +38,37 @@ void Backend::handle_events(const SDL_Event& e)
 	{
 		glViewport(0, 0, e.window.data1, e.window.data2);
 	}
+}
+
+void Backend::init_pixel_processing_state() const
+{
+	if(pixel_processing_state_.stencil_test_)
+	{
+		glEnable(GL_STENCIL_TEST);
+	}
+	if(pixel_processing_state_.depth_test_)
+	{
+		glEnable(GL_DEPTH_TEST);
+	}
+}
+
+void Backend::init_viewport() const
+{
+	window_.set_relative_mouse_mode(true);
+
+	int w, h;
+	window_.get_size(&w, &h);
+	glViewport(0, 0, w, h);
+}
+
+void Backend::init_debug() const
+{
+	glEnable(GL_DEBUG_OUTPUT);
+	glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+	glDebugMessageCallback(message_callback, nullptr);
+	glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_NOTIFICATION, 0, nullptr, GL_FALSE); //désactiver les messages de sévérité "Notification"
+	//glDebugMessageControl(GL_DONT_CARE, GL_DEBUG_TYPE_PUSH_GROUP, GL_DEBUG_SEVERITY_NOTIFICATION, 0, nullptr, GL_TRUE); //activer les messages "Push Group"
+	//glDebugMessageControl(GL_DONT_CARE, GL_DEBUG_TYPE_POP_GROUP, GL_DEBUG_SEVERITY_NOTIFICATION, 0, nullptr, GL_TRUE); //activer les messages "Pop Group"
 }
 
 void Backend::init_shaders() const
@@ -121,6 +138,54 @@ void Backend::destroy_openal()
 	if(!alcCloseDevice(device_))
 	{
 		logging::log("alcCloseDevice() returned an error!", logging::Severity::CRITICAL);
+	}
+}
+
+void Backend::begin_frame() const
+{
+	glClearColor(0.2f, 0.3f, 0.3f, 1.0f); //TODO : hardcodé
+
+	GLbitfield clear_bits = GL_COLOR_BUFFER_BIT;
+	clear_bits |= pixel_processing_state_.depth_test_ ? GL_DEPTH_BUFFER_BIT : 0x00000000;
+	clear_bits |= pixel_processing_state_.depth_test_ ? GL_STENCIL_BUFFER_BIT : 0x00000000;
+	glClear(clear_bits);
+}
+
+void Backend::end_frame() const
+{
+	swap_window_buffers();
+	reset_opengl_states();
+}
+
+void Backend::stencil_test(bool enabled)
+{
+	if(pixel_processing_state_.stencil_test_ != enabled)
+	{
+		if(enabled)
+		{
+			glEnable(GL_STENCIL_TEST);
+		}
+		else
+		{
+			glDisable(GL_STENCIL_TEST);
+		}
+		pixel_processing_state_.stencil_test_ = enabled;
+	}
+}
+
+void Backend::depth_test(bool enabled)
+{
+	if(pixel_processing_state_.depth_test_ != enabled)
+	{
+		if(enabled)
+		{
+			glEnable(GL_DEPTH_TEST);
+		}
+		else
+		{
+			glDisable(GL_DEPTH_TEST);
+		}
+		pixel_processing_state_.depth_test_ = enabled;
 	}
 }
 

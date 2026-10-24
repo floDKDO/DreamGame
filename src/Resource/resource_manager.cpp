@@ -24,10 +24,10 @@ std::size_t get_id_from_font_id(sdl::Font::Id font_id);
 
 void destroy_all_resources()
 {
-	meshes_.clear();
-	aabb_meshes_.clear();
 	shader_programs_.clear();
 	models_.clear();
+	meshes_.clear();
+	aabb_meshes_.clear();
 	fonts_.clear();
 	textures_.clear();
 }
@@ -229,7 +229,6 @@ std::size_t add_font(std::string_view font_path, float font_size)
 	return fonts_.insert_resource(font_id, sdl::Font(font_path, font_size));
 }
 
-//TODO : peut éventuellement retourner une police par défaut
 sdl::Font* get_font(std::size_t id)
 {
 	if(fonts_.ids_.count(id))

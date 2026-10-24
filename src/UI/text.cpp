@@ -41,6 +41,7 @@ void Text::init_surface_from_text()
 	}
 }
 
+//convention : l'origine est en haut à gauche de l'écran
 void Text::set_position(glm::vec2 position)
 {
 	position_ = position;

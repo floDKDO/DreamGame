@@ -141,7 +141,7 @@ Vertices get_2d_vertices()
 {
 	std::vector<glm::vec3> position_vector //on simule un vec2 avec un vec3 => la composante z vaut donc 0.0f
 	{
-		glm::vec3(0.0f, 1.0f, 0.0f),
+		glm::vec3(0.0f, 1.0f, 0.0f), //carré de coté 1 pixel => la multiplication par une size fonctionne (ex avec size = (300, 200) : (1, 1) * (300, 200) = (300, 200))
 		glm::vec3(1.0f, 0.0f, 0.0f),
 		glm::vec3(0.0f, 0.0f, 0.0f),
 		glm::vec3(1.0f, 1.0f, 0.0f)

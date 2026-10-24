@@ -60,7 +60,10 @@ void Game::run()
 		////////////////////////////////////////////////////////////////////////////////////////
 
 		update(delta_time);
+
+		backend_.begin_frame();
 		render();
+		backend_.end_frame();
 
 		update_fps_count(last_fps_refresh, frame_count_this_second);
 		last_frame = begin_current_frame;
@@ -101,13 +104,10 @@ void Game::handle_events()
 
 void Game::render()
 {
-	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
 	resource::bind_shader("2d");
 	textbox_.render();
 	//test_image_.render();
-	//test_image_2_.render();
+	test_image_2_.render();
 
 	resource::bind_shader("Phong");
 	for(auto& [model_id, model] : resource::get_models())
@@ -123,9 +123,6 @@ void Game::render()
 	//ImGui::Render();
 	//ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 	////////////////////////////////////////////////////////////////////////////////////////
-
-	backend_.swap_window_buffers();
-	backend_.reset_opengl_states();
 }
 
 void Game::update_fps_count(Uint64& last_fps_refresh, unsigned int& frame_count_this_second) const
