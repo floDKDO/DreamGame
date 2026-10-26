@@ -1,8 +1,8 @@
 #pragma once
 
-#include <string_view>
+#include "Image/image_loader.h"
 
-//TODO : renommer add_cubemap ?
+//TODO : renommer en Cubemap ?
 class Skybox
 {
 	public:
@@ -11,5 +11,12 @@ class Skybox
 		void render() const;
 
 	private:
+		ImageLoader back_;
+		ImageLoader bottom_;
+		ImageLoader front_;
+		ImageLoader left_;
+		ImageLoader right_;
+		ImageLoader top_;
+
 		std::size_t mesh_id_;
 };

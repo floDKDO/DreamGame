@@ -1,7 +1,7 @@
 #pragma once
 
 #include "text.h"
-#include "Render/image.h"
+#include "Image/image.h"
 #include "Input/input_manager.h"
 
 #include <vector>

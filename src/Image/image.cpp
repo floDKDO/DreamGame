@@ -4,13 +4,9 @@
 #include <glm/gtc/type_ptr.hpp>
 
 Image::Image(std::string_view path)
-	: position_(glm::vec2(0.0f)), angle_(0.0f), mesh_id_(resource::add_2d_image(path))
-{
-	const Mesh* mesh = resource::get_mesh(mesh_id_);
-	initial_texture_width_ = mesh->get_initial_texture_width();
-	initial_texture_height_ = mesh->get_initial_texture_height();
-	size_ = glm::vec2(initial_texture_width_, initial_texture_height_);
-}
+	: image_loader_(path), position_(glm::vec2(0.0f)), size_(glm::vec2(image_loader_.get_initial_width(), image_loader_.get_initial_height())),
+	angle_(0.0f), mesh_id_(resource::add_2d_image(path, image_loader_))
+{}
 
 glm::vec2 Image::get_position() const
 {
@@ -25,6 +21,11 @@ float Image::get_width() const
 float Image::get_height() const
 {
 	return size_.y;
+}
+
+const ImageLoader& Image::get_image_loader() const
+{
+	return image_loader_;
 }
 
 //convention : l'origine est en haut à gauche de l'écran

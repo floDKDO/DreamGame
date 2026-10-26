@@ -38,6 +38,7 @@ class Mesh
 		int get_initial_texture_height() const;
 
 	private:
+		void load_mesh();
 		void load_vertex_attribute(GLuint vbo_binding_index, attribute::Name attribute_name);
 		unsigned char* load_image(const ImageTexture& image_texture, int& width, int& height, int& channels) const;
 		void create_ebo();
@@ -51,7 +52,6 @@ class Mesh
 		void set_texture_content(Texture* texture, int width, int height, void* pixels) const;
 		void set_cubemap_content(Texture* texture) const;
 		void create_textures();
-		void load_mesh();
 
 		Id mesh_id_;
 		Info mesh_info_;

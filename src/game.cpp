@@ -109,8 +109,8 @@ void Game::render()
 	skybox_.render();
 	backend_.depth_write(true);
 
-	resource::bind_shader("2d");
-	textbox_.render();
+	//resource::bind_shader("2d");
+	//textbox_.render();
 	//test_image_.render();
 	//test_image_2_.render();
 

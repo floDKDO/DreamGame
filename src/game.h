@@ -6,7 +6,7 @@
 #include "Camera/camera.h"
 #include "Player/player.h"
 #include "Input/input_manager.h"
-#include "Render/image.h"
+#include "Image/image.h"
 #include "Render/skybox.h"
 #include "UI/textbox.h"
 

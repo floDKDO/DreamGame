@@ -48,6 +48,14 @@ Mesh::~Mesh()
 	destroy_all_buffers();
 }
 
+void Mesh::load_mesh()
+{
+	create_ebo();
+	create_vbo();
+	create_vao();
+	create_textures();
+}
+
 void Mesh::load_vertex_attribute(GLuint vbo_binding_index, attribute::Name attribute_name)
 {
 	attribute::Info attribute_info = Vertex::get_attribute_info(attribute_name);
@@ -59,6 +67,7 @@ void Mesh::load_vertex_attribute(GLuint vbo_binding_index, attribute::Name attri
 	glPopDebugGroup();
 }
 
+//TODO : inutile ?
 unsigned char* Mesh::load_image(const ImageTexture& image_texture, int& width, int& height, int& channels) const
 {
 	unsigned char* pixels;
@@ -87,7 +96,7 @@ void Mesh::create_ebo()
 {
 	glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 1, -1, "Entering EBO creation and storage code.");
 	glCreateBuffers(1, &ebo_);
-	glNamedBufferStorage(ebo_, mesh_info_.ebo_values_.size() * sizeof(mesh_info_.ebo_values_[0]), mesh_info_.ebo_values_.data(), GL_DYNAMIC_STORAGE_BIT); //TODO : voir pour le dernier argument
+	glNamedBufferStorage(ebo_, mesh_info_.ebo_values_.size() * sizeof(GLushort), mesh_info_.ebo_values_.data(), GL_DYNAMIC_STORAGE_BIT); //TODO : voir pour le dernier argument
 	glPopDebugGroup();
 }
 
@@ -187,7 +196,7 @@ void Mesh::set_texture_parameters(const Texture* texture) const
 	glPopDebugGroup();
 }
 
-void Mesh::set_texture_content(Texture* texture, int width, int height, void* pixels) const
+void Mesh::set_texture_content(Texture* texture, int width, int height, void* pixels) const //TODO : renommer set_2d_texture_content
 {
 	GLenum format = GL_RGBA;
 	if(std::holds_alternative<ImageTexture>(texture->texture_))
@@ -198,87 +207,68 @@ void Mesh::set_texture_content(Texture* texture, int width, int height, void* pi
 
 	GLint texture_level = 0; //on ne spécifie que la texture de niveau 0 et on génère automatiquement les mipmaps avec glGenerateTextureMipmap()
 	glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 1, -1, "Entering texture content code.");
-	if(texture->info_.target_ == GL_TEXTURE_2D)
-	{
-		glTextureSubImage2D(texture->info_.id_, texture_level, 0, 0, width, height, format, GL_UNSIGNED_BYTE, pixels); //ici (cas .png), il faut mettre GL_RGBA et non GL_RGBA8, ce dernier n'étant pas supporté pour ce paramètre
-	}
+	glTextureSubImage2D(texture->info_.id_, texture_level, 0, 0, width, height, format, GL_UNSIGNED_BYTE, pixels); //ici (cas .png), il faut mettre GL_RGBA et non GL_RGBA8, ce dernier n'étant pas supporté pour ce paramètre
 	glGenerateTextureMipmap(texture->info_.id_);
 	glPopDebugGroup();
 }
 
 void Mesh::set_cubemap_content(Texture* texture) const
 {
-	ImageTexture& image_texture = std::get<ImageTexture>(texture->texture_);
-	//if(std::holds_alternative<ImagePath>(image_texture.image_value_)) //TODO : toujours vrai normalement
-	//{
-		const ImagePath& image_path = std::get<ImagePath>(image_texture.image_value_);
-		std::vector<std::string> files = utils::get_files_from_directory(image_path);
-	//}
-
+	CubeMapTexture& cubemap_texture = std::get<CubeMapTexture>(texture->texture_);
+	int width = cubemap_texture.back_.initial_width_; //Comme toutes les images de la cubemap ont la même width / height / nombre de channels, on peut récupérer les infos de n'importe laquelle (ici back)
+	int height = cubemap_texture.back_.initial_height_;
+	int channels = cubemap_texture.back_.channels_;
+	GLenum format = gltf::get_base_enum_from_channels(channels);
 	GLint texture_level = 0; //on ne spécifie que la texture de niveau 0 et on génère automatiquement les mipmaps avec glGenerateTextureMipmap()
+
 	glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 1, -1, "Entering cubemap content code.");
-	for(GLint i = 0; i < 6; ++i) //TODO : créer une constante
-	{
-		int width, height, channels;
-		unsigned char* pixels;
-		if((pixels = stbi_load(files[i].c_str(), &width, &height, &channels, 0)) == nullptr)
-		{
-			logging::log("stbi_load() returned nullptr: " + std::string(stbi_failure_reason()), logging::Severity::CRITICAL);
-			exit(EXIT_FAILURE);
-		}
+	glTextureSubImage3D(texture->info_.id_, texture_level, 0, 0, 5, width, height, 1, format, GL_UNSIGNED_BYTE, cubemap_texture.back_.pixels_); //TODO : attention, la valeur de zoffset est 5 et non 4
+	glTextureSubImage3D(texture->info_.id_, texture_level, 0, 0, 3, width, height, 1, format, GL_UNSIGNED_BYTE, cubemap_texture.bottom_.pixels_);
+	glTextureSubImage3D(texture->info_.id_, texture_level, 0, 0, 4, width, height, 1, format, GL_UNSIGNED_BYTE, cubemap_texture.front_.pixels_); //TODO : attention, la valeur est 4 et non 5
+	glTextureSubImage3D(texture->info_.id_, texture_level, 0, 0, 1, width, height, 1, format, GL_UNSIGNED_BYTE, cubemap_texture.left_.pixels_);
+	glTextureSubImage3D(texture->info_.id_, texture_level, 0, 0, 0, width, height, 1, format, GL_UNSIGNED_BYTE, cubemap_texture.right_.pixels_);
+	glTextureSubImage3D(texture->info_.id_, texture_level, 0, 0, 2, width, height, 1, format, GL_UNSIGNED_BYTE, cubemap_texture.top_.pixels_);
+	//TODO : l'idéal serait d'avoir des constantes pour le champ zoffset
 
-		if(i == 0) //TODO : dégueulasse
-		{
-			std::cout << "Width: " << width << ", height: " << height << std::endl;
-			set_texture_storage(texture, width, height);
-		}
+	//for(const ImageTexture& image_texture : cubemap_texture.images_)
+	//{
+	//	const ImagePath& image_path = std::get<ImagePath>(image_texture.image_value_);
 
-		//TODO : ce code fonctionne uniquement si la convention de nommage des fichiers est respectée
-		GLint z_offset = 0;
-		if(files[i].find("right") != std::string::npos)
-		{
-			z_offset = GL_TEXTURE_CUBE_MAP_POSITIVE_X;
-			z_offset = 0;
-		}
-		else if(files[i].find("left") != std::string::npos)
-		{
-			z_offset = GL_TEXTURE_CUBE_MAP_NEGATIVE_X;
-			z_offset = 1;
-		}
-		else if(files[i].find("top") != std::string::npos)
-		{
-			z_offset = GL_TEXTURE_CUBE_MAP_POSITIVE_Y;
-			z_offset = 2;
-		}
-		else if(files[i].find("bottom") != std::string::npos)
-		{
-			z_offset = GL_TEXTURE_CUBE_MAP_NEGATIVE_Y;
-			z_offset = 3;
-		}
-		else if(files[i].find("back") != std::string::npos)
-		{
-			z_offset = GL_TEXTURE_CUBE_MAP_POSITIVE_Z;
-			z_offset = 5; //TODO : attention, la valeur est 5 et non 4
-		}
-		else if(files[i].find("front") != std::string::npos)
-		{
-			z_offset = GL_TEXTURE_CUBE_MAP_NEGATIVE_Z;
-			z_offset = 4; //TODO : attention, la valeur est 4 et non 5
-		}
-		else
-		{
-			std::cout << "****************************************\n";
-		}
+	//	//TODO : ce code fonctionne uniquement si la convention de nommage des fichiers est respectée
+	//	//TODO : mettre les if dans une méthode
+	//	GLint z_offset = 0;
+	//	if(image_path.find("right") != std::string::npos)
+	//	{
+	//		z_offset = 0;
+	//	}
+	//	else if(image_path.find("left") != std::string::npos)
+	//	{
+	//		z_offset = 1;
+	//	}
+	//	else if(image_path.find("top") != std::string::npos)
+	//	{
+	//		z_offset = 2;
+	//	}
+	//	else if(image_path.find("bottom") != std::string::npos)
+	//	{
+	//		z_offset = 3;
+	//	}
+	//	else if(image_path.find("back") != std::string::npos)
+	//	{
+	//		z_offset = 5; //TODO : attention, la valeur est 5 et non 4
+	//	}
+	//	else if(image_path.find("front") != std::string::npos)
+	//	{
+	//		z_offset = 4; //TODO : attention, la valeur est 4 et non 5
+	//	}
+	//	else
+	//	{
+	//		std::cout << "****************************************\n";
+	//	}
 
-		GLenum format = gltf::get_base_enum_from_channels(channels);
-		//std::cout << "channels: " << format << ", z_offset: " << z_offset << ", width : " << width << ", height : " << height << ", format : " << format << std::endl;
-		glTextureSubImage3D(texture->info_.id_, texture_level, 0, 0, z_offset, width, height, 1, format, GL_UNSIGNED_BYTE, pixels); //TODO : si j'utilise i, z_offset est inutile
-		stbi_image_free(pixels);
-
-		image_texture.channels_ = channels; //TODO : ces 3 lignes pourraient n'être exécutées qu'une seule fois
-		image_texture.initial_width_ = width;
-		image_texture.initial_height_ = height;
-	}
+	//	GLenum format = gltf::get_base_enum_from_channels(channels);
+	//	glTextureSubImage3D(texture->info_.id_, texture_level, 0, 0, z_offset, width, height, 1, format, GL_UNSIGNED_BYTE, image_texture.pixels_); //TODO : si j'utilise i, z_offset est inutile
+	//}
 	glGenerateTextureMipmap(texture->info_.id_);
 	glPopDebugGroup();
 }
@@ -302,68 +292,41 @@ void Mesh::create_textures()
 				continue;
 			}
 		}
-		
-		if(texture->info_.target_ != GL_TEXTURE_CUBE_MAP)
-		{
-			int width, height;
-			unsigned char* pixels = nullptr;
-			if(std::holds_alternative<ImageTexture>(texture->texture_))
-			{
-				ImageTexture& image_texture = std::get<ImageTexture>(texture->texture_);
-				int channels;
-				pixels = load_image(image_texture, width, height, channels);
-				image_texture.channels_ = channels;
-				image_texture.initial_width_ = width;
-				image_texture.initial_height_ = height;
-			}
-			else if(std::holds_alternative<TextTexture>(texture->texture_))
-			{
-				const TextTexture& text_texture = std::get<TextTexture>(texture->texture_);
-				pixels = static_cast<unsigned char*>(text_texture.pixels_);
-				width = text_texture.width_;
-				height = text_texture.height_;
-			}
-			else //cas qui n'arrive jamais
-			{
-				width = 0;
-				height = 0;
-			}
 
-			init_texture(texture);
+		init_texture(texture);
+
+		//TODO : essayer de factoriser
+		if(std::holds_alternative<ImageTexture>(texture->texture_))
+		{
+			ImageTexture& image_texture = std::get<ImageTexture>(texture->texture_);
+			unsigned char* pixels = image_texture.pixels_;
+			int width = image_texture.initial_width_;
+			int height = image_texture.initial_height_;
+
 			set_texture_storage(texture, width, height);
 			set_texture_content(texture, width, height, pixels);
-
-			if(std::holds_alternative<ImageTexture>(texture->texture_))
-			{
-				stbi_image_free(pixels);
-			}
 		}
-		else
+		else if(std::holds_alternative<TextTexture>(texture->texture_))
 		{
-			//TODO : cubemaps => lier avec le reste du code
-			//stbi_load(); //à faire 6 fois (une fois par face de la cube map)
-			//modif des champs de image_texture; //à faire une seule fois pour une cube map (toutes les textures de la cube map ont les mêmes caractéristiques)
-			//init_texture(texture); //à faire une seule fois pour une cube map
-			//set_texture_storage(texture, width, height); //à faire une seule fois pour une cube map
-			//glGenerateTextureMipmap(texture->info_.id_); //dans méthode set_texture_content() : à faire une seule fois pour une cube map
-			//glTextureSubImage3D(texture->info_.id_, texture_level, 0, 0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, width, height, 1, format, GL_UNSIGNED_BYTE, pixels); //dans méthode set_texture_content() : à faire 6 fois (une fois par face de la cube map)
-			//stbi_image_free(pixels); //à faire 6 fois (une fois par face de la cube map)
+			const TextTexture& text_texture = std::get<TextTexture>(texture->texture_);
+			unsigned char* pixels = static_cast<unsigned char*>(text_texture.pixels_);
+			int width = text_texture.width_;
+			int height = text_texture.height_;
 
-			init_texture(texture);
-			//for(GLint i = 0; i < 6; ++i)
-			{
-				set_cubemap_content(texture);
-			}
+			set_texture_storage(texture, width, height);
+			set_texture_content(texture, width, height, pixels);
+		}
+		else if(std::holds_alternative<CubeMapTexture>(texture->texture_))
+		{
+			CubeMapTexture& cubemap_texture = std::get<CubeMapTexture>(texture->texture_);
+			int width = cubemap_texture.back_.initial_width_; //Comme toutes les images de la cubemap ont la même width / height / nombre de channels, on peut récupérer les infos de n'importe laquelle (ici back)
+			int height = cubemap_texture.back_.initial_height_;
+			//int channels = cubemap_texture.back_.channels_;
+
+			set_texture_storage(texture, width, height);
+			set_cubemap_content(texture);
 		}
 	}
-}
-
-void Mesh::load_mesh()
-{
-	create_ebo();
-	create_vbo();
-	create_vao();
-	create_textures();
 }
 
 void Mesh::edit_text_texture(int new_width, int new_height, void* new_pixels) const
@@ -416,10 +379,7 @@ void Mesh::render() const
 			{
 				logging::log("Only one texture by mesh for now!", logging::Severity::WARNING);
 			}
-			//std::cout << "BIND\n";
 			glBindTextureUnit(texture->info_.texture_unit_, texture->info_.id_);
-			//std::cout << "END BIND\n";
-			//std::cout << "SAMPLER: " << shader_program->get_shader_program_name() << ", num: " << mesh_info_.texture_keys_.size() << std::endl;
 			if(texture->info_.target_ != GL_TEXTURE_CUBE_MAP)
 			{
 				shader_program->set_uniform_1i("texture_sampler0_", texture->info_.texture_unit_);

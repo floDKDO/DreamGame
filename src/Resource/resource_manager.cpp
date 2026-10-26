@@ -1,9 +1,10 @@
 #include "resource_manager.h"
 #include "model.h"
 #include "Common/utils.h"
-//#include "Logging/logging.h"
+#include "Logging/logging.h"
 #include "resources.h"
 
+#include <stb/stb_image.h>
 #include <string>
 #include <iostream>
 
@@ -84,21 +85,38 @@ std::size_t add_2d_text(std::string_view text, const sdl::Surface& surface)
 	return add_mesh(text, -1, Mesh::Info{utils::get_2d_ebo_values(), utils::get_2d_vertices(), {texture_id}, GL_TRIANGLES});
 }
 
-std::size_t add_2d_image(std::string_view path)
+std::size_t add_2d_image(std::string_view path, const ImageLoader& image_loader)
 {
-	Texture texture{TextureInfo{}, ImageTexture{std::string(path)}, false};
+	Texture texture{TextureInfo{}, ImageTexture{std::string(path), image_loader.get_initial_width(), image_loader.get_initial_height(), image_loader.get_channels(), image_loader.get_pixels()}};
 	std::size_t texture_id = add_texture(texture);
 	return add_mesh(path, -1, Mesh::Info{utils::get_2d_ebo_values(), utils::get_2d_vertices(), {texture_id}, GL_TRIANGLES});
 }
 
 //TODO : renommer add_cubemap ?
-std::size_t add_skybox(std::string_view directory_path) //TODO : directory_path ou vector de paths ?
+//TODO : regrouper les ImageLoaders
+std::size_t add_skybox(std::string_view directory_path, const ImageLoader& image_loader_back, const ImageLoader& image_loader_bottom, const ImageLoader& image_loader_front, const ImageLoader& image_loader_left, const ImageLoader& image_loader_right, const ImageLoader& image_loader_top)
 {
-	TextureInfo texture_info{};
+	TextureInfo texture_info;
 	texture_info.target_ = GL_TEXTURE_CUBE_MAP;
-	Texture texture{texture_info, ImageTexture{std::string(directory_path)}, true}; //TODO : mettre GL_CLAMP_TO_EDGE
+	texture_info.wrap_s_ = GL_CLAMP_TO_EDGE;
+	texture_info.wrap_t_ = GL_CLAMP_TO_EDGE;
+	texture_info.wrap_r_ = GL_CLAMP_TO_EDGE;
+
+	int width = image_loader_back.get_initial_width();
+	int height = image_loader_back.get_initial_height();
+	int channels = image_loader_back.get_channels();
+
+	CubeMapTexture cubemap_texture;
+	cubemap_texture.back_ = ImageTexture{image_loader_back.get_path(), width, height, channels, image_loader_back.get_pixels()};
+	cubemap_texture.bottom_ = ImageTexture{image_loader_bottom.get_path(), width, height, channels, image_loader_bottom.get_pixels()};
+	cubemap_texture.front_ = ImageTexture{image_loader_front.get_path(), width, height, channels, image_loader_front.get_pixels()};
+	cubemap_texture.left_ = ImageTexture{image_loader_left.get_path(), width, height, channels, image_loader_left.get_pixels()};
+	cubemap_texture.right_ = ImageTexture{image_loader_right.get_path(), width, height, channels, image_loader_right.get_pixels()};
+	cubemap_texture.top_ = ImageTexture{image_loader_top.get_path(), width, height, channels, image_loader_top.get_pixels()};
+
+	Texture texture{texture_info, cubemap_texture, true};
 	std::size_t texture_id = add_texture(texture);
-	return add_mesh(directory_path, -1, Mesh::Info{utils::get_3d_ebo_values(), utils::get_3d_vertices(), {texture_id}, GL_TRIANGLES});
+	return add_mesh(directory_path, -1, Mesh::Info{utils::get_3d_ebo_values(), utils::get_3d_vertices(), {texture_id}, GL_TRIANGLES}); //TODO : pas ouf le "-1" pour tous les meshes non issus d'un fichier glTF
 }
 
 const Mesh* get_mesh(std::size_t id)
