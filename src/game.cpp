@@ -109,16 +109,16 @@ void Game::render()
 	skybox_.render();
 	backend_.depth_write(true);
 
-	//resource::bind_shader("2d");
-	//textbox_.render();
+	resource::bind_shader("2d");
+	textbox_.render();
 	//test_image_.render();
-	//test_image_2_.render();
+	test_image_2_.render();
 
-	/*resource::bind_shader("Phong");
+	resource::bind_shader("Phong");
 	for(auto& [model_id, model] : resource::get_models())
 	{
 		model.render();
-	}*/
+	}
 
 	audio::set_listener_position(player_.get_model()->get_position());
 	audio::set_listener_orientation(camera_.get_camera_forward(), camera_.get_camera_up());

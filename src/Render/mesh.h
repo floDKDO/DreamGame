@@ -34,13 +34,10 @@ class Mesh
 
 		void render() const;
 		void edit_text_texture(int new_width, int new_height, void* new_pixels) const;
-		int get_initial_texture_width() const;
-		int get_initial_texture_height() const;
 
 	private:
 		void load_mesh();
 		void load_vertex_attribute(GLuint vbo_binding_index, attribute::Name attribute_name);
-		unsigned char* load_image(const ImageTexture& image_texture, int& width, int& height, int& channels) const;
 		void create_ebo();
 		void create_vbo();
 		void create_vao();

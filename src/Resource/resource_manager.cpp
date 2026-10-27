@@ -36,9 +36,9 @@ void destroy_all_resources()
 std::size_t add_texture(Texture texture)
 {
 	std::string texture_key;
-	if(std::holds_alternative<ImageTexture>(texture.texture_))
+	if(std::holds_alternative<ImageTexture>(texture.specific_info_))
 	{
-		ImageTexture& image_texture = std::get<ImageTexture>(texture.texture_);
+		ImageTexture& image_texture = std::get<ImageTexture>(texture.specific_info_);
 		if(std::holds_alternative<ImagePath>(image_texture.image_value_))
 		{
 			texture_key = std::get<ImagePath>(image_texture.image_value_);
@@ -51,7 +51,7 @@ std::size_t add_texture(Texture texture)
 			texture_key = "Empty path " + std::to_string(GlobalId::get());
 		}
 	}
-	else if(std::holds_alternative<TextTexture>(texture.texture_))
+	else if(std::holds_alternative<TextTexture>(texture.specific_info_))
 	{
 		//Idem ici pour les textures de type "text"
 		texture_key = "Text " + std::to_string(GlobalId::get());
@@ -80,14 +80,17 @@ std::size_t add_mesh(std::string_view file_name, int32_t mesh_index, Mesh::Info 
 
 std::size_t add_2d_text(std::string_view text, const sdl::Surface& surface)
 {
-	Texture texture{TextureInfo{}, text.empty() ? TextTexture{} : TextTexture{surface.get_width(), surface.get_height(), surface.get_pixels()}, false};
+	int width = text.empty() ? 0 : surface.get_width();
+	int height = text.empty() ? 0 : surface.get_height();
+
+	Texture texture{TextureInfo{false}, SamplingParameters{}, width, height, text.empty() ? TextTexture{} : TextTexture{surface.get_pixels()}};
 	std::size_t texture_id = add_texture(texture);
 	return add_mesh(text, -1, Mesh::Info{utils::get_2d_ebo_values(), utils::get_2d_vertices(), {texture_id}, GL_TRIANGLES});
 }
 
 std::size_t add_2d_image(std::string_view path, const ImageLoader& image_loader)
 {
-	Texture texture{TextureInfo{}, ImageTexture{std::string(path), image_loader.get_initial_width(), image_loader.get_initial_height(), image_loader.get_channels(), image_loader.get_pixels()}};
+	Texture texture{TextureInfo{}, SamplingParameters{}, image_loader.get_initial_width(), image_loader.get_initial_height(), ImageTexture{std::string(path), image_loader.get_channels(), image_loader.get_pixels()}};
 	std::size_t texture_id = add_texture(texture);
 	return add_mesh(path, -1, Mesh::Info{utils::get_2d_ebo_values(), utils::get_2d_vertices(), {texture_id}, GL_TRIANGLES});
 }
@@ -96,25 +99,24 @@ std::size_t add_2d_image(std::string_view path, const ImageLoader& image_loader)
 //TODO : regrouper les ImageLoaders
 std::size_t add_skybox(std::string_view directory_path, const ImageLoader& image_loader_back, const ImageLoader& image_loader_bottom, const ImageLoader& image_loader_front, const ImageLoader& image_loader_left, const ImageLoader& image_loader_right, const ImageLoader& image_loader_top)
 {
-	TextureInfo texture_info;
-	texture_info.target_ = GL_TEXTURE_CUBE_MAP;
-	texture_info.wrap_s_ = GL_CLAMP_TO_EDGE;
-	texture_info.wrap_t_ = GL_CLAMP_TO_EDGE;
-	texture_info.wrap_r_ = GL_CLAMP_TO_EDGE;
+	SamplingParameters sampling_parameters;
+	sampling_parameters.wrap_s_ = GL_CLAMP_TO_EDGE;
+	sampling_parameters.wrap_t_ = GL_CLAMP_TO_EDGE;
+	sampling_parameters.wrap_r_ = GL_CLAMP_TO_EDGE;
 
 	int width = image_loader_back.get_initial_width();
 	int height = image_loader_back.get_initial_height();
 	int channels = image_loader_back.get_channels();
 
-	CubeMapTexture cubemap_texture;
-	cubemap_texture.back_ = ImageTexture{image_loader_back.get_path(), width, height, channels, image_loader_back.get_pixels()};
-	cubemap_texture.bottom_ = ImageTexture{image_loader_bottom.get_path(), width, height, channels, image_loader_bottom.get_pixels()};
-	cubemap_texture.front_ = ImageTexture{image_loader_front.get_path(), width, height, channels, image_loader_front.get_pixels()};
-	cubemap_texture.left_ = ImageTexture{image_loader_left.get_path(), width, height, channels, image_loader_left.get_pixels()};
-	cubemap_texture.right_ = ImageTexture{image_loader_right.get_path(), width, height, channels, image_loader_right.get_pixels()};
-	cubemap_texture.top_ = ImageTexture{image_loader_top.get_path(), width, height, channels, image_loader_top.get_pixels()};
+	CubemapTexture cubemap_texture;
+	cubemap_texture.back_ = ImageTexture{image_loader_back.get_path(), channels, image_loader_back.get_pixels()};
+	cubemap_texture.bottom_ = ImageTexture{image_loader_bottom.get_path(), channels, image_loader_bottom.get_pixels()};
+	cubemap_texture.front_ = ImageTexture{image_loader_front.get_path(), channels, image_loader_front.get_pixels()};
+	cubemap_texture.left_ = ImageTexture{image_loader_left.get_path(), channels, image_loader_left.get_pixels()};
+	cubemap_texture.right_ = ImageTexture{image_loader_right.get_path(), channels, image_loader_right.get_pixels()};
+	cubemap_texture.top_ = ImageTexture{image_loader_top.get_path(), channels, image_loader_top.get_pixels()};
 
-	Texture texture{texture_info, cubemap_texture, true};
+	Texture texture{TextureInfo{true, GL_TEXTURE_CUBE_MAP}, sampling_parameters, width, height, cubemap_texture};
 	std::size_t texture_id = add_texture(texture);
 	return add_mesh(directory_path, -1, Mesh::Info{utils::get_3d_ebo_values(), utils::get_3d_vertices(), {texture_id}, GL_TRIANGLES}); //TODO : pas ouf le "-1" pour tous les meshes non issus d'un fichier glTF
 }

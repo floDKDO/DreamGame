@@ -559,7 +559,7 @@ std::vector<std::size_t> get_textures(const tg3_model& model_tg3)
 		Texture mesh_texture;
 		mesh_texture.info_.texture_unit_ = i;
 
-		ImageTexture& image_texture = std::get<ImageTexture>(mesh_texture.texture_); //un fichier glTF ne peut contenir que des textures "image" et non des textures "texte"
+		ImageTexture& image_texture = std::get<ImageTexture>(mesh_texture.specific_info_); //un fichier glTF ne peut contenir que des textures "image" et non des textures "texte"
 		if(image_tg3.buffer_view == -1)
 		{
 			std::string image_str;
@@ -602,10 +602,10 @@ std::vector<std::size_t> get_textures(const tg3_model& model_tg3)
 		}
 
 		tg3_sampler sampler_tg3 = model_tg3.samplers[texture_tg3.sampler];
-		mesh_texture.info_.min_filter_ = sampler_tg3.min_filter;
-		mesh_texture.info_.mag_filter_ = sampler_tg3.mag_filter;
-		mesh_texture.info_.wrap_s_ = sampler_tg3.wrap_s;
-		mesh_texture.info_.wrap_t_ = sampler_tg3.wrap_t;
+		mesh_texture.sampling_params_.min_filter_ = sampler_tg3.min_filter;
+		mesh_texture.sampling_params_.mag_filter_ = sampler_tg3.mag_filter;
+		mesh_texture.sampling_params_.wrap_s_ = sampler_tg3.wrap_s;
+		mesh_texture.sampling_params_.wrap_t_ = sampler_tg3.wrap_t;
 
 		texture_ids.push_back(resource::add_texture(mesh_texture));
 	}
