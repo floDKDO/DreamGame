@@ -287,6 +287,16 @@ void Mesh::edit_text_texture(int new_width, int new_height, void* new_pixels) co
 	set_texture_content(texture, new_width, new_height, new_pixels);
 }
 
+int Mesh::get_initial_texture_width() const
+{
+	return resource::get_texture(mesh_info_.texture_ids_[0])->initial_width_; //le mesh d'une Image ne contient qu'une seule texture
+}
+
+int Mesh::get_initial_texture_height() const
+{
+	return resource::get_texture(mesh_info_.texture_ids_[0])->initial_height_; //le mesh d'une Image ne contient qu'une seule texture
+}
+
 void Mesh::render() const
 {
 	if(ShaderProgram* shader_program = resource::get_currently_bound_shader(); shader_program != nullptr)

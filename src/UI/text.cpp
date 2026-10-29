@@ -5,7 +5,7 @@
 
 Text::Text(std::string_view text, int wrap_length)
 	: color_({255, 255, 255, 255}), is_wrapped_(wrap_length == 0 ? false : true), wrap_length_(wrap_length), quality_(Quality::SOLID),
-	font_id_(resource::add_font("resources/fonts/Aller_Rg.ttf", 24.0f)), //TODO : police hardcodée
+	font_id_(resource::add_font("resources/fonts/Aller_Rg.ttf", 24.0f)), //TODO : police et tailles hardcodées
 	text_(text), position_(glm::vec2(0.0f)), angle_(0.0f)
 {
 	init_surface_from_text();

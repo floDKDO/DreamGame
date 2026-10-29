@@ -1,6 +1,7 @@
 #include "utils.h"
 #include "Logging/logging.h"
 
+#include <stb/stb_image.h>
 #include <filesystem>
 #include <fstream>
 #include <sstream>
@@ -8,6 +9,57 @@
 
 namespace utils
 {
+
+unsigned char* checked_stbi_load(std::string_view path, int& width, int& height, int& channels)
+{
+	std::string path_str = std::string(path);
+
+	unsigned char* pixels;
+	if((pixels = stbi_load(path_str.c_str(), &width, &height, &channels, 0)) == nullptr)
+	{
+		logging::log("stbi_load() returned nullptr: " + std::string(stbi_failure_reason()), logging::Severity::CRITICAL);
+		exit(EXIT_FAILURE);
+	}
+	return pixels;
+}
+
+unsigned char* checked_stbi_load(std::string_view path)
+{
+	std::string path_str = std::string(path);
+	int width, height, channels; //Variables inutilisées mais pas possible de mettre nullptr dans stbi_load()
+
+	unsigned char* pixels;
+	if((pixels = stbi_load(path_str.c_str(), &width, &height, &channels, 0)) == nullptr)
+	{
+		logging::log("stbi_load() returned nullptr: " + std::string(stbi_failure_reason()), logging::Severity::CRITICAL);
+		exit(EXIT_FAILURE);
+	}
+	return pixels;
+}
+
+unsigned char* checked_stbi_load_from_memory(const unsigned char* buffer, std::size_t size, int& width, int& height, int& channels)
+{
+	unsigned char* pixels;
+	if((pixels = stbi_load_from_memory(buffer, int(size), &width, &height, &channels, 0)) == nullptr)
+	{
+		logging::log("stbi_load_from_memory() returned nullptr: " + std::string(stbi_failure_reason()), logging::Severity::CRITICAL);
+		exit(EXIT_FAILURE);
+	}
+	return pixels;
+}
+
+unsigned char* checked_stbi_load_from_memory(const unsigned char* buffer, std::size_t size)
+{
+	int width, height, channels; //Variables inutilisées mais pas possible de mettre nullptr dans stbi_load_from_memory()
+
+	unsigned char* pixels;
+	if((pixels = stbi_load_from_memory(buffer, int(size), &width, &height, &channels, 0)) == nullptr)
+	{
+		logging::log("stbi_load_from_memory() returned nullptr: " + std::string(stbi_failure_reason()), logging::Severity::CRITICAL);
+		exit(EXIT_FAILURE);
+	}
+	return pixels;
+}
 
 std::vector<std::string> get_files_from_directory(std::string_view directory_path)
 {

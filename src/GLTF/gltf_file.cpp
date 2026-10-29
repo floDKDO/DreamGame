@@ -5,6 +5,7 @@
 #include "Logging/logging.h"
 #include "Resource/resource_manager.h"
 
+#include <stb/stb_image.h>
 #include <iostream>
 
 namespace
@@ -573,25 +574,31 @@ std::vector<std::size_t> get_textures(const tg3_model& model_tg3)
 				std::string image_data_base64 = image_str.substr(image_str.find(',') + 1); //+1 pour ne pas prendre la virgule
 				std::string image_data_decoded = utils::base64_decode(image_data_base64.data(), image_data_base64.size());
 
-				image_texture.image_value_ = ImageData();
-				ImageData& image_data = std::get<ImageData>(image_texture.image_value_);
+				//image_texture.image_value_ = ImageData();
+				//ImageData& image_data = std::get<ImageData>(image_texture.image_value_);
+				std::vector<unsigned char> image_data;
 				image_data.reserve(image_data_base64.size());
 				for(std::size_t j = 0ULL; j < image_data_decoded.size(); ++j)
 				{
 					image_data.push_back(image_data_decoded[j]);
 				}
+
+				//TODO : code dupliqué avec en-dessous
+				image_texture.pixels_ = utils::checked_stbi_load_from_memory(image_data.data(), image_data.size(), mesh_texture.initial_width_, mesh_texture.initial_height_, image_texture.channels_);
 			}
 			else
 			{
-				image_texture.image_value_ = "resources/models/" + image_str;
+				image_texture.path_ = "resources/models/" + image_str;
+				image_texture.pixels_ = utils::checked_stbi_load(image_texture.path_, mesh_texture.initial_width_, mesh_texture.initial_height_, image_texture.channels_);
 			}
 		}
 		else
 		{
-			image_texture.image_value_ = ImageData();
-			ImageData& image_data = std::get<ImageData>(image_texture.image_value_);
+			//image_texture.image_value_ = ImageData();
+			//ImageData& image_data = std::get<ImageData>(image_texture.image_value_);
 			tg3_buffer_view buffer_view_tg3 = model_tg3.buffer_views[image_tg3.buffer_view];
 			tg3_buffer buffer_tg3 = model_tg3.buffers[buffer_view_tg3.buffer];
+			std::vector<unsigned char> image_data;
 			image_data.reserve(buffer_view_tg3.byte_length);
 
 			//std::copy(buffer.data.data, buffer.data.data + buffer_view.byte_length, std::back_inserter(mesh_texture.image_data_)); //TODO : mieux que la boucle for suivante ?
@@ -599,6 +606,9 @@ std::vector<std::size_t> get_textures(const tg3_model& model_tg3)
 			{
 				image_data.push_back(buffer_tg3.data.data[buffer_view_tg3.byte_offset + j]);
 			}
+
+			//TODO : code dupliqué avec au-dessus
+			image_texture.pixels_ = utils::checked_stbi_load_from_memory(image_data.data(), image_data.size(), mesh_texture.initial_width_, mesh_texture.initial_height_, image_texture.channels_);
 		}
 
 		tg3_sampler sampler_tg3 = model_tg3.samplers[texture_tg3.sampler];

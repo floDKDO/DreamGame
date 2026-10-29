@@ -6,7 +6,6 @@
 #include "Common/transform.h"
 #include "RAII_SDL3/font.h"
 #include "RAII_SDL3/surface.h"
-#include "Image/image_loader.h"
 
 #include <string_view>
 #include <unordered_map>
@@ -23,8 +22,8 @@ Texture* get_texture(std::size_t id); //ne retourne pas de const Texture* car la
 
 std::size_t add_mesh(std::string_view file_name, int32_t mesh_index, Mesh::Info mesh_info);
 std::size_t add_2d_text(std::string_view text, const sdl::Surface& surface);
-std::size_t add_2d_image(std::string_view path, const ImageLoader& image_loader);
-std::size_t add_skybox(std::string_view directory_path, const ImageLoader& image_loader_back, const ImageLoader& image_loader_bottom, const ImageLoader& image_loader_front, const ImageLoader& image_loader_left, const ImageLoader& image_loader_right, const ImageLoader& image_loader_top);
+std::size_t add_2d_image(std::string_view path);
+std::size_t add_skybox(std::string_view directory_path);
 const Mesh* get_mesh(std::size_t id);
 
 std::size_t add_aabb_mesh(std::string_view file_name, int32_t mesh_index, Mesh::Info aabb_mesh_info);
@@ -40,6 +39,6 @@ ShaderProgram* bind_shader(std::string_view name); //ne retourne pas de const ca
 ShaderProgram* get_currently_bound_shader();
 
 std::size_t add_font(std::string_view font_path, float font_size);
-sdl::Font* get_font(std::size_t id);
+sdl::Font* get_font(std::size_t id); //TODO : retourner une référence ?
 
 }

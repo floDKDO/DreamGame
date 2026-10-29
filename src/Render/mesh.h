@@ -32,8 +32,10 @@ class Mesh
 		Mesh& operator=(Mesh&& mesh);
 		~Mesh();
 
-		void render() const;
+		void render() const; //TODO : paramètre (valeur par défaut = GL_FILL) pour glPolygonMode ?
 		void edit_text_texture(int new_width, int new_height, void* new_pixels) const;
+		int get_initial_texture_width() const;
+		int get_initial_texture_height() const;
 
 	private:
 		void load_mesh();

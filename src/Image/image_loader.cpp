@@ -24,7 +24,7 @@ ImageLoader::ImageLoader(std::string_view path)
 }*/
 
 //TODO : à retirer ?
-ImageLoader::ImageLoader(const ImageTexture& image_texture)
+/*ImageLoader::ImageLoader(const ImageTexture& image_texture)
 {
 	if(std::holds_alternative<ImagePath>(image_texture.image_value_))
 	{
@@ -44,7 +44,7 @@ ImageLoader::ImageLoader(const ImageTexture& image_texture)
 			exit(EXIT_FAILURE);
 		}
 	}
-}
+}*/
 
 ImageLoader::ImageLoader(ImageLoader&& image_loader)
 	: path_(image_loader.path_), pixels_(image_loader.pixels_), initial_width_(image_loader.initial_width_), initial_height_(image_loader.initial_height_), channels_(image_loader.channels_)
