@@ -7,7 +7,7 @@
 #include "Player/player.h"
 #include "Input/input_manager.h"
 #include "Image/image.h"
-#include "Render/skybox.h"
+#include "Render/cubemap.h"
 #include "UI/textbox.h"
 
 class Game
@@ -34,5 +34,5 @@ class Game
 		Image test_image_;
 		Image test_image_2_;
 		Textbox textbox_;
-		Skybox skybox_;
+		Cubemap skybox_;
 };

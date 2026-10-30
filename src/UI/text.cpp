@@ -5,8 +5,8 @@
 
 Text::Text(std::string_view text, int wrap_length)
 	: color_({255, 255, 255, 255}), is_wrapped_(wrap_length == 0 ? false : true), wrap_length_(wrap_length), quality_(Quality::SOLID),
-	font_id_(resource::add_font("resources/fonts/Aller_Rg.ttf", 24.0f)), //TODO : police et tailles hardcodées
-	text_(text), position_(glm::vec2(0.0f)), angle_(0.0f)
+	font_path_("resources/fonts/Aller_Rg.ttf"), font_id_(resource::add_font(font_path_, 24.0f)), //TODO : police et tailles hardcodées
+	surface_(), text_(text), position_(glm::vec2(0.0f)), angle_(0.0f)
 {
 	init_surface_from_text();
 	mesh_id_ = resource::add_2d_text(text, surface_);
@@ -14,29 +14,30 @@ Text::Text(std::string_view text, int wrap_length)
 
 void Text::init_surface_from_text()
 {
-	sdl::Font* font = resource::get_font(font_id_);
-
-	//la valeur "{255, 255, 255, 255}" n'est pas hardcodée : elle est nécessaire pour que la multiplication via text_color_ fonctionne
-	if(quality_ == Quality::SOLID)
+	if(sdl::Font* font = resource::get_font(font_id_); font != nullptr) //N'est normalement pas NULL
 	{
-		if(is_wrapped_)
+		//la valeur "{255, 255, 255, 255}" n'est pas hardcodée : elle est nécessaire pour que la multiplication via text_color_ fonctionne
+		if(quality_ == Quality::SOLID)
 		{
-			surface_.render_text_solid_wrapped(*font, text_, {255, 255, 255, 255}, wrap_length_);
+			if(is_wrapped_)
+			{
+				surface_.render_text_solid_wrapped(*font, text_, {255, 255, 255, 255}, wrap_length_);
+			}
+			else
+			{
+				surface_.render_text_solid(*font, text_, {255, 255, 255, 255});
+			}
 		}
 		else
 		{
-			surface_.render_text_solid(*font, text_, {255, 255, 255, 255});
-		}
-	}
-	else
-	{
-		if(is_wrapped_)
-		{
-			surface_.render_text_lcd_wrapped(*font, text_, {255, 255, 255, 255}, wrap_length_);
-		}
-		else
-		{
-			surface_.render_text_lcd(*font, text_, {255, 255, 255, 255});
+			if(is_wrapped_)
+			{
+				surface_.render_text_lcd_wrapped(*font, text_, {255, 255, 255, 255}, wrap_length_);
+			}
+			else
+			{
+				surface_.render_text_lcd(*font, text_, {255, 255, 255, 255});
+			}
 		}
 	}
 }
@@ -49,9 +50,8 @@ void Text::set_position(glm::vec2 position)
 
 void Text::set_font_size(float font_size)
 {
-	font_id_ = resource::add_font("resources/fonts/Aller_Rg.ttf", font_size); //TODO : police hardcodée
+	font_id_ = resource::add_font(font_path_, font_size);
 	init_surface_from_text();
-	//std::cout << "SET FONT SIZE\n";
 	resource::get_mesh(mesh_id_)->edit_text_texture(surface_.get_width(), surface_.get_height(), surface_.get_pixels());
 }
 
@@ -64,7 +64,6 @@ void Text::edit_text(std::string_view new_text)
 {
 	text_ = new_text;
 	init_surface_from_text();
-	//std::cout << "SET EDIT TEXT\n";
 	resource::get_mesh(mesh_id_)->edit_text_texture(surface_.get_width(), surface_.get_height(), surface_.get_pixels());
 }
 
@@ -72,7 +71,6 @@ void Text::add_char(char c)
 {
 	text_ += c;
 	init_surface_from_text();
-	//std::cout << "ADD CHAR\n";
 	resource::get_mesh(mesh_id_)->edit_text_texture(surface_.get_width(), surface_.get_height(), surface_.get_pixels());
 }
 
@@ -96,7 +94,6 @@ void Text::render() const
 	{
 		if(const Mesh* mesh = resource::get_mesh(mesh_id_); mesh != nullptr)
 		{
-			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 			if(ShaderProgram* shader_program_2d = resource::bind_shader("Text"); shader_program_2d != nullptr)
 			{
 				shader_program_2d->set_uniform_matrix_4fv("model_matrix_", glm::value_ptr(get_model_matrix()));

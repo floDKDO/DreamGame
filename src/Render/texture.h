@@ -1,6 +1,6 @@
 #pragma once
 
-#include "RAII_SDL3/surface.h"
+//#include "RAII_SDL3/surface.h"
 
 #include <GL/glew.h>
 #include <string>
@@ -23,17 +23,9 @@ struct SamplingParameters
 	GLint wrap_r_ = GL_REPEAT;
 };
 
-//TODO : à retirer
-//using ImagePath = std::string; //std::string = chemin de l'image
-//using ImageData = std::vector<unsigned char>; //std::vector<unsigned char> = données de l'image si son fichier glTF ne contient pas de chemin pour l'image (ex : embedded glTF)
-
 struct ImageTexture
 {
-	//std::variant<ImagePath, ImageData> image_value_; //TODO : à retirer
 	std::string path_; //si vide (= valeur initiale), alors c'est un "embedded glTF"
-	int channels_ = 4;
-
-	//TODO : RAII avec ImageLoader ?
 	unsigned char* pixels_ = nullptr; //devra être libéré avec stbi_image_free()
 };
 
@@ -46,8 +38,6 @@ struct CubemapTexture
 	ImageTexture left_;
 	ImageTexture right_;
 	ImageTexture top_;
-
-	//TODO : éventuellement créer un champ channels_ ?
 };
 
 struct TextTexture
@@ -55,14 +45,15 @@ struct TextTexture
 	void* pixels_ = nullptr;
 
 	//sdl::Surface surface_; //TODO
+	//std::size_t font_id_;
 };
 
 struct Texture
 {
 	TextureInfo info_;
 	SamplingParameters sampling_params_;
-
-	int initial_width_ = 0;
-	int initial_height_ = 0;
+	int original_width_ = 0;
+	int original_height_ = 0;
+	int original_channels_ = 4; //TODO : n'est pour l'instant pas utilisé par TextTexture
 	std::variant<ImageTexture, CubemapTexture, TextTexture> specific_info_;
 };

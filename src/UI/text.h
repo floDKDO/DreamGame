@@ -22,7 +22,6 @@ class Text
 		void set_font_size(float font_size);
 		void set_angle(float angle);
 		void edit_text(std::string_view new_text);
-		//void clear();
 		void add_char(char c);
 		void render() const;
 
@@ -36,6 +35,7 @@ class Text
 		int wrap_length_;
 
 		Quality quality_;
+		std::string font_path_;
 		std::size_t font_id_;
 		sdl::Surface surface_;
 		std::string text_;

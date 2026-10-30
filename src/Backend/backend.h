@@ -52,6 +52,7 @@ class Backend
 		void init_viewport() const;
 		void init_debug() const;
 		void init_shaders() const;
+		void init_others();
 		void init_imgui() const;
 		void destroy_imgui() const;
 		void init_openal();
@@ -64,6 +65,7 @@ class Backend
 		ALCdevice* device_;
 		ALCcontext* context_;
 		PixelProcessingState pixel_processing_state_;
+		bool texture_cubemap_seamless_;
 };
 
 void GLAPIENTRY message_callback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, [[maybe_unused]] const void* user_param);

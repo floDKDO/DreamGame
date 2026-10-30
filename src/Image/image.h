@@ -21,7 +21,7 @@ class Image
 	private:
 		glm::mat4 get_model_matrix() const;
 		
-		int initial_texture_width_, initial_texture_height_;
+		int original_texture_width_, original_texture_height_;
 		glm::vec2 position_, size_;
 		float angle_;
 		std::size_t mesh_id_;

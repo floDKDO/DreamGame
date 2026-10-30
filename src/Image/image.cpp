@@ -9,9 +9,9 @@ Image::Image(std::string_view path)
 	mesh_id_ = resource::add_2d_image(path);
 
 	const Mesh* mesh = resource::get_mesh(mesh_id_);
-	initial_texture_width_ = mesh->get_initial_texture_width();
-	initial_texture_height_ = mesh->get_initial_texture_height();
-	size_ = glm::vec2(initial_texture_width_, initial_texture_height_);
+	original_texture_width_ = mesh->get_original_texture_width();
+	original_texture_height_ = mesh->get_original_texture_height();
+	size_ = glm::vec2(original_texture_width_, original_texture_height_);
 }
 
 glm::vec2 Image::get_position() const
@@ -60,7 +60,6 @@ void Image::render() const
 {
 	if(const Mesh* mesh = resource::get_mesh(mesh_id_); mesh != nullptr)
 	{
-		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 		if(ShaderProgram* shader_program_2d = resource::bind_shader("2d"); shader_program_2d != nullptr)
 		{
 			shader_program_2d->set_uniform_matrix_4fv("model_matrix_", glm::value_ptr(get_model_matrix()));

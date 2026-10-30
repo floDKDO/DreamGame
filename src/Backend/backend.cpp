@@ -20,6 +20,7 @@ Backend::Backend()
 	init_debug();
 	//init_imgui(); //TODO
 	init_openal();
+	init_others();
 
 	//stbi_set_flip_vertically_on_load(true); //TODO : commenté car la texture de la classe Image s'affiche à l'envers quand cette ligne est active => logique car l'origine est en haut à gauche donc pas besoin de flip
 	print_opengl_stuff();
@@ -91,6 +92,12 @@ void Backend::init_shaders() const
 		resource::add_shader(shader_name, {vertex_shader_path.string(), fragment_shader_path.string()});
 	}
 	resource::bind_shader("Phong");
+}
+
+void Backend::init_others()
+{
+	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
+	texture_cubemap_seamless_ = true;
 }
 
 void Backend::init_imgui() const

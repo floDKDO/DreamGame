@@ -47,16 +47,16 @@ template <typename Tres>
 class Resources<std::size_t, Tres>
 {
 	public:
-	std::size_t insert_resource(Tres&& resource)
-	{
-		resources_.insert(std::make_pair(GlobalId::global_id_, std::move(resource)));
-		return GlobalId::global_id_++;
-	}
+		std::size_t insert_resource(Tres&& resource)
+		{
+			resources_.insert(std::make_pair(GlobalId::global_id_, std::move(resource)));
+			return GlobalId::global_id_++;
+		}
 
-	void clear()
-	{
-		resources_.clear();
-	}
+		void clear()
+		{
+			resources_.clear();
+		}
 
-	std::unordered_map<std::size_t, Tres> resources_;
+		std::unordered_map<std::size_t, Tres> resources_;
 };

@@ -17,7 +17,7 @@ class Mesh
 		struct Id
 		{
 			std::string file_name_;
-			int32_t mesh_index_ = -1;
+			int32_t mesh_index_ = absent_mesh_index;
 
 			bool operator==(const Id& other) const
 			{
@@ -32,10 +32,12 @@ class Mesh
 		Mesh& operator=(Mesh&& mesh);
 		~Mesh();
 
-		void render() const; //TODO : paramètre (valeur par défaut = GL_FILL) pour glPolygonMode ?
+		void render(GLenum mode = GL_FILL) const;
 		void edit_text_texture(int new_width, int new_height, void* new_pixels) const;
-		int get_initial_texture_width() const;
-		int get_initial_texture_height() const;
+		int get_original_texture_width() const;
+		int get_original_texture_height() const;
+
+		static const int32_t absent_mesh_index;
 
 	private:
 		void load_mesh();
@@ -48,7 +50,7 @@ class Mesh
 		void create_and_bind_texture(Texture* texture) const;
 		void set_texture_storage(Texture* texture, int width, int height) const;
 		void set_texture_parameters(const Texture* texture) const;
-		void set_texture_content(Texture* texture, int width, int height, void* pixels) const;
+		void set_2d_texture_content(Texture* texture, int width, int height, void* pixels) const;
 		void set_cubemap_content(Texture* texture) const;
 		void create_textures();
 

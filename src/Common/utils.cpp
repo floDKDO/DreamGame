@@ -61,6 +61,11 @@ unsigned char* checked_stbi_load_from_memory(const unsigned char* buffer, std::s
 	return pixels;
 }
 
+std::string get_extension_from_cubemap_directory(std::string_view directory_path)
+{
+	return std::filesystem::directory_iterator(directory_path)->path().extension().string();
+}
+
 std::vector<std::string> get_files_from_directory(std::string_view directory_path)
 {
 	std::vector<std::string> files;
@@ -224,7 +229,7 @@ Vertices get_2d_vertices()
 		glm::vec2(1.0f, 1.0f)
 	};
 
-	Vertices vertices(4);
+	Vertices vertices(position_vector.size());
 	vertices.add_position_attributes(position_vector);
 	vertices.add_color_attributes(color_vector);
 	vertices.add_texcoord_attributes(texcoord_vector);
@@ -262,7 +267,7 @@ Vertices get_3d_vertices()
 		glm::vec3( 0.5f, 0.5f, -0.5f), //7 : en haut à droite
 	};
 
-	Vertices vertices(8);
+	Vertices vertices(position_vector.size());
 	vertices.add_position_attributes(position_vector);
 	return vertices;
 }

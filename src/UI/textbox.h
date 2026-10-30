@@ -22,7 +22,7 @@ class Textbox
 			bool dialogue_finished_ = false;
 		};
 
-		Textbox(const input::InputManager& input_manager);
+		explicit Textbox(const input::InputManager& input_manager);
 
 		void set_dialogues(const std::vector<Dialogue>& dialogues);
 		void render();

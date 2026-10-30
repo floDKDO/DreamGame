@@ -18,7 +18,7 @@ endif()
 
 set(STB_DIR "${CMAKE_SOURCE_DIR}/third_party/stb") 
 set(IMGUI_DIR "${CMAKE_SOURCE_DIR}/third_party/imgui") 
-set(TINYGLTF_DIR "${CMAKE_SOURCE_DIR}/third_party/tinygltf") 
+set(TINYGLTF_DIR "${CMAKE_SOURCE_DIR}/third_party/tinygltf")
 
 file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS
 	src/*.cpp src/*.h 

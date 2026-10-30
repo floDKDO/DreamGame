@@ -44,7 +44,6 @@ void Node::render() const
 	{
 		if(const Mesh* mesh = resource::get_mesh(node_info_.mesh_id_); mesh != nullptr)
 		{
-			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 			mesh->render();
 		}
 
@@ -52,8 +51,7 @@ void Node::render() const
 		{
 			if(const Mesh* aabb_mesh = resource::get_aabb_mesh(node_info_.aabb_info_.mesh_id_); aabb_mesh != nullptr)
 			{
-				glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); //affichage wireframe pour AABB
-				aabb_mesh->render();
+				aabb_mesh->render(GL_LINE);//affichage wireframe pour AABB
 			}
 		}
 	}

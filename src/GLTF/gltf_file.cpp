@@ -5,7 +5,6 @@
 #include "Logging/logging.h"
 #include "Resource/resource_manager.h"
 
-#include <stb/stb_image.h>
 #include <iostream>
 
 namespace
@@ -20,7 +19,7 @@ Vertices get_vertices(const tg3_model& model_tg3, const tg3_primitive& primitive
 Vertices get_aabb_vertices(const tg3_model& model_tg3, const tg3_primitive& primitive_tg3);
 Transform get_transform(const tg3_node& node_tg3);
 std::size_t get_mesh(std::string_view path, const tg3_model& model_tg3, const tg3_node& node_tg3);
-std::size_t get_aabb_mesh(std::string_view file_name, int32_t mesh_index, Mesh::Info mesh_info);
+std::size_t get_aabb_mesh(std::string_view file_name, Mesh::Info mesh_info, int32_t mesh_index);
 std::optional<tg3_accessor> get_accessor_from_attribute(std::string_view attribute, const tg3_model& model_tg3, const tg3_primitive& primitive_tg3);
 glm::vec3 get_min_values(const tg3_model& model_tg3, const tg3_primitive& primitive_tg3);
 glm::vec3 get_max_values(const tg3_model& model_tg3, const tg3_primitive& primitive_tg3);
@@ -402,7 +401,6 @@ Vertices get_aabb_vertices(const tg3_model& model_tg3, const tg3_primitive& prim
 {
 	glm::vec3 min_values = get_min_values(model_tg3, primitive_tg3);
 	glm::vec3 max_values = get_max_values(model_tg3, primitive_tg3);
-	std::size_t vertices_number = 8ULL;
 
 	std::vector<glm::vec3> position_attributes
 	{
@@ -416,7 +414,7 @@ Vertices get_aabb_vertices(const tg3_model& model_tg3, const tg3_primitive& prim
 		glm::vec3(min_values.x, max_values.y, max_values.z)  //7 : top face, down left
 	};
 
-	Vertices vertices(vertices_number); //TODO : remplacer "vertices_number" par le nombre d'entrées de position_attributes (si oui, le faire partout)
+	Vertices vertices(position_attributes.size());
 	vertices.add_position_attributes(position_attributes);
 	return vertices;
 }
@@ -448,19 +446,19 @@ std::size_t get_mesh(std::string_view path, const tg3_model& model_tg3, const tg
 		if(has_textures(model_tg3))
 		{
 			std::vector<std::size_t> texture_ids = get_textures(model_tg3);
-			id = resource::add_mesh(path, mesh_index, Mesh::Info{ebo_values, vertices, texture_ids, GLenum(primitive_tg3.mode)});
+			id = resource::add_mesh(path, Mesh::Info{ebo_values, vertices, texture_ids, GLenum(primitive_tg3.mode)}, mesh_index);
 		}
 		else
 		{
-			id = resource::add_mesh(path, mesh_index, Mesh::Info{ebo_values, vertices, {}, GLenum(primitive_tg3.mode)});
+			id = resource::add_mesh(path, Mesh::Info{ebo_values, vertices, {}, GLenum(primitive_tg3.mode)}, mesh_index);
 		}
 	}
 	return id;
 }
 
-std::size_t get_aabb_mesh(std::string_view file_name, int32_t mesh_index, Mesh::Info mesh_info)
+std::size_t get_aabb_mesh(std::string_view file_name, Mesh::Info mesh_info, int32_t mesh_index)
 {
-	return resource::add_aabb_mesh(file_name, mesh_index, mesh_info);
+	return resource::add_aabb_mesh(file_name, mesh_info, mesh_index);
 }
 
 std::optional<tg3_accessor> get_accessor_from_attribute(std::string_view attribute, const tg3_model& model_tg3, const tg3_primitive& primitive_tg3)
@@ -539,7 +537,7 @@ AABBInfo get_aabb(std::string_view path, const tg3_model& model_tg3, const tg3_n
 		};
 		glm::vec3 min_values = get_min_values(model_tg3, primitive_tg3);
 		glm::vec3 max_values = get_max_values(model_tg3, primitive_tg3);
-		std::size_t id = get_aabb_mesh(path, mesh_index, Mesh::Info{ebo_values, vertices, {}, GLenum(primitive_tg3.mode)});
+		std::size_t id = get_aabb_mesh(path, Mesh::Info{ebo_values, vertices, {}, GLenum(primitive_tg3.mode)}, mesh_index);
 
 		//un AABB n'a pas de texture
 		return {id, AABB(min_values, max_values)};
@@ -574,28 +572,22 @@ std::vector<std::size_t> get_textures(const tg3_model& model_tg3)
 				std::string image_data_base64 = image_str.substr(image_str.find(',') + 1); //+1 pour ne pas prendre la virgule
 				std::string image_data_decoded = utils::base64_decode(image_data_base64.data(), image_data_base64.size());
 
-				//image_texture.image_value_ = ImageData();
-				//ImageData& image_data = std::get<ImageData>(image_texture.image_value_);
 				std::vector<unsigned char> image_data;
 				image_data.reserve(image_data_base64.size());
 				for(std::size_t j = 0ULL; j < image_data_decoded.size(); ++j)
 				{
 					image_data.push_back(image_data_decoded[j]);
 				}
-
-				//TODO : code dupliqué avec en-dessous
-				image_texture.pixels_ = utils::checked_stbi_load_from_memory(image_data.data(), image_data.size(), mesh_texture.initial_width_, mesh_texture.initial_height_, image_texture.channels_);
+				image_texture.pixels_ = utils::checked_stbi_load_from_memory(image_data.data(), image_data.size(), mesh_texture.original_width_, mesh_texture.original_height_, mesh_texture.original_channels_);
 			}
 			else
 			{
 				image_texture.path_ = "resources/models/" + image_str;
-				image_texture.pixels_ = utils::checked_stbi_load(image_texture.path_, mesh_texture.initial_width_, mesh_texture.initial_height_, image_texture.channels_);
+				image_texture.pixels_ = utils::checked_stbi_load(image_texture.path_, mesh_texture.original_width_, mesh_texture.original_height_, mesh_texture.original_channels_);
 			}
 		}
 		else
 		{
-			//image_texture.image_value_ = ImageData();
-			//ImageData& image_data = std::get<ImageData>(image_texture.image_value_);
 			tg3_buffer_view buffer_view_tg3 = model_tg3.buffer_views[image_tg3.buffer_view];
 			tg3_buffer buffer_tg3 = model_tg3.buffers[buffer_view_tg3.buffer];
 			std::vector<unsigned char> image_data;
@@ -606,9 +598,7 @@ std::vector<std::size_t> get_textures(const tg3_model& model_tg3)
 			{
 				image_data.push_back(buffer_tg3.data.data[buffer_view_tg3.byte_offset + j]);
 			}
-
-			//TODO : code dupliqué avec au-dessus
-			image_texture.pixels_ = utils::checked_stbi_load_from_memory(image_data.data(), image_data.size(), mesh_texture.initial_width_, mesh_texture.initial_height_, image_texture.channels_);
+			image_texture.pixels_ = utils::checked_stbi_load_from_memory(image_data.data(), image_data.size(), mesh_texture.original_width_, mesh_texture.original_height_, mesh_texture.original_channels_);
 		}
 
 		tg3_sampler sampler_tg3 = model_tg3.samplers[texture_tg3.sampler];
@@ -617,7 +607,7 @@ std::vector<std::size_t> get_textures(const tg3_model& model_tg3)
 		mesh_texture.sampling_params_.wrap_s_ = sampler_tg3.wrap_s;
 		mesh_texture.sampling_params_.wrap_t_ = sampler_tg3.wrap_t;
 
-		texture_ids.push_back(resource::add_texture(mesh_texture));
+		texture_ids.push_back(resource::add_texture(std::move(mesh_texture)));
 	}
 	return texture_ids;
 }

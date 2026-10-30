@@ -3,8 +3,21 @@
 #include "Resource/resource_manager.h"
 #include "glTF/gltf.h"
 
-#include <filesystem>
 #include <iostream>
+
+const int32_t Mesh::absent_mesh_index = -1;
+
+namespace
+{
+
+const GLint z_offset_cubemap_back_ = 5; //TODO : attention, la valeur de zoffset est 5 et non 4
+const GLint z_offset_cubemap_bottom_ = 3;
+const GLint z_offset_cubemap_front_ = 4; //TODO : attention, la valeur est 4 et non 5
+const GLint z_offset_cubemap_left_ = 1;
+const GLint z_offset_cubemap_right_ = 0;
+const GLint z_offset_cubemap_top_ = 2;
+
+}
 
 Mesh::Mesh(const Id& mesh_id, const Info& mesh_info)
 	: mesh_id_(mesh_id), mesh_info_(mesh_info), ebo_(0), vbo_(0), vao_(0)
@@ -142,13 +155,7 @@ void Mesh::create_and_bind_texture(Texture* texture) const
 
 void Mesh::set_texture_storage(Texture* texture, int width, int height) const
 {
-	GLenum internal_format = GL_RGBA8;
-	if(std::holds_alternative<ImageTexture>(texture->specific_info_))
-	{
-		const ImageTexture& image_texture = std::get<ImageTexture>(texture->specific_info_);
-		internal_format = gltf::get_sized_enum_from_channels(image_texture.channels_);
-	}
-	
+	GLenum internal_format = gltf::get_sized_enum_from_channels(texture->original_channels_);
 	GLsizei number_of_texture_levels = texture->info_.should_have_mipmaps_ ? 1 + int(std::floor(std::log2(std::max(width, height)))) : 1;
 	glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 1, -1, "Entering texture storage code.");
 	glTextureStorage2D(texture->info_.id_, number_of_texture_levels, internal_format, width, height); //ici (cas .png), il faut mettre GL_RGBA8 et non GL_RGBA car il faut mettre un "Sized Internal Format" (voir https://registry.khronos.org/OpenGL-Refpages/gl4/html/glTexStorage2D.xhtml)
@@ -169,15 +176,9 @@ void Mesh::set_texture_parameters(const Texture* texture) const
 	glPopDebugGroup();
 }
 
-void Mesh::set_texture_content(Texture* texture, int width, int height, void* pixels) const //TODO : renommer set_2d_texture_content
+void Mesh::set_2d_texture_content(Texture* texture, int width, int height, void* pixels) const
 {
-	GLenum format = GL_RGBA;
-	if(std::holds_alternative<ImageTexture>(texture->specific_info_))
-	{
-		const ImageTexture& image_texture = std::get<ImageTexture>(texture->specific_info_);
-		format = gltf::get_base_enum_from_channels(image_texture.channels_);
-	}
-
+	GLenum format = gltf::get_base_enum_from_channels(texture->original_channels_);
 	GLint texture_level = 0; //on ne spécifie que la texture de niveau 0 et on génère automatiquement les mipmaps avec glGenerateTextureMipmap()
 	glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 1, -1, "Entering texture content code.");
 	glTextureSubImage2D(texture->info_.id_, texture_level, 0, 0, width, height, format, GL_UNSIGNED_BYTE, pixels); //ici (cas .png), il faut mettre GL_RGBA et non GL_RGBA8, ce dernier n'étant pas supporté pour ce paramètre
@@ -188,20 +189,18 @@ void Mesh::set_texture_content(Texture* texture, int width, int height, void* pi
 void Mesh::set_cubemap_content(Texture* texture) const
 {
 	CubemapTexture& cubemap_texture = std::get<CubemapTexture>(texture->specific_info_);
-	int width = texture->initial_width_;
-	int height = texture->initial_height_;
-	int channels = cubemap_texture.back_.channels_; //Comme toutes les images de la cubemap ont le même nombre de channels, on peut récupérer l'info de n'importe laquelle (ici back)
-	GLenum format = gltf::get_base_enum_from_channels(channels);
+	int width = texture->original_width_;
+	int height = texture->original_height_;
+	GLenum format = gltf::get_base_enum_from_channels(texture->original_channels_);
 	GLint texture_level = 0; //on ne spécifie que la texture de niveau 0 et on génère automatiquement les mipmaps avec glGenerateTextureMipmap()
 
 	glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 1, -1, "Entering cubemap content code.");
-	glTextureSubImage3D(texture->info_.id_, texture_level, 0, 0, 5, width, height, 1, format, GL_UNSIGNED_BYTE, cubemap_texture.back_.pixels_); //TODO : attention, la valeur de zoffset est 5 et non 4
-	glTextureSubImage3D(texture->info_.id_, texture_level, 0, 0, 3, width, height, 1, format, GL_UNSIGNED_BYTE, cubemap_texture.bottom_.pixels_);
-	glTextureSubImage3D(texture->info_.id_, texture_level, 0, 0, 4, width, height, 1, format, GL_UNSIGNED_BYTE, cubemap_texture.front_.pixels_); //TODO : attention, la valeur est 4 et non 5
-	glTextureSubImage3D(texture->info_.id_, texture_level, 0, 0, 1, width, height, 1, format, GL_UNSIGNED_BYTE, cubemap_texture.left_.pixels_);
-	glTextureSubImage3D(texture->info_.id_, texture_level, 0, 0, 0, width, height, 1, format, GL_UNSIGNED_BYTE, cubemap_texture.right_.pixels_);
-	glTextureSubImage3D(texture->info_.id_, texture_level, 0, 0, 2, width, height, 1, format, GL_UNSIGNED_BYTE, cubemap_texture.top_.pixels_);
-	//TODO : l'idéal serait d'avoir des constantes pour le champ zoffset
+	glTextureSubImage3D(texture->info_.id_, texture_level, 0, 0, z_offset_cubemap_back_, width, height, 1, format, GL_UNSIGNED_BYTE, cubemap_texture.back_.pixels_);
+	glTextureSubImage3D(texture->info_.id_, texture_level, 0, 0, z_offset_cubemap_bottom_, width, height, 1, format, GL_UNSIGNED_BYTE, cubemap_texture.bottom_.pixels_);
+	glTextureSubImage3D(texture->info_.id_, texture_level, 0, 0, z_offset_cubemap_front_, width, height, 1, format, GL_UNSIGNED_BYTE, cubemap_texture.front_.pixels_);
+	glTextureSubImage3D(texture->info_.id_, texture_level, 0, 0, z_offset_cubemap_left_, width, height, 1, format, GL_UNSIGNED_BYTE, cubemap_texture.left_.pixels_);
+	glTextureSubImage3D(texture->info_.id_, texture_level, 0, 0, z_offset_cubemap_right_, width, height, 1, format, GL_UNSIGNED_BYTE, cubemap_texture.right_.pixels_);
+	glTextureSubImage3D(texture->info_.id_, texture_level, 0, 0, z_offset_cubemap_top_, width, height, 1, format, GL_UNSIGNED_BYTE, cubemap_texture.top_.pixels_);
 	glGenerateTextureMipmap(texture->info_.id_);
 	glPopDebugGroup();
 }
@@ -216,7 +215,7 @@ void Mesh::create_textures()
 			logging::log("The texture is nullptr!", logging::Severity::WARNING);
 			continue;
 		}
-		else if(std::holds_alternative<TextTexture>(texture->specific_info_) && (texture->initial_width_ == 0 && texture->initial_height_ == 0))
+		else if(std::holds_alternative<TextTexture>(texture->specific_info_) && (texture->original_width_ == 0 && texture->original_height_ == 0))
 		{ 
 			if(TextTexture& text_texture = std::get<TextTexture>(texture->specific_info_); text_texture.pixels_ == nullptr)
 			{
@@ -226,37 +225,25 @@ void Mesh::create_textures()
 			}
 		}
 
+		int width = texture->original_width_;
+		int height = texture->original_height_;
 		init_texture(texture);
+		set_texture_storage(texture, width, height);
 
-		//TODO : essayer de factoriser
 		if(std::holds_alternative<ImageTexture>(texture->specific_info_))
 		{
 			ImageTexture& image_texture = std::get<ImageTexture>(texture->specific_info_);
 			unsigned char* pixels = image_texture.pixels_;
-			int width = texture->initial_width_;
-			int height = texture->initial_height_;
-
-			set_texture_storage(texture, width, height);
-			set_texture_content(texture, width, height, pixels);
+			set_2d_texture_content(texture, width, height, pixels);
 		}
 		else if(std::holds_alternative<TextTexture>(texture->specific_info_))
 		{
 			const TextTexture& text_texture = std::get<TextTexture>(texture->specific_info_);
 			unsigned char* pixels = static_cast<unsigned char*>(text_texture.pixels_);
-			int width = texture->initial_width_;
-			int height = texture->initial_height_;
-
-			set_texture_storage(texture, width, height);
-			set_texture_content(texture, width, height, pixels);
+			set_2d_texture_content(texture, width, height, pixels);
 		}
 		else if(std::holds_alternative<CubemapTexture>(texture->specific_info_))
 		{
-			//CubemapTexture& cubemap_texture = std::get<CubemapTexture>(texture->specific_info_);
-			int width = texture->initial_width_;
-			int height = texture->initial_height_;
-			//int channels = cubemap_texture.back_.channels_; //Comme toutes les images de la cubemap ont le même nombre de channels, on peut récupérer l'info de n'importe laquelle (ici back)
-
-			set_texture_storage(texture, width, height);
 			set_cubemap_content(texture);
 		}
 	}
@@ -275,8 +262,8 @@ void Mesh::edit_text_texture(int new_width, int new_height, void* new_pixels) co
 
 	if(new_width != old_width || new_height != old_height)
 	{
-		texture->initial_width_ = new_width;
-		texture->initial_height_ = new_height;
+		texture->original_width_ = new_width;
+		texture->original_height_ = new_height;
 
 		glDeleteTextures(1, &texture->info_.id_);
 		init_texture(texture);
@@ -284,20 +271,20 @@ void Mesh::edit_text_texture(int new_width, int new_height, void* new_pixels) co
 	}
 
 	texture_text.pixels_ = new_pixels;
-	set_texture_content(texture, new_width, new_height, new_pixels);
+	set_2d_texture_content(texture, new_width, new_height, new_pixels);
 }
 
-int Mesh::get_initial_texture_width() const
+int Mesh::get_original_texture_width() const
 {
-	return resource::get_texture(mesh_info_.texture_ids_[0])->initial_width_; //le mesh d'une Image ne contient qu'une seule texture
+	return resource::get_texture(mesh_info_.texture_ids_[0])->original_width_; //le mesh d'une Image ne contient qu'une seule texture
 }
 
-int Mesh::get_initial_texture_height() const
+int Mesh::get_original_texture_height() const
 {
-	return resource::get_texture(mesh_info_.texture_ids_[0])->initial_height_; //le mesh d'une Image ne contient qu'une seule texture
+	return resource::get_texture(mesh_info_.texture_ids_[0])->original_height_; //le mesh d'une Image ne contient qu'une seule texture
 }
 
-void Mesh::render() const
+void Mesh::render(GLenum mode) const
 {
 	if(ShaderProgram* shader_program = resource::get_currently_bound_shader(); shader_program != nullptr)
 	{
@@ -321,6 +308,7 @@ void Mesh::render() const
 	}
 	glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 1, -1, "Entering binding VAO and drawing code.");
 	glBindVertexArray(vao_);
+	glPolygonMode(GL_FRONT_AND_BACK, mode);
 	glDrawElements(mesh_info_.render_mode_, GLsizei(mesh_info_.ebo_values_.size()), GL_UNSIGNED_SHORT, 0);
 	//glBindVertexArray(0); //= unbind, commenté car provoque des erreurs
 	glPopDebugGroup();

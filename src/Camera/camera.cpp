@@ -20,14 +20,14 @@ void Camera::update(float delta_time)
 {
 	compute_euler_angles(delta_time);
 	view_matrix_ = look_at(camera_position_, target_position_ + target_to_camera_offset_, get_camera_up());
-	if(ShaderProgram* shader_program = resource::bind_shader("Phong"); shader_program != nullptr)
+
+	ShaderProgram* shader_program;
+	if(shader_program = resource::bind_shader("Phong"); shader_program != nullptr) //Positionner les deux variables uniformes du shader "Phong"
 	{
 		shader_program->set_uniform_matrix_4fv("view_matrix_", glm::value_ptr(view_matrix_));
 		shader_program->set_uniform_3f("view_position_", camera_position_);
 	}
-
-	//TODO
-	if(ShaderProgram* shader_program = resource::bind_shader("Skybox"); shader_program != nullptr)
+	if(shader_program = resource::bind_shader("Skybox"); shader_program != nullptr) //Positionner la variable uniforme du shader "Skybox"
 	{
 		glm::mat4 view_matrix_without_translation = view_matrix_;
 		view_matrix_without_translation[3] = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f); //on retire la partie "translation" de la view_matrix

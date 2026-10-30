@@ -27,6 +27,7 @@ unsigned char* checked_stbi_load(std::string_view path, int& width, int& height,
 unsigned char* checked_stbi_load(std::string_view path);
 unsigned char* checked_stbi_load_from_memory(const unsigned char* buffer, std::size_t size, int& width, int& height, int& channels);
 unsigned char* checked_stbi_load_from_memory(const unsigned char* buffer, std::size_t size);
+std::string get_extension_from_cubemap_directory(std::string_view directory_path);
 std::vector<std::string> get_files_from_directory(std::string_view directory_path);
 std::string get_string_from_bool(bool b);
 std::string get_string_from_unsigned_char_ptr(const unsigned char* ptr);
