@@ -13,7 +13,8 @@ glm::mat4 get_perspective_matrix()
 
 glm::mat4 get_orthographic_matrix()
 {
-	return glm::ortho(0.0f, float(utils::get_viewport_width()), float(utils::get_viewport_height()), 0.0f, -1.0f, 1.0f); //l'origine (0, 0) est en haut à gauche => pas besoin d'appeler stbi_set_flip_vertically_on_load(true);
+	//TODO : créer des constantes pour 1280.0f et 720.0f
+	return glm::ortho(0.0f, 1280.0f, 720.0f, 0.0f, -1.0f, 1.0f); //l'origine (0, 0) est en haut à gauche => pas besoin d'appeler stbi_set_flip_vertically_on_load(true);
 }
 
 }

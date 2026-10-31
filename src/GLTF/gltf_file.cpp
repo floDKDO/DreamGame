@@ -237,9 +237,10 @@ std::unique_ptr<Node> glTFFile::get_root_node() const
 	int32_t root_node_index = scene_tg3.nodes[0];
 	tg3_node root_node_tg3 = model_tg3_.nodes[root_node_index];
 
-	if(root_node_tg3.children_count > 1 && root_node_tg3.mesh == -1)
+	if(root_node_tg3.children_count >= 1 && root_node_tg3.mesh == -1)
 	{
-		logging::log("The root node " + std::string(root_node_tg3.name.data) + " is an empty node", logging::Severity::DEBUG);
+		std::string root_node_name = (root_node_tg3.name.len > 0) ? std::string(root_node_tg3.name.data) : "";
+		logging::log("The root node " + root_node_name + " is an empty node", logging::Severity::DEBUG);
 	}
 
 	return get_node(path_, glm::mat4(1.0f), model_tg3_, root_node_tg3); //les root nodes n'ont pas de parent donc ont une matrice identitée pour leur parent_matrix
@@ -328,7 +329,7 @@ std::unique_ptr<gltf::Node> get_node(std::string_view path, glm::mat4 parent_mat
 	}
 
 	std::unique_ptr<gltf::Node> node = std::make_unique<gltf::Node>(std::string_view(node_name), gltf::Node::Info{get_transform(node_tg3), parent_matrix, get_mesh(path, model_tg3, node_tg3), get_aabb(path, model_tg3, node_tg3)});
-	if(node_tg3.children_count > 1 && node_tg3.mesh == -1)
+	if(node_tg3.children_count >= 1 && node_tg3.mesh == -1)
 	{
 		node->set_empty_node();
 	}
