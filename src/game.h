@@ -1,14 +1,7 @@
 #pragma once
 
 #include "Backend/backend.h"
-#include "Resource/model.h"
-#include "Map/map_file.h"
-#include "Camera/camera.h"
-#include "Player/player.h"
 #include "Input/input_manager.h"
-#include "Image/image.h"
-#include "Render/cubemap.h"
-#include "UI/textbox.h"
 
 class Game
 {
@@ -25,14 +18,5 @@ class Game
 
 		Backend backend_;
 		input::InputManager input_manager_;
-		Player player_;
-		Camera camera_;
 		bool running_;
-		//Map test_map_;
-		MapFile test_map_;
-		Model* gizmo_;
-		Image test_image_;
-		Image test_image_2_;
-		Textbox textbox_;
-		Cubemap skybox_;
 };

@@ -1,6 +1,6 @@
 #include "game.h"
-#include "OpenAL/openal.h"
-#include "Resource/resource_manager.h"
+//#include "OpenAL/openal.h"
+#include "State/state_machine.h"
 
 //#include <imgui/imgui.h>
 //#include <imgui/imgui_impl_sdl3.h>
@@ -9,22 +9,14 @@
 #include <iostream>
 
 Game::Game()
-	: backend_(),
-	player_(input_manager_),
-	camera_(input_manager_, player_.get_model()->get_position()),
-	running_(true), test_map_("resources/maps/corridor.gltf"),
-	gizmo_(nullptr), test_image_("resources/images/nakazato.jpg"),
-	test_image_2_("resources/images/yuri_tea.png"),
-	textbox_(input_manager_), skybox_("resources/images/skybox")
+	: backend_(), input_manager_(), running_(true)
 {
-	std::size_t gizmo_model_id = resource::add_model("resources/models/axis_gizmo.glb");
-	gizmo_ = resource::get_model(gizmo_model_id);
-	textbox_.set_dialogues({{"Yuri", "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."}, {"Unknown", "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."}});
+	create_all_states(input_manager_, backend_);
 }
 
 void Game::run()
 {
-	std::string temp_model_name("test"); //ici, "test" serait le nom du modèle
+	/*std::string temp_model_name("test"); //ici, "test" serait le nom du modèle
 	audio::set_listener_position(player_.get_model()->get_position());
 	audio::set_listener_orientation(camera_.get_camera_forward(), camera_.get_camera_up());
 	audio::set_listener_velocity(glm::vec3(0.0f));
@@ -35,7 +27,7 @@ void Game::run()
 	audio::set_source_reference_distance(temp_model_name, 1.0f);
 	audio::set_source_max_distance(temp_model_name, 20.0f);
 	audio::set_source_rolloff_factor(temp_model_name, 1.0f);
-	audio::set_source_position(temp_model_name, glm::vec3(0.0f));
+	audio::set_source_position(temp_model_name, glm::vec3(0.0f));*/
 	//audio::play_source(temp_model_name);
 
 	Uint64 begin_current_frame = 0; //en ms
@@ -69,7 +61,7 @@ void Game::run()
 		last_frame = begin_current_frame;
 	}
 
-	audio::destroy_source(temp_model_name);
+	//audio::destroy_source(temp_model_name);
 }
 
 void Game::handle_events()
@@ -104,24 +96,10 @@ void Game::handle_events()
 
 void Game::render()
 {
-	backend_.depth_write(false); //comme les depth values de la skybox sont sûrement plus petites que celles des modèles, on désactive l'écriture dans le depth buffer (il reste rempli de 1.0 donc les modèles pourront s'afficher)
-	resource::bind_shader("Skybox");
-	skybox_.render();
-	backend_.depth_write(true);
+	get_current_state()->display();
 
-	resource::bind_shader("2d");
-	textbox_.render();
-	//test_image_.render();
-	test_image_2_.render();
-
-	resource::bind_shader("Phong");
-	for(auto& [model_id, model] : resource::get_models())
-	{
-		model.render();
-	}
-
-	audio::set_listener_position(player_.get_model()->get_position());
-	audio::set_listener_orientation(camera_.get_camera_forward(), camera_.get_camera_up());
+	//audio::set_listener_position(player_.get_model()->get_position());
+	//audio::set_listener_orientation(camera_.get_camera_forward(), camera_.get_camera_up());
 
 	//TODO
 	////////////////////////////////////////////////////////////////////////////////////////
@@ -143,8 +121,6 @@ void Game::update_fps_count(Uint64& last_fps_refresh, unsigned int& frame_count_
 
 void Game::update(float delta_time)
 {
-	camera_.update(delta_time);
-	player_.update(delta_time, camera_.get_camera_forward(), camera_.get_camera_left());
 	input_manager_.update(delta_time);
-	textbox_.update(delta_time);
+	get_current_state()->update(delta_time);
 }
