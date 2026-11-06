@@ -10,7 +10,7 @@ const float Camera::EulerAngles::max_pitch_ = 40.0f;
 
 Camera::Camera(const input::InputManager& input_manager, const glm::vec3& target_position)
 	: input_manager_(input_manager), 
-	target_position_(target_position), target_to_camera_offset_(0.0f, 2.5f, 0.0f),
+	target_position_(target_position), target_to_camera_offset_(0.0f, 2.5f, 0.0f), //TODO : hardcodé
 	camera_position_(target_position + target_to_camera_offset_),
 	view_matrix_(1.0f),
 	euler_angles_()

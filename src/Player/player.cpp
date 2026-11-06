@@ -7,7 +7,7 @@
 Player::Player(const input::InputManager& input_manager)
 	: input_manager_(input_manager), model_(nullptr)
 {
-	std::size_t player_model_id = resource::add_model("resources/models/player.glb");
+	std::size_t player_model_id = resource::add_model("resources/models/player.glb", "Player");
 	model_ = resource::get_model(player_model_id);
 	model_->add_translation_y(5.0f);
 }

@@ -37,7 +37,7 @@ void MapFile::add_models() const
 
 		std::string model_filename = model_value["modelFilename"];
 
-		resource::add_model("resources/models/" + model_filename, transform);
+		resource::add_model("resources/models/" + model_filename, model_value["instanceName"], transform);
 	}
 }
 

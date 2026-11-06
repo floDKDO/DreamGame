@@ -185,14 +185,14 @@ const Mesh* get_aabb_mesh(std::size_t id)
 	return nullptr;
 }
 
-std::size_t add_model(std::string_view path, Transform transform)
+std::size_t add_model(std::string_view path, std::string_view name, Transform transform)
 {
-	return models_.insert_resource(Model(path, transform));
+	return models_.insert_resource(Model(path, name, transform));
 }
 
-std::size_t add_model(std::string_view path)
+std::size_t add_model(std::string_view path, std::string_view name)
 {
-	return models_.insert_resource(Model(path));
+	return models_.insert_resource(Model(path, name));
 }
 
 Model* get_model(std::size_t id)

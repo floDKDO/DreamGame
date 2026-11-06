@@ -209,10 +209,12 @@ Vertices get_2d_vertices()
 {
 	std::vector<glm::vec3> position_vector //on simule un vec2 avec un vec3 => la composante z vaut donc 0.0f
 	{
-		glm::vec3(0.0f, 1.0f, 0.0f), //carré de coté 1 pixel => la multiplication par une size fonctionne (ex avec size = (300, 200) : (1, 1) * (300, 200) = (300, 200))
+		//pas des NDC !
+		glm::vec3(0.0f, 1.0f, 0.0f), //carré de coté 1 pixel placé à l'origine (dépend des arguments passés à glm::ortho()) => la multiplication par une size fonctionne (ex avec size = (300, 200) : (1, 1) * (300, 200) = (300, 200))
 		glm::vec3(1.0f, 0.0f, 0.0f),
 		glm::vec3(0.0f, 0.0f, 0.0f),
 		glm::vec3(1.0f, 1.0f, 0.0f)
+		//si on remplace les 1.0 par une grande taille (ex : 300.0), alors le carré sera toujours placé à l'origine mais fera 300 pixels de côté
 	};
 	std::vector<glm::vec4> color_vector
 	{

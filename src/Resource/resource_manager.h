@@ -29,8 +29,8 @@ const Mesh* get_mesh(std::size_t id);
 std::size_t add_aabb_mesh(std::string_view file_name, Mesh::Info aabb_mesh_info, int32_t mesh_index);
 const Mesh* get_aabb_mesh(std::size_t id);
 
-std::size_t add_model(std::string_view path, Transform transform);
-std::size_t add_model(std::string_view path);
+std::size_t add_model(std::string_view path, std::string_view name, Transform transform);
+std::size_t add_model(std::string_view path, std::string_view name);
 Model* get_model(std::size_t id); //ne retourne pas de const cat la classe Player a besoin de modifier le modèle du joueur
 std::unordered_map<std::size_t, Model>& get_models();
 

@@ -5,11 +5,11 @@
 InGameState::InGameState(const input::InputManager& input_manager, Backend& backend)
 	: State(input_manager, backend), player_(input_manager_),
 	camera_(input_manager_, player_.get_model()->get_position()),
-	test_map_("resources/maps/corridor.gltf"), gizmo_(nullptr),
+	test_map_("resources/maps/corridor_multiple_lights.gltf"), gizmo_(nullptr),
 	test_image_("resources/images/yuri_tea.png"),
 	textbox_(input_manager), skybox_("resources/images/skybox")
 {
-	std::size_t gizmo_model_id = resource::add_model("resources/models/axis_gizmo.glb");
+	std::size_t gizmo_model_id = resource::add_model("resources/models/axis_gizmo.glb", "Axis guizmo");
 	gizmo_ = resource::get_model(gizmo_model_id);
 	textbox_.set_dialogues({{"Yuri", "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."}, {"Unknown", "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."}});
 }
@@ -49,9 +49,4 @@ void InGameState::update([[maybe_unused]] float delta_time)
 	camera_.update(delta_time);
 	player_.update(delta_time, camera_.get_camera_forward(), camera_.get_camera_left());
 	textbox_.update(delta_time);
-
-	if(input_manager_.get_input_info().x_movement_intensity_ > 0.2f)
-	{
-		push_state(StateId::TITLE_SCREEN);
-	}
 }

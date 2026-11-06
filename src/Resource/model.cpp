@@ -3,12 +3,12 @@
 
 #include <iostream>
 
-Model::Model(std::string_view path)
-	: gltf_file_(path), root_node_(gltf_file_.get_root_node())
+Model::Model(std::string_view path, std::string_view name)
+	: gltf_file_(path), name_(name), root_node_(gltf_file_.get_root_node())
 {}
 
-Model::Model(std::string_view path, Transform transform)
-	: gltf_file_(path), root_node_(gltf_file_.get_root_node())
+Model::Model(std::string_view path, std::string_view name, Transform transform)
+	: gltf_file_(path), name_(name), root_node_(gltf_file_.get_root_node())
 {
 	set_translation(transform.position_);
 	set_rotation(transform.rotation_);
@@ -24,6 +24,20 @@ void Model::render()
 			shader_program->set_uniform_3f("light_position_", get_position());
 		}
 	}
+	if(get_name() == "Light source.001") //TODO : hardcodé
+	{
+		if(ShaderProgram* shader_program = resource::bind_shader("Phong"); shader_program != nullptr)
+		{
+			shader_program->set_uniform_3f("light_position2_", get_position());
+		}
+	}
+	if(get_name() == "Light source.002") //TODO : hardcodé
+	{
+		if(ShaderProgram* shader_program = resource::bind_shader("Phong"); shader_program != nullptr)
+		{
+			shader_program->set_uniform_3f("light_position3_", get_position());
+		}
+	}
 	root_node_->render();
 }
 
@@ -34,7 +48,7 @@ const glm::vec3& Model::get_position() const
 
 std::string Model::get_name() const
 {
-	return root_node_->get_name();
+	return name_;
 }
 
 const gltf::Node* Model::get_root_node()
