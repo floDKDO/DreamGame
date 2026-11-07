@@ -1,18 +1,25 @@
 #include "model.h"
 #include "resource_manager.h"
+#include "OpenAL/source.h"
 
 #include <iostream>
 
-Model::Model(std::string_view path, std::string_view name)
-	: gltf_file_(path), name_(name), root_node_(gltf_file_.get_root_node())
-{}
-
-Model::Model(std::string_view path, std::string_view name, Transform transform)
-	: gltf_file_(path), name_(name), root_node_(gltf_file_.get_root_node())
+//Attention : pour l'instant, si je construit un Model directement (sans passer par un MapFile), la transform indiquée dans le fichier glTF du Model ne sera pas prise en compte
+//=> soit "Apply all transforms" sur Blender ou définir nous-même une Transform dans Model::Info
+Model::Model(Info model_info)
+	: model_info_(model_info), gltf_file_(model_info.path_), root_node_(gltf_file_.get_root_node()),
+	ambient_sound_id_(model_info.ambient_sound_path_.empty() ? std::numeric_limits<std::size_t>::max() : resource::add_audio_source(model_info.ambient_sound_path_, true))
 {
-	set_translation(transform.position_);
-	set_rotation(transform.rotation_);
-	set_scale(transform.scale_);
+	set_translation(model_info.transform_.position_);
+	set_rotation(model_info.transform_.rotation_);
+	set_scale(model_info.transform_.scale_);
+
+	if(ambient_sound_id_ != std::numeric_limits<std::size_t>::max())
+	{
+		audio::Source* source = resource::get_audio_source(ambient_sound_id_);
+		source->set_position(get_position());
+		source->play();
+	}
 }
 
 void Model::render()
@@ -48,7 +55,7 @@ const glm::vec3& Model::get_position() const
 
 std::string Model::get_name() const
 {
-	return name_;
+	return model_info_.name_;
 }
 
 const gltf::Node* Model::get_root_node()

@@ -1,5 +1,6 @@
 #include "map_file.h"
 #include "Resource/resource_manager.h"
+#include "Resource/model.h"
 //#include "Logging/logging.h"
 
 #include <fstream>
@@ -13,6 +14,16 @@ MapFile::MapFile(std::string_view map_file_path)
 	open();
 	gltf_to_map_format();
 	add_models();
+}
+
+std::string MapFile::get_map_name() const
+{
+	return std::string(map_data_["mapName"]);
+}
+
+std::string MapFile::get_map_music() const
+{
+	return std::string(map_data_["mapMusic"]);
 }
 
 void MapFile::add_models() const
@@ -36,8 +47,12 @@ void MapFile::add_models() const
 		transform.scale_ = scale_vec;
 
 		std::string model_filename = model_value["modelFilename"];
-
-		resource::add_model("resources/models/" + model_filename, model_value["instanceName"], transform);
+		std::string model_ambient_sound = model_value["ambientSound"];
+		if(!model_ambient_sound.empty())
+		{
+			model_ambient_sound = "resources/audio/sounds/" + model_ambient_sound;
+		}
+		resource::add_model(Model::Info{model_value["instanceName"], "resources/models/" + model_filename, transform, model_ambient_sound});
 	}
 }
 
@@ -71,6 +86,7 @@ void MapFile::gltf_to_map_format()
 
 	map_data_["models"] = {};
 	map_data_["mapName"] = scene["name"];
+	map_data_["mapMusic"] = "test.wav"; //TODO : hardcodé
 	
 	int j = 0;
 	json& models = map_data_["models"];
@@ -108,6 +124,15 @@ void MapFile::gltf_to_map_format()
 		else
 		{
 			model["scale"] = node["scale"];
+		}
+
+		if(node["extras"]["ambientSound"].is_null())
+		{
+			model["ambientSound"] = "";
+		}
+		else
+		{
+			model["ambientSound"] = node["extras"]["ambientSound"];
 		}
 
 		models[j] = model;

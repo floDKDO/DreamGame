@@ -6,11 +6,12 @@
 #include "Common/transform.h"
 #include "RAII_SDL3/font.h"
 #include "RAII_SDL3/surface.h"
+#include "OpenAL/source.h"
+#include "OpenAL/buffer.h"
+#include "Resource/model.h"
 
 #include <string_view>
 #include <unordered_map>
-
-class Model;
 
 namespace resource
 {
@@ -19,6 +20,13 @@ void destroy_all_resources();
 
 std::size_t add_texture(Texture&& texture);
 Texture* get_texture(std::size_t id); //ne retourne pas de const Texture* car la fonction glCreateTextures() modifie son troisième paramètre
+
+std::size_t add_audio_buffer(std::string_view path);
+audio::Buffer* get_audio_buffer(std::size_t id);
+
+std::size_t add_audio_source(std::string_view path, bool loop = false);
+std::size_t add_audio_source(std::string_view path, glm::vec3 position, bool loop = false);
+audio::Source* get_audio_source(std::size_t id);
 
 std::size_t add_mesh(std::string_view file_name, Mesh::Info mesh_info, int32_t mesh_index = Mesh::absent_mesh_index);
 std::size_t add_2d_text(std::string_view text, const sdl::Surface& surface);
@@ -29,8 +37,7 @@ const Mesh* get_mesh(std::size_t id);
 std::size_t add_aabb_mesh(std::string_view file_name, Mesh::Info aabb_mesh_info, int32_t mesh_index);
 const Mesh* get_aabb_mesh(std::size_t id);
 
-std::size_t add_model(std::string_view path, std::string_view name, Transform transform);
-std::size_t add_model(std::string_view path, std::string_view name);
+std::size_t add_model(Model::Info model_info);
 Model* get_model(std::size_t id); //ne retourne pas de const cat la classe Player a besoin de modifier le modèle du joueur
 std::unordered_map<std::size_t, Model>& get_models();
 

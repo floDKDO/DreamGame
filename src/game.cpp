@@ -1,5 +1,4 @@
 #include "game.h"
-//#include "OpenAL/openal.h"
 #include "State/state_machine.h"
 
 //#include <imgui/imgui.h>
@@ -16,20 +15,6 @@ Game::Game()
 
 void Game::run()
 {
-	/*std::string temp_model_name("test"); //ici, "test" serait le nom du modèle
-	audio::set_listener_position(player_.get_model()->get_position());
-	audio::set_listener_orientation(camera_.get_camera_forward(), camera_.get_camera_up());
-	audio::set_listener_velocity(glm::vec3(0.0f));
-	audio::create_source(temp_model_name, "resources/audio/test.wav"); 
-	audio::set_source_gain(temp_model_name, 1.0f);
-	audio::set_source_gain(temp_model_name, 1.0f);
-	audio::set_source_pitch(temp_model_name, 1.0f);
-	audio::set_source_reference_distance(temp_model_name, 1.0f);
-	audio::set_source_max_distance(temp_model_name, 20.0f);
-	audio::set_source_rolloff_factor(temp_model_name, 1.0f);
-	audio::set_source_position(temp_model_name, glm::vec3(0.0f));*/
-	//audio::play_source(temp_model_name);
-
 	Uint64 begin_current_frame = 0; //en ms
 	Uint64 last_frame = 0;          //en ms
 	float  delta_time = 0;          //en secondes
@@ -97,9 +82,6 @@ void Game::handle_events()
 void Game::render()
 {
 	get_current_state()->display();
-
-	//audio::set_listener_position(player_.get_model()->get_position());
-	//audio::set_listener_orientation(camera_.get_camera_forward(), camera_.get_camera_up());
 
 	//TODO
 	////////////////////////////////////////////////////////////////////////////////////////

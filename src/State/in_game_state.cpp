@@ -1,6 +1,6 @@
 #include "in_game_state.h"
 #include "Resource/resource_manager.h"
-#include "state_machine.h"
+#include "OpenAL/listener.h"
 
 InGameState::InGameState(const input::InputManager& input_manager, Backend& backend)
 	: State(input_manager, backend), player_(input_manager_),
@@ -9,9 +9,13 @@ InGameState::InGameState(const input::InputManager& input_manager, Backend& back
 	test_image_("resources/images/yuri_tea.png"),
 	textbox_(input_manager), skybox_("resources/images/skybox")
 {
-	std::size_t gizmo_model_id = resource::add_model("resources/models/axis_gizmo.glb", "Axis guizmo");
+	std::size_t gizmo_model_id = resource::add_model(Model::Info{"Axis guizmo", "resources/models/axis_gizmo.glb"});
 	gizmo_ = resource::get_model(gizmo_model_id);
 	textbox_.set_dialogues({{"Yuri", "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."}, {"Unknown", "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."}});
+	
+	//std::size_t map_music_id = resource::add_audio_source("resources/audio/musics/" + test_map_.get_map_music(), true);
+	//audio::Source* music_source = resource::get_audio_source(map_music_id);
+	//music_source->play();
 }
 
 void InGameState::on_show()
@@ -49,4 +53,8 @@ void InGameState::update([[maybe_unused]] float delta_time)
 	camera_.update(delta_time);
 	player_.update(delta_time, camera_.get_camera_forward(), camera_.get_camera_left());
 	textbox_.update(delta_time);
+
+	audio::set_listener_position(player_.get_model()->get_position());
+	audio::set_listener_orientation(camera_.get_camera_forward(), camera_.get_camera_up());
+	audio::set_listener_velocity(glm::vec3(0.0f));
 }

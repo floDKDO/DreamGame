@@ -16,7 +16,33 @@ WAVBuffer::WAVBuffer(std::string_view path)
 	}
 }
 
+WAVBuffer::WAVBuffer(WAVBuffer&& wav_buffer)
+	: audio_data_(wav_buffer.audio_data_), audio_spec_(wav_buffer.audio_spec_), audio_len_(wav_buffer.audio_len_)
+{
+	wav_buffer.audio_data_ = nullptr;
+}
+
+WAVBuffer& WAVBuffer::operator=(WAVBuffer&& wav_buffer)
+{
+	if(this == &wav_buffer)
+	{
+		return *this;
+	}
+
+	destroy();
+	audio_data_ = wav_buffer.audio_data_;
+	audio_spec_ = wav_buffer.audio_spec_;
+	audio_len_ = wav_buffer.audio_len_;
+	wav_buffer.audio_data_ = nullptr;
+	return *this;
+}
+
 WAVBuffer::~WAVBuffer()
+{
+	destroy();
+}
+
+void WAVBuffer::destroy()
 {
 	SDL_free(audio_data_);
 	audio_data_ = nullptr;
@@ -35,25 +61,39 @@ int WAVBuffer::get_format() const //format de OpenAL
 	{
 		case SDL_AUDIO_U8:
 		case SDL_AUDIO_S8:
-			if(audio_spec_.channels >= 1)
+			switch(audio_spec_.channels)
 			{
-				format = AL_FORMAT_MONO8;
-			}
-			else
-			{
-				format = AL_FORMAT_STEREO8;
+				case 1:
+					format = AL_FORMAT_MONO8;
+					break;
+
+				case 2:
+					format = AL_FORMAT_STEREO8;
+					break;
+
+				default:
+					format = 0;
+					logging::log("Unhandled number of channels!", logging::Severity::WARNING);
+					break;
 			}
 			break;
 
 		case SDL_AUDIO_S16LE:
 		case SDL_AUDIO_S16BE:
-			if(audio_spec_.channels >= 1)
+			switch(audio_spec_.channels)
 			{
-				format = AL_FORMAT_MONO16;
-			}
-			else
-			{
-				format = AL_FORMAT_STEREO16;
+				case 1:
+					format = AL_FORMAT_MONO16;
+					break;
+
+				case 2:
+					format = AL_FORMAT_STEREO16;
+					break;
+
+				default:
+					format = 0;
+					logging::log("Unhandled number of channels!", logging::Severity::WARNING);
+					break;
 			}
 			break;
 
@@ -61,18 +101,10 @@ int WAVBuffer::get_format() const //format de OpenAL
 		case SDL_AUDIO_S32BE:
 		case SDL_AUDIO_F32LE:
 		case SDL_AUDIO_F32BE:
-			if(audio_spec_.channels >= 1)
-			{
-				format = 0;
-			}
-			else
-			{
-				format = 0;
-			}
+			format = 0; //TODO : gérer le cas 32 bits
 			logging::log("Unhandled audio format!", logging::Severity::WARNING);
 			break;
 	}
-
 	return format;
 }
 

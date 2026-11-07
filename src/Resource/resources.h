@@ -28,6 +28,14 @@ class Resources
 		std::size_t insert_resource(Tid resource_id, Tres&& resource)
 		{
 			resources_.insert(std::make_pair(resource_id, std::move(resource)));
+			/* //TODO
+			if(p.second)
+			{
+				ids_.insert({GlobalId::global_id_, resource_id});
+				return GlobalId::global_id_++;
+			}
+			else return GlobalId::global_id_;
+			*/
 			ids_.insert({GlobalId::global_id_, resource_id});
 			return GlobalId::global_id_++;
 		}

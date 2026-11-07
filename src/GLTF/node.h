@@ -35,6 +35,7 @@ class Node
 		void set_empty_node();
 		bool is_empty_node() const;
 
+		const Transform& get_transform() const;
 		const glm::vec3& get_position() const; //retourne une référence car la position est utilisée en tant que membre (const ref) dans la classe Camera
 
 		void set_translation(glm::vec3 position);

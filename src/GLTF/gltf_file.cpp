@@ -72,7 +72,7 @@ void glTFFile::open()
 {
 	if(path_.find("resources/models/") == std::string::npos)
 	{
-		logging::log("This glTF file is not a model. Exiting!", logging::Severity::CRITICAL);
+		logging::log("The glTF file '" + path_ + "' is not a model. Exiting!", logging::Severity::CRITICAL);
 		exit(EXIT_FAILURE);
 	}
 

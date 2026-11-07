@@ -17,6 +17,8 @@ Resources<Mesh::Id, Mesh> meshes_;
 Resources<Mesh::Id, Mesh> aabb_meshes_;
 Resources<sdl::Font::Id, sdl::Font> fonts_;
 Resources<std::string, Texture> textures_; //si la texture possède un path, sa clef est le path ; si la texture est au format embedded glTF, toujours l'insérer cas peu commun et pas vraiment possible d'identifer de manière unique ce type de texture sans lire tout leur contenu)
+Resources<std::string, audio::Buffer> audio_buffers_;
+Resources<std::size_t, audio::Source> audio_sources_; //template specialization (voir "resources.h")
 
 //Ces méthodes sont placées là (donc pas dans le header) car elles sont utilisées uniquement dans ce fichier .cpp
 ShaderProgram* get_shader(std::string_view name);
@@ -33,6 +35,19 @@ void destroy_all_resources()
 			stbi_image_free(image_texture.pixels_);
 		}
 	}
+
+	for(auto& [id, source] : audio_sources_.resources_)
+	{
+		source.destroy();
+	}
+	audio_sources_.clear();
+
+	for(auto& [id, buffer] : audio_buffers_.resources_)
+	{
+		buffer.destroy();
+	}
+	audio_buffers_.clear();
+
 	shader_programs_.clear();
 	models_.clear();
 	meshes_.clear();
@@ -68,6 +83,7 @@ std::size_t add_texture(Texture&& texture)
 	return textures_.insert_resource(texture_key, std::move(texture));
 }
 
+//TODO : très proche d'autres méthodes dans ce fichier
 Texture* get_texture(std::size_t id)
 {
 	if(textures_.ids_.count(id))
@@ -79,6 +95,50 @@ Texture* get_texture(std::size_t id)
 	}
 	logging::log("get_texture() returned nullptr!", logging::Severity::WARNING);
 	return nullptr;
+}
+
+std::size_t add_audio_buffer(std::string_view path)
+{
+	return audio_buffers_.insert_resource(std::string(path), audio::Buffer(path));
+}
+
+//TODO : très proche d'autres méthodes dans ce fichier
+audio::Buffer* get_audio_buffer(std::size_t id)
+{
+	if(audio_buffers_.ids_.count(id))
+	{
+		if(std::string buffer_string = audio_buffers_.ids_.at(id); audio_buffers_.resources_.count(buffer_string))
+		{
+			return &audio_buffers_.resources_.at(buffer_string);
+		}
+	}
+	logging::log("get_audio_source() returned nullptr!", logging::Severity::WARNING);
+	return nullptr;
+}
+
+std::size_t add_audio_source(std::string_view path, bool loop)
+{
+	return add_audio_source(path, glm::vec3(0.0f), loop);
+}
+
+std::size_t add_audio_source(std::string_view path, glm::vec3 position, bool loop)
+{
+	std::size_t audio_buffer_id = add_audio_buffer(path);
+	return audio_sources_.insert_resource(audio::Source(audio_buffer_id, position, loop));
+}
+
+//TODO : très proche d'autres méthodes dans ce fichier
+audio::Source* get_audio_source(std::size_t id)
+{
+	if(audio_sources_.resources_.count(id))
+	{
+		return &audio_sources_.resources_.at(id);
+	}
+	else
+	{
+		logging::log("get_audio_source() returned nullptr!", logging::Severity::WARNING);
+		return nullptr;
+	}
 }
 
 std::size_t add_2d_text(std::string_view text, const sdl::Surface& surface)
@@ -185,16 +245,12 @@ const Mesh* get_aabb_mesh(std::size_t id)
 	return nullptr;
 }
 
-std::size_t add_model(std::string_view path, std::string_view name, Transform transform)
+std::size_t add_model(Model::Info model_info)
 {
-	return models_.insert_resource(Model(path, name, transform));
+	return models_.insert_resource(Model(model_info));
 }
 
-std::size_t add_model(std::string_view path, std::string_view name)
-{
-	return models_.insert_resource(Model(path, name));
-}
-
+//TODO : très proche d'autres méthodes dans ce fichier
 Model* get_model(std::size_t id)
 {
 	if(models_.resources_.count(id))
@@ -233,6 +289,7 @@ ShaderProgram* bind_shader(std::string_view name)
 	return shader_program;
 }
 
+//TODO : très proche d'autres méthodes dans ce fichier
 ShaderProgram* get_shader(std::string_view name)
 {
 	std::string name_str = std::string(name);

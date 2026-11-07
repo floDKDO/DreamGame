@@ -210,6 +210,11 @@ const std::vector<std::unique_ptr<Node>>&Node::get_children_nodes() const
 	return children_nodes_;
 }
 
+const Transform& Node::get_transform() const
+{
+	return node_info_.transform_;
+}
+
 const glm::vec3& Node::get_position() const
 {
 	return node_info_.transform_.position_;

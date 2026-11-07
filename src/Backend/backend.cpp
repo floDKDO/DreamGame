@@ -28,9 +28,9 @@ Backend::Backend()
 
 Backend::~Backend()
 {
-	destroy_openal();
-	//destroy_imgui();
 	resource::destroy_all_resources();
+	destroy_openal(); //doit être fait après destroy_all_resources() car cette méthode détruit des objets OpenAL
+	//destroy_imgui();
 }
 
 void Backend::handle_events(const SDL_Event& e)

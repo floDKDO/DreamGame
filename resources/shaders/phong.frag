@@ -16,13 +16,13 @@ uniform vec3 light_position3_;
 
 vec4 point_light(vec3 light_position)
 {
-	float distance = length(light_position - world_position_);
-	float attenuation = 1.0 / (1.0 + 0.07 * distance + 0.017 * (distance * distance));
+	float distance = length(light_position - world_position_); //longueur du vecteur position "light_position - world_position_" en partant de (0, 0, 0)
+	float attenuation = 1.0 / (1.0 + 0.07 * distance + 0.017 * (distance * distance)); //TODO : hardcodé
 	vec3 normalized_normal = normalize(normal_);
 	vec3 light_color = vec3(1.0);
 
 	//ambient
-	float ambient_strength = 0.1;
+	float ambient_strength = 0.1; //TODO : hardcodé
 	vec3 ambient = ambient_strength * light_color;
 	ambient *= attenuation;
 
@@ -33,8 +33,8 @@ vec4 point_light(vec3 light_position)
 	diffuse *= attenuation;
 
 	//specular
-	float specular_strength = 0.5;
-	int shininess = 32;
+	float specular_strength = 0.5; //TODO : hardcodé
+	int shininess = 32; //TODO : hardcodé
 	vec3 view_direction = normalize(view_position_ - world_position_);
 	vec3 reflect_direction = reflect(-light_direction, normalized_normal); //reflect attend un vecteur qui parte de la source de lumière vers le fragment, d'où la soustraction
 	float spec = pow(max(dot(view_direction, reflect_direction), 0.0), shininess);

@@ -867,7 +867,7 @@
 			],
 			"translation":[
 				-22.649995803833008,
-				1.9999923706054688,
+				1.9533312320709229,
 				-5.000003814697266
 			]
 		},
@@ -1543,24 +1543,31 @@
 		},
 		{
 			"extras":{
-				"modelName":"light_source.glb"
+				"modelName":"plane.glb"
 			},
 			"mesh":101,
-			"name":"Light source",
+			"name":"Cube.011",
+			"rotation":[
+				0.9963130950927734,
+				-0.08579198271036148,
+				0,
+				0
+			],
 			"scale":[
-				0.5,
-				0.5,
-				0.5
+				-0.17042087018489838,
+				-0.8472320437431335,
+				-0.2511608302593231
 			],
 			"translation":[
-				0,
-				9.5,
-				0
+				-15.910369873046875,
+				0.5817219018936157,
+				-7.268718719482422
 			]
 		},
 		{
 			"extras":{
-				"modelName":"light_source.glb"
+				"modelName":"light_source.glb",
+				"ambientSound":"light_sound.wav"
 			},
 			"mesh":102,
 			"name":"Light source.001",
@@ -1570,14 +1577,15 @@
 				0.5
 			],
 			"translation":[
-				-19.04863929748535,
-				9.39367389678955,
-				8.513405799865723
+				-18.905933380126953,
+				9.289155006408691,
+				8.834752082824707
 			]
 		},
 		{
 			"extras":{
-				"modelName":"light_source.glb"
+				"modelName":"light_source.glb",
+				"ambientSound":"light_sound.wav"
 			},
 			"mesh":103,
 			"name":"Light source.002",
@@ -1587,9 +1595,9 @@
 				0.5
 			],
 			"translation":[
-				17.854110717773438,
-				9.39320182800293,
-				-9.992511749267578
+				6.098173141479492,
+				9.289155006408691,
+				-8.579731941223145
 			]
 		}
 	],
@@ -3108,20 +3116,22 @@
 			]
 		},
 		{
-			"name":"Cube.118",
+			"name":"Cube.003",
 			"primitives":[
 				{
 					"attributes":{
 						"POSITION":397,
 						"NORMAL":398,
-						"TEXCOORD_0":399
+						"TEXCOORD_0":399,
+						"COLOR_0":400
 					},
-					"indices":400
+					"indices":240,
+					"material":1
 				}
 			]
 		},
 		{
-			"name":"Cube.001",
+			"name":"Light source.002",
 			"primitives":[
 				{
 					"attributes":{
@@ -3129,20 +3139,20 @@
 						"NORMAL":402,
 						"TEXCOORD_0":403
 					},
-					"indices":400
+					"indices":404
 				}
 			]
 		},
 		{
-			"name":"Cube.002",
+			"name":"Light source.004",
 			"primitives":[
 				{
 					"attributes":{
-						"POSITION":404,
-						"NORMAL":405,
-						"TEXCOORD_0":406
+						"POSITION":405,
+						"NORMAL":406,
+						"TEXCOORD_0":407
 					},
-					"indices":400
+					"indices":404
 				}
 			]
 		}
@@ -6543,36 +6553,36 @@
 		{
 			"bufferView":397,
 			"componentType":5126,
-			"count":48,
+			"count":24,
 			"max":[
-				2,
-				5,
-				2
+				25.299999237060547,
+				0.15000343322753906,
+				7.499999523162842
 			],
 			"min":[
-				-2,
-				-1,
-				-2
+				-25.30000114440918,
+				-0.15000534057617188,
+				-7.5
 			],
 			"type":"VEC3"
 		},
 		{
 			"bufferView":398,
 			"componentType":5126,
-			"count":48,
+			"count":24,
 			"type":"VEC3"
 		},
 		{
 			"bufferView":399,
 			"componentType":5126,
-			"count":48,
+			"count":24,
 			"type":"VEC2"
 		},
 		{
 			"bufferView":400,
-			"componentType":5123,
-			"count":72,
-			"type":"SCALAR"
+			"componentType":5126,
+			"count":24,
+			"type":"VEC3"
 		},
 		{
 			"bufferView":401,
@@ -6604,6 +6614,12 @@
 		},
 		{
 			"bufferView":404,
+			"componentType":5123,
+			"count":72,
+			"type":"SCALAR"
+		},
+		{
+			"bufferView":405,
 			"componentType":5126,
 			"count":48,
 			"max":[
@@ -6619,13 +6635,13 @@
 			"type":"VEC3"
 		},
 		{
-			"bufferView":405,
+			"bufferView":406,
 			"componentType":5126,
 			"count":48,
 			"type":"VEC3"
 		},
 		{
-			"bufferView":406,
+			"bufferView":407,
 			"componentType":5126,
 			"count":48,
 			"type":"VEC2"
@@ -9016,68 +9032,74 @@
 		},
 		{
 			"buffer":0,
-			"byteLength":576,
+			"byteLength":288,
 			"byteOffset":103992,
 			"target":34962
 		},
 		{
 			"buffer":0,
-			"byteLength":576,
+			"byteLength":288,
+			"byteOffset":104280,
+			"target":34962
+		},
+		{
+			"buffer":0,
+			"byteLength":192,
 			"byteOffset":104568,
 			"target":34962
 		},
 		{
 			"buffer":0,
+			"byteLength":288,
+			"byteOffset":104760,
+			"target":34962
+		},
+		{
+			"buffer":0,
+			"byteLength":576,
+			"byteOffset":105048,
+			"target":34962
+		},
+		{
+			"buffer":0,
+			"byteLength":576,
+			"byteOffset":105624,
+			"target":34962
+		},
+		{
+			"buffer":0,
 			"byteLength":384,
-			"byteOffset":105144,
+			"byteOffset":106200,
 			"target":34962
 		},
 		{
 			"buffer":0,
 			"byteLength":144,
-			"byteOffset":105528,
+			"byteOffset":106584,
 			"target":34963
 		},
 		{
 			"buffer":0,
 			"byteLength":576,
-			"byteOffset":105672,
+			"byteOffset":106728,
 			"target":34962
 		},
 		{
 			"buffer":0,
 			"byteLength":576,
-			"byteOffset":106248,
+			"byteOffset":107304,
 			"target":34962
 		},
 		{
 			"buffer":0,
 			"byteLength":384,
-			"byteOffset":106824,
-			"target":34962
-		},
-		{
-			"buffer":0,
-			"byteLength":576,
-			"byteOffset":107208,
-			"target":34962
-		},
-		{
-			"buffer":0,
-			"byteLength":576,
-			"byteOffset":107784,
-			"target":34962
-		},
-		{
-			"buffer":0,
-			"byteLength":384,
-			"byteOffset":108360,
+			"byteOffset":107880,
 			"target":34962
 		}
 	],
 	"buffers":[
 		{
-			"byteLength":108744,
+			"byteLength":108264,
 			"uri":"corridor_multiple_lights.bin"
 		}
 	]

@@ -7,7 +7,7 @@
 Player::Player(const input::InputManager& input_manager)
 	: input_manager_(input_manager), model_(nullptr)
 {
-	std::size_t player_model_id = resource::add_model("resources/models/player.glb", "Player");
+	std::size_t player_model_id = resource::add_model(Model::Info{"Player", "resources/models/player.glb"});
 	model_ = resource::get_model(player_model_id);
 	model_->add_translation_y(5.0f);
 }
@@ -50,7 +50,7 @@ void Player::update(float delta_time, glm::vec3 camera_forward, glm::vec3 camera
 		model_->add_translation(-((input_info.x_movement_intensity_ * sensitivity * delta_time) * camera_left));
 	}
 
-	model_->add_translation(glm::vec3(0.0f, -0.1f, 0.0f)); //gravité
+	//model_->add_translation(glm::vec3(0.0f, -0.1f, 0.0f)); //gravité
 	//model_->rotate(glm::angleAxis(-glm::degrees(atan2((input_info.x_movement_intensity_ * sensitivity * delta_time)/* * camera_left.x*/, (input_info.y_movement_intensity_ * sensitivity * delta_time)/* * camera_forward.z*/)), glm::vec3(0.0f, 1.0f, 0.0f)));
 
 	handle_collisions();	

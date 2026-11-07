@@ -11,9 +11,9 @@ class WAVBuffer
 	public:
 		explicit WAVBuffer(std::string_view path);
 		WAVBuffer(const WAVBuffer&) = delete;
-		WAVBuffer(WAVBuffer&&) = delete;
+		WAVBuffer(WAVBuffer&& wav_buffer);
 		WAVBuffer& operator=(const WAVBuffer&) = delete;
-		WAVBuffer& operator=(WAVBuffer&&) = delete;
+		WAVBuffer& operator=(WAVBuffer&& wav_buffer);
 		~WAVBuffer();
 
 		const Uint8* get_audio_data() const;
@@ -23,6 +23,8 @@ class WAVBuffer
 		Uint32 get_length() const;
 
 	private:
+		void destroy();
+
 		Uint8* audio_data_;
 		SDL_AudioSpec audio_spec_;
 		Uint32 audio_len_;

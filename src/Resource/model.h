@@ -6,8 +6,15 @@
 class Model
 {
 	public:
-		Model(std::string_view path, std::string_view name);
-		Model(std::string_view path, std::string_view name, Transform transform);
+		struct Info
+		{
+			std::string name_;
+			std::string path_;
+			Transform transform_;
+			std::string ambient_sound_path_;
+		};
+
+		explicit Model(Info model_info);
 
 		void render();
 
@@ -28,7 +35,8 @@ class Model
 		void set_scale(glm::vec3 scale);
 
 	private:
+		Info model_info_;
 		gltf::glTFFile gltf_file_;
-		std::string name_;
 		std::unique_ptr<gltf::Node> root_node_;
+		std::size_t ambient_sound_id_;
 };
