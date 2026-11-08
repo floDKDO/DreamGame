@@ -5,8 +5,9 @@
 #include "RAII_SDL3/sdl_ttf.h"
 
 #include <glm/vec2.hpp>
-#include <AL/alc.h>
 #include <GL/glew.h>
+#include <AL/al.h>
+#include <AL/alc.h>
 
 class Backend
 {
@@ -68,5 +69,6 @@ class Backend
 		bool texture_cubemap_seamless_;
 };
 
-void GLAPIENTRY message_callback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, [[maybe_unused]] const void* user_param);
+void AL_APIENTRY openal_message_callback(ALenum source, ALenum type, ALuint id, ALenum severity, ALsizei length, const ALchar* message, [[maybe_unused]] void* user_param) noexcept; //doit être noexcept sinon la fonction ne sera pas acceptée par alDebugMessageCallbackEXT()
+void GLAPIENTRY opengl_message_callback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, [[maybe_unused]] const void* user_param);
 void print_opengl_stuff();

@@ -13,9 +13,9 @@ InGameState::InGameState(const input::InputManager& input_manager, Backend& back
 	gizmo_ = resource::get_model(gizmo_model_id);
 	textbox_.set_dialogues({{"Yuri", "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."}, {"Unknown", "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."}});
 	
-	std::size_t map_music_id = resource::add_al_source("resources/audio/musics/" + test_map_.get_map_music(), true);
+	/*std::size_t map_music_id = resource::add_al_source("resources/audio/musics/" + test_map_.get_map_music(), true);
 	al::Source* music_source = resource::get_al_source(map_music_id);
-	music_source->play();
+	music_source->play();*/
 }
 
 void InGameState::on_show()

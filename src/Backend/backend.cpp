@@ -6,7 +6,7 @@
 #include <imgui/imgui.h>
 #include <imgui/imgui_impl_sdl3.h>
 #include <imgui/imgui_impl_opengl3.h>
-#include <AL/al.h>
+#include <AL/alext.h>
 //#include <stb/stb_image.h>
 #include <filesystem>
 #include <iostream>
@@ -68,7 +68,7 @@ void Backend::init_debug() const
 {
 	glEnable(GL_DEBUG_OUTPUT);
 	glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-	glDebugMessageCallback(message_callback, nullptr);
+	glDebugMessageCallback(opengl_message_callback, nullptr);
 	glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_NOTIFICATION, 0, nullptr, GL_FALSE); //désactiver les messages de sévérité "Notification"
 	//glDebugMessageControl(GL_DONT_CARE, GL_DEBUG_TYPE_PUSH_GROUP, GL_DEBUG_SEVERITY_NOTIFICATION, 0, nullptr, GL_TRUE); //activer les messages "Push Group"
 	//glDebugMessageControl(GL_DONT_CARE, GL_DEBUG_TYPE_POP_GROUP, GL_DEBUG_SEVERITY_NOTIFICATION, 0, nullptr, GL_TRUE); //activer les messages "Pop Group"
@@ -126,14 +126,32 @@ void Backend::init_openal()
 	{
 		logging::log("alcOpenDevice() returned nullptr!", logging::Severity::CRITICAL);
 	}
-	if((context_ = alcCreateContext(device_, nullptr)) == nullptr)
+
+	ALCint attributes[] = {ALC_CONTEXT_FLAGS_EXT, ALC_CONTEXT_DEBUG_BIT_EXT, 0};
+	if((context_ = alcCreateContext(device_, attributes)) == nullptr)
 	{
 		logging::log("alcCreateContext() returned nullptr!", logging::Severity::CRITICAL);
 	}
+
 	if(!alcMakeContextCurrent(context_))
 	{
 		logging::log("alcMakeContextCurrent() returned an error!", logging::Severity::CRITICAL);
 	}
+
+	if(alIsExtensionPresent("AL_EXT_debug") == AL_TRUE)
+	{
+		logging::log("The OpenAL debug extension is available!", logging::Severity::DEBUG);
+		alEnable(AL_DEBUG_OUTPUT_EXT);
+
+		using ALGETPROCADDRESS = void (*)(ALDEBUGPROCEXT callback, void* user_param);
+		ALGETPROCADDRESS ptr_alGetProcAddress = ALGETPROCADDRESS(alGetProcAddress("alDebugMessageCallbackEXT"));
+		ptr_alGetProcAddress(openal_message_callback, nullptr);
+
+		using ALDEBUGMESSAGECONTROL = void (*)(ALenum source, ALenum type, ALenum severity, ALsizei count, const ALuint* ids, ALboolean enable);
+		ALDEBUGMESSAGECONTROL ptr_alDebugMessageControl = ALDEBUGMESSAGECONTROL(alGetProcAddress("alDebugMessageControlEXT"));
+		ptr_alDebugMessageControl(AL_DONT_CARE_EXT, AL_DONT_CARE_EXT, AL_DEBUG_SEVERITY_NOTIFICATION_EXT, 0, nullptr, AL_FALSE); //désactiver les messages de sévérité "Notification"
+	}
+
 	alDistanceModel(AL_LINEAR_DISTANCE_CLAMPED); //commun pour toutes les sources
 }
 
@@ -230,7 +248,93 @@ void Backend::update_window_fps(unsigned int frame_count_this_second) const
 	window_.update_fps(frame_count_this_second);
 }
 
-void GLAPIENTRY message_callback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, [[maybe_unused]] const void* user_param)
+void AL_APIENTRY openal_message_callback(ALenum source, ALenum type, ALuint id, ALenum severity, ALsizei length, const ALchar* message, [[maybe_unused]] void* user_param) noexcept
+{
+	auto lambda_source = [&source]() -> std::string
+	{
+		switch(source)
+		{
+			case AL_DEBUG_SOURCE_API_EXT:
+				return "SOURCE: API, ";
+
+			case AL_DEBUG_SOURCE_AUDIO_SYSTEM_EXT:
+				return "SOURCE: Audio System, ";
+
+			case AL_DEBUG_SOURCE_THIRD_PARTY_EXT:
+				return "SOURCE: Third party, ";
+
+			case AL_DEBUG_SOURCE_APPLICATION_EXT:
+				return "SOURCE: Application, ";
+
+			case AL_DEBUG_SOURCE_OTHER_EXT:
+				return "SOURCE: Other, ";
+
+			default:
+				return "SOURCE: Unknown, ";
+		}
+	};
+
+	auto lamda_type = [&type]() -> std::string
+	{
+		switch(type)
+		{
+			case AL_DEBUG_TYPE_ERROR_EXT:
+				return "Error";
+
+			case AL_DEBUG_TYPE_DEPRECATED_BEHAVIOR_EXT:
+				return "Deprecated behavior";
+
+			case AL_DEBUG_TYPE_UNDEFINED_BEHAVIOR_EXT:
+				return "Undefined behavior";
+
+			case AL_DEBUG_TYPE_PORTABILITY_EXT:
+				return "Portability";
+
+			case AL_DEBUG_TYPE_PERFORMANCE_EXT:
+				return "Performance";
+
+			case AL_DEBUG_TYPE_MARKER_EXT:
+				return "Marker";
+
+			case AL_DEBUG_TYPE_OTHER_EXT:
+				return "Other";
+
+			case AL_DEBUG_TYPE_POP_GROUP_EXT:
+				return "Pop group";
+
+			case AL_DEBUG_TYPE_PUSH_GROUP_EXT:
+				return "Push group";
+
+			default:
+				return "Unknown";
+		}
+	};
+
+	auto lambda_severity = [&severity]() -> std::string
+	{
+		switch(severity)
+		{
+			case AL_DEBUG_SEVERITY_HIGH_EXT:
+				return "SEVERITY: High, ";
+
+			case AL_DEBUG_SEVERITY_MEDIUM_EXT:
+				return "SEVERITY: Medium, ";
+
+			case AL_DEBUG_SEVERITY_LOW_EXT:
+				return "SEVERITY: Low, ";
+
+			case AL_DEBUG_SEVERITY_NOTIFICATION_EXT:
+				return "SEVERITY: Notification, ";
+
+			default:
+				return "SEVERITY: Unknown, ";
+		}
+	};
+
+	logging::log("[OpenAL " + lamda_type() + "] - " + lambda_severity() + lambda_source() + "ID: " + std::to_string(id) + ", MESSAGE (length=" + std::to_string(length) + "): \"" + message + "\"", logging::Severity::DEBUG);
+}
+
+void GLAPIENTRY opengl_message_callback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, [[maybe_unused]] const void* user_param)
 {
 	auto lambda_source = [&source]() -> std::string
 	{
