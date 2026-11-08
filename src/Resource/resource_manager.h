@@ -3,7 +3,6 @@
 #include "shader_program.h"
 #include "Render/mesh.h"
 #include "Render/texture.h"
-#include "Common/transform.h"
 #include "RAII_SDL3/font.h"
 #include "RAII_SDL3/surface.h"
 #include "OpenAL/source.h"
@@ -21,12 +20,12 @@ void destroy_all_resources();
 std::size_t add_texture(Texture&& texture);
 Texture* get_texture(std::size_t id); //ne retourne pas de const Texture* car la fonction glCreateTextures() modifie son troisième paramètre
 
-std::size_t add_audio_buffer(std::string_view path);
-audio::Buffer* get_audio_buffer(std::size_t id);
+std::size_t add_al_buffer(std::string_view path);
+al::Buffer* get_al_buffer(std::size_t id);
 
-std::size_t add_audio_source(std::string_view path, bool loop = false);
-std::size_t add_audio_source(std::string_view path, glm::vec3 position, bool loop = false);
-audio::Source* get_audio_source(std::size_t id);
+std::size_t add_al_source(std::string_view path, bool loop = false);
+std::size_t add_al_source(std::string_view path, glm::vec3 position, bool loop = false);
+al::Source* get_al_source(std::size_t id);
 
 std::size_t add_mesh(std::string_view file_name, Mesh::Info mesh_info, int32_t mesh_index = Mesh::absent_mesh_index);
 std::size_t add_2d_text(std::string_view text, const sdl::Surface& surface);

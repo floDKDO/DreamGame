@@ -1,6 +1,6 @@
 #include "gamepad.h"
 
-#include <SDL3/SDL.h>
+#include <SDL3/SDL_timer.h>
 #include <iostream>
 
 namespace sdl
@@ -12,18 +12,45 @@ Gamepad::Gamepad() //SDL_OpenGamepad
 	open();
 }
 
+Gamepad::Gamepad(Gamepad&& gamepad)
+	: gamepad_(gamepad.gamepad_), last_check_time_(gamepad.last_check_time_), current_check_time_(gamepad.current_check_time_)
+{
+	gamepad.gamepad_ = nullptr;
+}
+
+Gamepad& Gamepad::operator=(Gamepad&& gamepad)
+{
+	if(this == &gamepad)
+	{
+		return *this;
+	}
+
+	destroy();
+
+	gamepad_ = gamepad.gamepad_;
+	last_check_time_ = gamepad.last_check_time_;
+	current_check_time_ = gamepad.current_check_time_;
+	gamepad.gamepad_ = nullptr;
+	return *this;
+}
+
 Gamepad::~Gamepad() //SDL_CloseGamepad
+{
+	destroy();
+}
+
+SDL_Gamepad* Gamepad::fetch() const
+{
+	return gamepad_;
+}
+
+void Gamepad::destroy()
 {
 	if(gamepad_ != nullptr)
 	{
 		SDL_CloseGamepad(gamepad_);
 		gamepad_ = nullptr;
 	}
-}
-
-SDL_Gamepad* Gamepad::fetch() const
-{
-	return gamepad_;
 }
 
 Sint16 Gamepad::get_axis(SDL_GamepadAxis axis) const

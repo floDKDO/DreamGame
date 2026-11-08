@@ -23,7 +23,39 @@ Window::Window()
 	set_icon();
 }
 
+Window::Window(Window&& window)
+	: window_(window.window_), context_(window.context_), window_icon_(std::move(window.window_icon_))
+{
+	window.window_ = nullptr;
+}
+
+Window& Window::operator=(Window&& window)
+{
+	if(this == &window)
+	{
+		return *this;
+	}
+	
+	destroy();
+
+	window_ = window.window_;
+	context_ = window.context_;
+	window_icon_ = std::move(window.window_icon_);
+	window.window_ = nullptr;
+	return *this;
+}
+
 Window::~Window()
+{
+	destroy();
+}
+
+SDL_Window* Window::fetch() const
+{
+	return window_;
+}
+
+void Window::destroy()
 {
 	if(window_ != nullptr)
 	{
@@ -34,11 +66,6 @@ Window::~Window()
 		SDL_DestroyWindow(window_);
 		window_ = nullptr;
 	}
-}
-
-SDL_Window* Window::fetch() const
-{
-	return window_;
 }
 
 void Window::set_opengl_attributes() const

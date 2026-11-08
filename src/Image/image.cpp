@@ -6,8 +6,6 @@
 Image::Image(std::string_view path)
 	: position_(glm::vec2(0.0f)), angle_(0.0f), mesh_id_(resource::add_2d_image(path))
 {
-	mesh_id_ = resource::add_2d_image(path);
-
 	const Mesh* mesh = resource::get_mesh(mesh_id_);
 	original_texture_width_ = mesh->get_original_texture_width();
 	original_texture_height_ = mesh->get_original_texture_height();

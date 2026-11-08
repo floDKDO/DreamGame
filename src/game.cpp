@@ -45,8 +45,6 @@ void Game::run()
 		update_fps_count(last_fps_refresh, frame_count_this_second);
 		last_frame = begin_current_frame;
 	}
-
-	//audio::destroy_source(temp_model_name);
 }
 
 void Game::handle_events()

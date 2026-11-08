@@ -5,7 +5,7 @@
 #include <AL/al.h>
 #include <string_view>
 
-namespace audio
+namespace al
 {
 
 class Source
@@ -25,8 +25,11 @@ class Source
 
 		Source(std::size_t buffer_id, bool loop);
 		Source(std::size_t buffer_id, glm::vec3 position, bool loop);
-
-		static void check_error(std::string_view function_name);
+		Source(const Source&) = delete;
+		Source(Source&& source);
+		Source& operator=(const Source&) = delete;
+		Source& operator=(Source&& source);
+		~Source();
 
 		void play() const;
 		void destroy() const;
@@ -44,6 +47,7 @@ class Source
 		ALuint id_;
 		std::size_t buffer_id_;
 		Properties properties_;
+		ALsizei size_;
 };
 
 }

@@ -10,9 +10,9 @@ class Window
 	public:
 		Window(); 
 		Window(const Window&) = delete;
-		Window(Window&&) = delete;
+		Window(Window&& window);
 		Window& operator=(const Window&) = delete;
-		Window& operator=(Window&&) = delete;
+		Window& operator=(Window&& window);
 		~Window(); 
 
 		SDL_Window* fetch() const;
@@ -28,6 +28,7 @@ class Window
 		void set_opengl_context();
 		void set_icon() const;
 		void set_title(std::string_view title) const;
+		void destroy();
 
 		SDL_Window* window_;
 		SDL_GLContext context_;

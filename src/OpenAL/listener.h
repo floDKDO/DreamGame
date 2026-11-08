@@ -2,7 +2,7 @@
 
 #include <glm/vec3.hpp>
 
-namespace audio
+namespace al
 {
 
 void set_listener_position(glm::vec3 position);

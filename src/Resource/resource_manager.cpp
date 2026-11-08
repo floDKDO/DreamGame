@@ -16,9 +16,9 @@ Resources<std::size_t, Model> models_; //template specialization (voir "resource
 Resources<Mesh::Id, Mesh> meshes_;
 Resources<Mesh::Id, Mesh> aabb_meshes_;
 Resources<sdl::Font::Id, sdl::Font> fonts_;
-Resources<std::string, Texture> textures_; //si la texture possède un path, sa clef est le path ; si la texture est au format embedded glTF, toujours l'insérer cas peu commun et pas vraiment possible d'identifer de manière unique ce type de texture sans lire tout leur contenu)
-Resources<std::string, audio::Buffer> audio_buffers_;
-Resources<std::size_t, audio::Source> audio_sources_; //template specialization (voir "resources.h")
+Resources<std::string, Texture> textures_; //si la texture possède un path, sa clef est le path. Si la texture est au format embedded glTF, toujours l'insérer cas peu commun et pas vraiment possible d'identifer de manière unique ce type de texture sans lire tout leur contenu)
+Resources<std::string, al::Buffer> al_buffers_;
+Resources<std::size_t, al::Source> al_sources_; //template specialization (voir "resources.h")
 
 //Ces méthodes sont placées là (donc pas dans le header) car elles sont utilisées uniquement dans ce fichier .cpp
 ShaderProgram* get_shader(std::string_view name);
@@ -36,18 +36,8 @@ void destroy_all_resources()
 		}
 	}
 
-	for(auto& [id, source] : audio_sources_.resources_)
-	{
-		source.destroy();
-	}
-	audio_sources_.clear();
-
-	for(auto& [id, buffer] : audio_buffers_.resources_)
-	{
-		buffer.destroy();
-	}
-	audio_buffers_.clear();
-
+	al_sources_.clear();
+	al_buffers_.clear();
 	shader_programs_.clear();
 	models_.clear();
 	meshes_.clear();
@@ -97,46 +87,46 @@ Texture* get_texture(std::size_t id)
 	return nullptr;
 }
 
-std::size_t add_audio_buffer(std::string_view path)
+std::size_t add_al_buffer(std::string_view path)
 {
-	return audio_buffers_.insert_resource(std::string(path), audio::Buffer(path));
+	return al_buffers_.insert_resource(std::string(path), al::Buffer(path));
 }
 
 //TODO : très proche d'autres méthodes dans ce fichier
-audio::Buffer* get_audio_buffer(std::size_t id)
+al::Buffer* get_al_buffer(std::size_t id)
 {
-	if(audio_buffers_.ids_.count(id))
+	if(al_buffers_.ids_.count(id))
 	{
-		if(std::string buffer_string = audio_buffers_.ids_.at(id); audio_buffers_.resources_.count(buffer_string))
+		if(std::string buffer_string = al_buffers_.ids_.at(id); al_buffers_.resources_.count(buffer_string))
 		{
-			return &audio_buffers_.resources_.at(buffer_string);
+			return &al_buffers_.resources_.at(buffer_string);
 		}
 	}
-	logging::log("get_audio_source() returned nullptr!", logging::Severity::WARNING);
+	logging::log("get_al_source() returned nullptr!", logging::Severity::WARNING);
 	return nullptr;
 }
 
-std::size_t add_audio_source(std::string_view path, bool loop)
+std::size_t add_al_source(std::string_view path, bool loop)
 {
-	return add_audio_source(path, glm::vec3(0.0f), loop);
+	return add_al_source(path, glm::vec3(0.0f), loop);
 }
 
-std::size_t add_audio_source(std::string_view path, glm::vec3 position, bool loop)
+std::size_t add_al_source(std::string_view path, glm::vec3 position, bool loop)
 {
-	std::size_t audio_buffer_id = add_audio_buffer(path);
-	return audio_sources_.insert_resource(audio::Source(audio_buffer_id, position, loop));
+	std::size_t al_buffer_id = add_al_buffer(path);
+	return al_sources_.insert_resource(al::Source(al_buffer_id, position, loop));
 }
 
 //TODO : très proche d'autres méthodes dans ce fichier
-audio::Source* get_audio_source(std::size_t id)
+al::Source* get_al_source(std::size_t id)
 {
-	if(audio_sources_.resources_.count(id))
+	if(al_sources_.resources_.count(id))
 	{
-		return &audio_sources_.resources_.at(id);
+		return &al_sources_.resources_.at(id);
 	}
 	else
 	{
-		logging::log("get_audio_source() returned nullptr!", logging::Severity::WARNING);
+		logging::log("get_al_source() returned nullptr!", logging::Severity::WARNING);
 		return nullptr;
 	}
 }

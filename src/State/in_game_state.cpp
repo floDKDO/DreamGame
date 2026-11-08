@@ -13,9 +13,9 @@ InGameState::InGameState(const input::InputManager& input_manager, Backend& back
 	gizmo_ = resource::get_model(gizmo_model_id);
 	textbox_.set_dialogues({{"Yuri", "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."}, {"Unknown", "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."}});
 	
-	//std::size_t map_music_id = resource::add_audio_source("resources/audio/musics/" + test_map_.get_map_music(), true);
-	//audio::Source* music_source = resource::get_audio_source(map_music_id);
-	//music_source->play();
+	std::size_t map_music_id = resource::add_al_source("resources/audio/musics/" + test_map_.get_map_music(), true);
+	al::Source* music_source = resource::get_al_source(map_music_id);
+	music_source->play();
 }
 
 void InGameState::on_show()
@@ -54,7 +54,7 @@ void InGameState::update([[maybe_unused]] float delta_time)
 	player_.update(delta_time, camera_.get_camera_forward(), camera_.get_camera_left());
 	textbox_.update(delta_time);
 
-	audio::set_listener_position(player_.get_model()->get_position());
-	audio::set_listener_orientation(camera_.get_camera_forward(), camera_.get_camera_up());
-	audio::set_listener_velocity(glm::vec3(0.0f));
+	al::set_listener_position(player_.get_model()->get_position());
+	al::set_listener_orientation(camera_.get_camera_forward(), camera_.get_camera_up());
+	al::set_listener_velocity(glm::vec3(0.0f));
 }

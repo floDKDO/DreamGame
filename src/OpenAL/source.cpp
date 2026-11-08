@@ -1,38 +1,66 @@
 #include "source.h"
 #include "buffer.h"
-#include "RAII_SDL3/wav_buffer.h"
-#include "Logging/logging.h"
 #include "Resource/resource_manager.h"
 
 #include <string>
 #include <iostream>
 
-namespace audio
+namespace al
 {
 
 //si path désigne un son (dossier sounds/), celui-ci doit être en mono pour bénéficier de l'atténuation 
 //=> documentation OpenAL : "Buffers containing more than one channel of data will be played without 3D spatialization."
 Source::Source(std::size_t buffer_id, bool loop)
-	: buffer_id_(buffer_id)
+	: buffer_id_(buffer_id), size_(1)
 {
 	properties_.loop_ = loop;
 	init();
 }
 
 Source::Source(std::size_t buffer_id, glm::vec3 position, bool loop)
-	: buffer_id_(buffer_id)
+	: buffer_id_(buffer_id), size_(1)
 {
 	properties_.loop_ = loop;
 	properties_.position_ = position;
 	init();
 }
 
+Source::Source(Source&& source)
+	: id_(source.id_), buffer_id_(source.buffer_id_), properties_(source.properties_), size_(source.size_)
+{
+	source.size_ = 0;
+}
+
+Source& Source::operator=(Source&& source)
+{
+	if(this == &source)
+	{
+		return *this;
+	}
+
+	destroy();
+
+	id_ = source.id_;
+	buffer_id_ = source.buffer_id_;
+	properties_ = source.properties_;
+	size_ = source.size_;
+
+	source.size_ = 0;
+	return *this;
+}
+
+Source::~Source()
+{
+	destroy();
+	size_ = 0;
+}
+
 void Source::init()
 {
-	alGenSources(1, &id_);
+	alGenSources(size_, &id_);
 	check_error("alGenSources()");
 
-	Buffer* buffer = resource::get_audio_buffer(buffer_id_);
+	Buffer* buffer = resource::get_al_buffer(buffer_id_);
 	alSourcei(id_, AL_BUFFER, buffer->get_id());
 	check_error("alSourcei()");
 
@@ -55,14 +83,6 @@ void Source::init()
 	check_error("alSource3f()");
 }
 
-void Source::check_error(std::string_view function_name)
-{
-	if(ALenum al_error = alGetError(); al_error != AL_NO_ERROR)
-	{
-		logging::log("Error in " + std::string(function_name), logging::Severity::WARNING);
-	}
-}
-
 void Source::play() const
 {
 	alSourcePlay(id_);
@@ -71,14 +91,17 @@ void Source::play() const
 
 void Source::destroy() const
 {
-	alSourceStop(id_);
-	check_error("alSourceStop()");
+	if(size_ != 0)
+	{
+		alSourceStop(id_);
+		check_error("alSourceStop()");
 
-	alSourcei(id_, AL_BUFFER, NULL);
-	check_error("alSourcei()");
+		alSourcei(id_, AL_BUFFER, NULL);
+		check_error("alSourcei()");
 
-	alDeleteSources(1, &id_);
-	check_error("alDeleteSources()");
+		alDeleteSources(size_, &id_);
+		check_error("alDeleteSources()");
+	}
 }
 
 void Source::set_gain(float value)
