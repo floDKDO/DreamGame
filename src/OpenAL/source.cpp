@@ -2,14 +2,11 @@
 #include "buffer.h"
 #include "Resource/resource_manager.h"
 
-#include <string>
 #include <iostream>
 
 namespace al
 {
 
-//si path désigne un son (dossier sounds/), celui-ci doit être en mono pour bénéficier de l'atténuation 
-//=> documentation OpenAL : "Buffers containing more than one channel of data will be played without 3D spatialization."
 Source::Source(std::size_t buffer_id, bool loop)
 	: buffer_id_(buffer_id), size_(1)
 {
@@ -151,6 +148,16 @@ void Source::set_position(glm::vec3 value)
 	properties_.position_ = value;
 	alSource3f(id_, AL_POSITION, properties_.position_.x, properties_.position_.y, properties_.position_.z);
 	check_error("alSource3f()");
+}
+
+void Source::change_buffer(std::string_view path)
+{
+	buffer_id_ = resource::add_al_buffer(path);
+	Buffer* buffer = resource::get_al_buffer(buffer_id_);
+	alSourceStop(id_);
+	check_error("alSourceStop()");
+	alSourcei(id_, AL_BUFFER, buffer->get_id());
+	check_error("alSourcei()");
 }
 
 }

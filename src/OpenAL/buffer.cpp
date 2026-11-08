@@ -6,6 +6,8 @@
 namespace al
 {
 
+//si path désigne un son (dossier sounds/), celui-ci doit être en mono pour bénéficier de l'atténuation
+//=> documentation OpenAL : "Buffers containing more than one channel of data will be played without 3D spatialization."
 Buffer::Buffer(std::string_view path)
 	: wav_buffer_(path), size_(1)
 {

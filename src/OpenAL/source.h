@@ -40,6 +40,7 @@ class Source
 		void set_reference_distance(float value);
 		void set_max_distance(float value);
 		void set_position(glm::vec3 value);
+		void change_buffer(std::string_view path);
 
 	private:
 		void init();
