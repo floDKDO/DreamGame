@@ -27,6 +27,4 @@ class Buffer
 		ALsizei size_;
 };
 
-void check_error(std::string_view function_name);
-
 }
