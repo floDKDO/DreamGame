@@ -68,24 +68,30 @@ void Window::destroy()
 	}
 }
 
+void Window::set_opengl_attribute(SDL_GLAttr attr, int value) const
+{
+	if(!SDL_GL_SetAttribute(attr, value))
+	{
+		SDL_Log("(SDL_GL_SetAttribute) %s\n", SDL_GetError());
+	}
+}
+
 void Window::set_opengl_attributes() const
 {
-	if(!SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE))
-	{
-		SDL_Log("(SDL_GL_SetAttribute) %s\n", SDL_GetError());
-	}
-	if(!SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4))
-	{
-		SDL_Log("(SDL_GL_SetAttribute) %s\n", SDL_GetError());
-	}
-	if(!SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 5))
-	{
-		SDL_Log("(SDL_GL_SetAttribute) %s\n", SDL_GetError());
-	}
-	if(!SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG))
-	{
-		SDL_Log("(SDL_GL_SetAttribute) %s\n", SDL_GetError());
-	}
+	set_opengl_attribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE); //utiliser le profil "Core" d'OpenGL
+	set_opengl_attribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);							//utiliser la version majeure "4" d'OpenGL
+	set_opengl_attribute(SDL_GL_CONTEXT_MINOR_VERSION, 5);							//utiliser la version mineure "5" d'OpenGL (=> version 4.5)
+	set_opengl_attribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);			//activer le mode de debug d'OpenGL
+
+	set_opengl_attribute(SDL_GL_DOUBLEBUFFER, 1); //activer le double buffering
+	set_opengl_attribute(SDL_GL_STEREO, 0);       //désactiver le stéréo 3D
+
+	set_opengl_attribute(SDL_GL_RED_SIZE, 8);     //taille minimale en bits pour le canal rouge dans le color buffer
+	set_opengl_attribute(SDL_GL_GREEN_SIZE, 8);   //taille minimale en bits pour le canal bleu dans le color buffer
+	set_opengl_attribute(SDL_GL_BLUE_SIZE, 8);    //taille minimale en bits pour le canal vert dans le color buffer
+	set_opengl_attribute(SDL_GL_ALPHA_SIZE, 8);   //taille minimale en bits pour le canal alpha dans le color buffer
+	set_opengl_attribute(SDL_GL_DEPTH_SIZE, 16);  //taille minimale en bits d'une entrée dans le depth buffer du framebuffer par défaut
+	set_opengl_attribute(SDL_GL_STENCIL_SIZE, 0); //taille minimale en bits d'une entrée dans le stencil buffer du framebuffer par défaut
 }
 
 void Window::set_hints() const

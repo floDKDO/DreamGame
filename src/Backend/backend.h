@@ -49,6 +49,7 @@ class Backend
 			GLclampd depth_clear_value_ = 1.0;
 		};
 
+		void init_glew() const;
 		void init_pixel_processing_state() const;
 		void init_viewport() const;
 		void init_debug() const;
@@ -62,7 +63,6 @@ class Backend
 		sdl::SDL sdl_;
 		sdl::SDLTTF sdl_ttf_;
 		sdl::Window window_;
-		GLenum glew_;
 		ALCdevice* device_;
 		ALCcontext* context_;
 		PixelProcessingState pixel_processing_state_;

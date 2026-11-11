@@ -23,6 +23,7 @@ class Window
 		void set_relative_mouse_mode(bool enabled) const;
 
 	private:
+		void set_opengl_attribute(SDL_GLAttr attr, int value) const;
 		void set_opengl_attributes() const;
 		void set_hints() const;
 		void set_opengl_context();

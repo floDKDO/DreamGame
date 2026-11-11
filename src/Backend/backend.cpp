@@ -12,8 +12,9 @@
 #include <iostream>
 
 Backend::Backend()
-	: sdl_(), sdl_ttf_(), window_(), glew_(glewInit()), pixel_processing_state_()
+	: sdl_(), sdl_ttf_(), window_(), pixel_processing_state_()
 {
+	init_glew();
 	init_shaders();
 	init_viewport();
 	init_pixel_processing_state();
@@ -38,6 +39,16 @@ void Backend::handle_events(const SDL_Event& e)
 	if(e.type == SDL_EVENT_WINDOW_RESIZED)
 	{
 		glViewport(0, 0, e.window.data1, e.window.data2);
+	}
+}
+
+void Backend::init_glew() const
+{
+	glewExperimental = GL_TRUE;
+	if(GLenum error = glewInit(); error != GLEW_OK)
+	{
+		logging::log("glewInit() returned the error '" + utils::get_string_from_unsigned_char_ptr(glewGetErrorString(error)) + "'!", logging::Severity::CRITICAL);
+		exit(EXIT_FAILURE);
 	}
 }
 
