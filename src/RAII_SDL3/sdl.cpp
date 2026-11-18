@@ -13,7 +13,7 @@ SDL::SDL()
 	{
 		SDL_Log("(SDL_Init) %s\n", SDL_GetError());
 	}
-	logging::log("** Init SDL **", logging::Severity::DEBUG);
+	logging::log("Init SDL", logging::Severity::DEBUG);
 
 	//TODO : SteamAPI_InitEx()
 }
@@ -21,7 +21,7 @@ SDL::SDL()
 SDL::~SDL()
 {
 	SDL_Quit();
-	logging::log("** Quit SDL **", logging::Severity::DEBUG);
+	logging::log("Quit SDL", logging::Severity::DEBUG);
 }
 
 }

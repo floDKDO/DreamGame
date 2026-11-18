@@ -108,7 +108,7 @@ void ShaderProgram::link() const
 void ShaderProgram::set_projection_matrix()
 {
 	glm::mat4 projection_matrix(1.0f);
-	if(shader_program_name_ == "Phong" || shader_program_name_ == "Skybox")
+	if(shader_program_name_ == "Phong" || shader_program_name_ == "Skybox" || shader_program_name_ == "Base") //TODO : vérifier le comportement si j'utilise la matrice orthographique avec le shader "Base" pour afficher la texture de mon propre framebuffer
 	{
 		projection_matrix = projection::get_perspective_matrix();
 	}

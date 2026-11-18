@@ -73,7 +73,7 @@ void Mesh::load_vertex_attribute(GLuint vbo_binding_index, attribute::Name attri
 
 	glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 1, -1, "Entering VAO's attribute code.");
 	glEnableVertexArrayAttrib(vao_, attribute_info.index_);
-	glVertexArrayAttribFormat(vao_, attribute_info.index_, attribute_info.component_count_, GL_FLOAT, attribute_info.normalized_, GLuint(attribute_info.offset_));
+	glVertexArrayAttribFormat(vao_, attribute_info.index_, attribute_info.component_count_, GL_FLOAT, attribute_info.normalized_, GLuint(attribute_info.offset_)); //offset contient la taille en octet de la distance entre le début de Vertex et l'attribut. Exemple : texcoord est après deux vec3 de taille 12 octets, son offset est donc de 12 + 12 = 24 octets
 	glVertexArrayAttribBinding(vao_, attribute_info.index_, vbo_binding_index);
 	glPopDebugGroup();
 }
@@ -219,7 +219,6 @@ void Mesh::create_textures()
 		{ 
 			if(TextTexture& text_texture = std::get<TextTexture>(texture->specific_info_); text_texture.pixels_ == nullptr)
 			{
-				logging::log("The text texture is empty!", logging::Severity::DEBUG);
 				init_texture(texture);
 				continue;
 			}

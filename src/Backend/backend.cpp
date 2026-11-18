@@ -50,6 +50,7 @@ void Backend::init_glew() const
 		logging::log("glewInit() returned the error '" + utils::get_string_from_unsigned_char_ptr(glewGetErrorString(error)) + "'!", logging::Severity::CRITICAL);
 		exit(EXIT_FAILURE);
 	}
+	logging::log("Using the version '" + utils::get_string_from_unsigned_char_ptr(glewGetString(GLEW_VERSION)) + "' of GLEW", logging::Severity::DEBUG);
 }
 
 void Backend::init_pixel_processing_state() const
@@ -151,7 +152,7 @@ void Backend::init_openal()
 
 	if(alIsExtensionPresent("AL_EXT_debug") == AL_TRUE)
 	{
-		logging::log("The OpenAL debug extension is available!", logging::Severity::DEBUG);
+		logging::log("The OpenAL debug extension is available", logging::Severity::DEBUG);
 		alEnable(AL_DEBUG_OUTPUT_EXT);
 
 		using ALGETPROCADDRESS = void (*)(ALDEBUGPROCEXT callback, void* user_param);

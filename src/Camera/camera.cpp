@@ -55,6 +55,7 @@ glm::mat4 Camera::get_view_matrix() const
 	return view_matrix_;
 }
 
+//<=> glm::lookAtRH
 glm::mat4 Camera::look_at(glm::vec3 camera_position, glm::vec3 camera_target_position, glm::vec3 up_vector) const
 {
 	glm::vec3 forward = glm::normalize(camera_position - camera_target_position); //on obtient un vecteur qui part de la target vers la caméra

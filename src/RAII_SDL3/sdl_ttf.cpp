@@ -13,13 +13,13 @@ SDLTTF::SDLTTF()
 	{
 		SDL_Log("(TTF_Init) %s\n", SDL_GetError());
 	}
-	logging::log("** Init TTF **", logging::Severity::DEBUG);
+	logging::log("Init TTF", logging::Severity::DEBUG);
 }
 
 SDLTTF::~SDLTTF()
 {
 	TTF_Quit();
-	logging::log("** Quit TTF **", logging::Severity::DEBUG);
+	logging::log("Quit TTF", logging::Severity::DEBUG);
 }
 
 }

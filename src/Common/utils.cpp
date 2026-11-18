@@ -200,6 +200,45 @@ int get_viewport_height()
 	return viewport_data[3];
 }
 
+std::vector<GLushort> get_screen_ebo_values()
+{
+	return std::vector<GLushort>{0, 1, 2, 0, 3, 1}; //TODO : identique à get_2d_ebo_values()
+}
+
+Vertices get_screen_vertices()
+{
+	std::vector<glm::vec3> position_vector //on simule un vec2 avec un vec3 => la composante z vaut donc 0.0f
+	{
+		//NDC !
+		glm::vec3(-1.0f,  1.0f, 0.0f),
+		glm::vec3(1.0f, -1.0f, 0.0f),
+		glm::vec3(-1.0f, -1.0f, 0.0f),
+		glm::vec3(1.0f,  1.0f, 0.0f)
+	};
+	std::vector<glm::vec4> color_vector
+	{
+		glm::vec4(1.0f, 1.0f, 1.0f, 1.0f),
+		glm::vec4(1.0f, 1.0f, 1.0f, 1.0f),
+		glm::vec4(1.0f, 1.0f, 1.0f, 1.0f),
+		glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)
+	};
+	std::vector<glm::vec2> texcoord_vector
+	{
+		glm::vec2(0.0f, 1.0f),
+		glm::vec2(1.0f, 0.0f),
+		glm::vec2(0.0f, 0.0f),
+		glm::vec2(1.0f, 1.0f)
+	};
+
+	Vertices vertices(position_vector.size());
+	vertices.add_position_attributes(position_vector);
+	vertices.add_color_attributes(color_vector);
+	vertices.add_texcoord_attributes(texcoord_vector);
+
+	return vertices;
+}
+
+
 std::vector<GLushort> get_2d_ebo_values()
 {
 	return std::vector<GLushort>{0, 1, 2, 0, 3, 1};

@@ -237,12 +237,6 @@ std::unique_ptr<Node> glTFFile::get_root_node() const
 	int32_t root_node_index = scene_tg3.nodes[0];
 	tg3_node root_node_tg3 = model_tg3_.nodes[root_node_index];
 
-	if(root_node_tg3.children_count >= 1 && root_node_tg3.mesh == -1)
-	{
-		std::string root_node_name = (root_node_tg3.name.len > 0) ? std::string(root_node_tg3.name.data) : "";
-		logging::log("The root node " + root_node_name + " is an empty node", logging::Severity::DEBUG);
-	}
-
 	return get_node(path_, glm::mat4(1.0f), model_tg3_, root_node_tg3); //les root nodes n'ont pas de parent donc ont une matrice identitée pour leur parent_matrix
 }
 
@@ -328,8 +322,13 @@ std::unique_ptr<gltf::Node> get_node(std::string_view path, glm::mat4 parent_mat
 		node_name = std::string(node_tg3.name.data);
 	}
 
-	std::unique_ptr<gltf::Node> node = std::make_unique<gltf::Node>(std::string_view(node_name), gltf::Node::Info{get_transform(node_tg3), parent_matrix, get_mesh(path, model_tg3, node_tg3), get_aabb(path, model_tg3, node_tg3)});
-	if(node_tg3.children_count >= 1 && node_tg3.mesh == -1)
+	bool is_empty_node = node_tg3.children_count >= 1 && node_tg3.mesh == -1;
+	std::unique_ptr<gltf::Node> node = std::make_unique<gltf::Node>(std::string_view(node_name), gltf::Node::Info{get_transform(node_tg3), parent_matrix, 
+		is_empty_node ? std::numeric_limits<std::size_t>::max() : get_mesh(path, model_tg3, node_tg3),
+		is_empty_node ? AABBInfo{std::numeric_limits<std::size_t>::max(), std::nullopt} : get_aabb(path, model_tg3, node_tg3)}
+	);
+	
+	if(is_empty_node)
 	{
 		node->set_empty_node();
 	}
@@ -453,8 +452,11 @@ std::size_t get_mesh(std::string_view path, const tg3_model& model_tg3, const tg
 		{
 			id = resource::add_mesh(path, Mesh::Info{ebo_values, vertices, {}, GLenum(primitive_tg3.mode)}, mesh_index);
 		}
+		return id;
 	}
-	return id;
+	std::string node_name = (node_tg3.name.len > 0) ? std::string(node_tg3.name.data) : "";
+	logging::log("get_mesh(): the node \"" + node_name + "\" does not have a mesh", logging::Severity::NOTICE);
+	return id; //cas où le node ne possède pas de mesh
 }
 
 std::size_t get_aabb_mesh(std::string_view file_name, Mesh::Info mesh_info, int32_t mesh_index)

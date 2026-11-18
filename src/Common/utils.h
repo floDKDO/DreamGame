@@ -41,6 +41,8 @@ glm::quat get_rotation_from_model_matrix(glm::mat4 model_matrix);
 std::string base64_decode(const void* data, const std::size_t len);
 int get_viewport_width();
 int get_viewport_height();
+std::vector<GLushort> get_screen_ebo_values();
+Vertices get_screen_vertices();
 std::vector<GLushort> get_2d_ebo_values();
 Vertices get_2d_vertices();
 std::vector<GLushort> get_3d_ebo_values();
