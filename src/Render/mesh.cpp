@@ -10,9 +10,9 @@ const int32_t Mesh::absent_mesh_index = -1;
 namespace
 {
 
-const GLint z_offset_cubemap_back_ = 5; //TODO : attention, la valeur de zoffset est 5 et non 4
+const GLint z_offset_cubemap_back_ = 5;  //TODO : attention, la valeur de zoffset est 5 et non 4
 const GLint z_offset_cubemap_bottom_ = 3;
-const GLint z_offset_cubemap_front_ = 4; //TODO : attention, la valeur est 4 et non 5
+const GLint z_offset_cubemap_front_ = 4; //TODO : attention, la valeur de zoffset est 4 et non 5
 const GLint z_offset_cubemap_left_ = 1;
 const GLint z_offset_cubemap_right_ = 0;
 const GLint z_offset_cubemap_top_ = 2;

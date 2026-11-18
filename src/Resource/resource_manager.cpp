@@ -11,7 +11,7 @@
 namespace resource
 {
 
-std::unordered_map<std::string, ShaderProgram> shader_programs_; //pas besoin d'id de type std::size_t
+Resources<std::string, ShaderProgram> shader_programs_;
 Resources<std::size_t, Model> models_; //template specialization (voir "resources.h")
 Resources<Mesh::Id, Mesh> meshes_;
 Resources<Mesh::Id, Mesh> aabb_meshes_;
@@ -21,6 +21,7 @@ Resources<std::string, al::Buffer> al_buffers_;
 Resources<std::size_t, al::Source> al_sources_; //template specialization (voir "resources.h")
 
 //Ces méthodes sont placées là (donc pas dans le header) car elles sont utilisées uniquement dans ce fichier .cpp
+ShaderProgram* get_shader(std::size_t id);
 ShaderProgram* get_shader(std::string_view name);
 std::size_t get_id_from_font_id(sdl::Font::Id font_id);
 
@@ -259,33 +260,46 @@ std::unordered_map<std::size_t, Model>& get_models()
 	return models_.resources_;
 }
 
-void add_shader(std::string_view name, std::vector<std::string> shader_paths)
+std::size_t add_shader(std::string_view name, std::vector<std::string> shader_paths)
 {
-	shader_programs_.insert(std::make_pair(name, ShaderProgram(name, shader_paths)));
+	return shader_programs_.insert_resource(std::string(name), ShaderProgram(name, shader_paths));
+}
+
+ShaderProgram* bind_shader(std::size_t id)
+{
+	ShaderProgram* shader_program = get_shader(id);
+	shader_program->use();
+	return shader_program;
 }
 
 ShaderProgram* bind_shader(std::string_view name)
 {
 	ShaderProgram* shader_program = get_shader(name);
-
-	GLint shader_program_id = 0;
-	glGetIntegerv(GL_CURRENT_PROGRAM, &shader_program_id);
-	if(GLuint(shader_program_id) == shader_program->get_shader_program_id())
-	{
-		//logging::log("Trying to bind to an already bound shader (" + std::string(name) + ")", logging::Severity::NOTICE);
-		return shader_program;
-	}
 	shader_program->use();
 	return shader_program;
+}
+
+//TODO : très proche d'autres méthodes dans ce fichier
+ShaderProgram* get_shader(std::size_t id)
+{
+	if(shader_programs_.ids_.count(id))
+	{
+		if(std::string shader_program_string = shader_programs_.ids_.at(id); shader_programs_.resources_.count(shader_program_string))
+		{
+			return &shader_programs_.resources_.at(shader_program_string);
+		}
+	}
+	logging::log("get_shader2() returned nullptr!", logging::Severity::WARNING);
+	return nullptr;
 }
 
 //TODO : très proche d'autres méthodes dans ce fichier
 ShaderProgram* get_shader(std::string_view name)
 {
 	std::string name_str = std::string(name);
-	if(shader_programs_.count(name_str))
+	if(shader_programs_.resources_.count(name_str))
 	{
-		return &shader_programs_.at(name_str);
+		return &shader_programs_.resources_.at(name_str);
 	}
 	else
 	{
@@ -299,7 +313,7 @@ ShaderProgram* get_currently_bound_shader()
 	GLint shader_program_id = 0;
 	glGetIntegerv(GL_CURRENT_PROGRAM, &shader_program_id);
 
-	for(auto& [shader_program_name, shader_program] : shader_programs_)
+	for(auto& [shader_program_name, shader_program] : shader_programs_.resources_)
 	{
 		if(shader_program.get_shader_program_id() == GLuint(shader_program_id))
 		{

@@ -40,7 +40,8 @@ std::size_t add_model(Model::Info model_info);
 Model* get_model(std::size_t id); //ne retourne pas de const cat la classe Player a besoin de modifier le modèle du joueur
 std::unordered_map<std::size_t, Model>& get_models();
 
-void add_shader(std::string_view name, std::vector<std::string> shader_paths);
+std::size_t add_shader(std::string_view name, std::vector<std::string> shader_paths);
+ShaderProgram* bind_shader(std::size_t id); //ne retourne pas de const car les méthodes d'ajout et de modification de variables uniformes ne sont pas const
 ShaderProgram* bind_shader(std::string_view name); //ne retourne pas de const car les méthodes d'ajout et de modification de variables uniformes ne sont pas const
 ShaderProgram* get_currently_bound_shader();
 

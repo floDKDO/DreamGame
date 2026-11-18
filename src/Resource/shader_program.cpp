@@ -108,6 +108,8 @@ void ShaderProgram::link() const
 void ShaderProgram::set_projection_matrix()
 {
 	glm::mat4 projection_matrix(1.0f);
+
+	//TODO : inverser la condition => logiquement, il devrait y avoir très peu de shaders qui utilisent la matrice de projection orthographique
 	if(shader_program_name_ == "Phong" || shader_program_name_ == "Skybox" || shader_program_name_ == "Base") //TODO : vérifier le comportement si j'utilise la matrice orthographique avec le shader "Base" pour afficher la texture de mon propre framebuffer
 	{
 		projection_matrix = projection::get_perspective_matrix();
@@ -131,8 +133,13 @@ GLuint ShaderProgram::get_shader_program_id() const
 
 void ShaderProgram::use()
 {
-	glUseProgram(shader_program_id_);
-	set_projection_matrix(); //permet de ne plus avoir besoin de positionner la variable uniforme "projection_matrix_" à chaque fois qu'on bind un shader
+	GLint shader_program_id = 0;
+	glGetIntegerv(GL_CURRENT_PROGRAM, &shader_program_id);
+	if(GLuint(shader_program_id) != shader_program_id_) //ne pas appeler glUseProgram() inutilement
+	{
+		glUseProgram(shader_program_id_);
+		set_projection_matrix(); //permet de ne plus avoir besoin de positionner la variable uniforme "projection_matrix_" à chaque fois qu'on bind un shader
+	}
 }
 
 void ShaderProgram::insert_uniform(const GLchar* name)
@@ -140,11 +147,8 @@ void ShaderProgram::insert_uniform(const GLchar* name)
 	std::string name_str = std::string(name);
 	if(!uniforms_.count(name_str))
 	{
-		GLint shader_program_id = 0;
-		glGetIntegerv(GL_CURRENT_PROGRAM, &shader_program_id);
-
 		GLint location;
-		if((location = glGetUniformLocation(GLuint(shader_program_id), name)) == -1)
+		if((location = glGetUniformLocation(shader_program_id_, name)) == -1) //ne nécessite pas que le shader program soit actif pour fonctionner => pas besoin que glUseProgram() ait été appelé auparavant
 		{
 			logging::log("The requested uniform variable (" + std::string(name) + ") does not exist!", logging::Severity::WARNING);
 		}
