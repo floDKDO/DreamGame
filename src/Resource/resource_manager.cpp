@@ -74,18 +74,9 @@ std::size_t add_texture(Texture&& texture)
 	return textures_.insert_resource(texture_key, std::move(texture));
 }
 
-//TODO : très proche d'autres méthodes dans ce fichier
 Texture* get_texture(std::size_t id)
 {
-	if(textures_.ids_.count(id))
-	{
-		if(std::string texture_string = textures_.ids_.at(id); textures_.resources_.count(texture_string))
-		{
-			return &textures_.resources_.at(texture_string);
-		}
-	}
-	logging::log("get_texture() returned nullptr!", logging::Severity::WARNING);
-	return nullptr;
+	return textures_.get_resource(id);
 }
 
 std::size_t add_al_buffer(std::string_view path)
@@ -93,18 +84,9 @@ std::size_t add_al_buffer(std::string_view path)
 	return al_buffers_.insert_resource(std::string(path), al::Buffer(path));
 }
 
-//TODO : très proche d'autres méthodes dans ce fichier
 al::Buffer* get_al_buffer(std::size_t id)
 {
-	if(al_buffers_.ids_.count(id))
-	{
-		if(std::string buffer_string = al_buffers_.ids_.at(id); al_buffers_.resources_.count(buffer_string))
-		{
-			return &al_buffers_.resources_.at(buffer_string);
-		}
-	}
-	logging::log("get_al_source() returned nullptr!", logging::Severity::WARNING);
-	return nullptr;
+	return al_buffers_.get_resource(id);
 }
 
 std::size_t add_al_source(std::string_view path, bool loop)
@@ -118,18 +100,9 @@ std::size_t add_al_source(std::string_view path, glm::vec3 position, bool loop)
 	return al_sources_.insert_resource(al::Source(al_buffer_id, position, loop));
 }
 
-//TODO : très proche d'autres méthodes dans ce fichier
 al::Source* get_al_source(std::size_t id)
 {
-	if(al_sources_.resources_.count(id))
-	{
-		return &al_sources_.resources_.at(id);
-	}
-	else
-	{
-		logging::log("get_al_source() returned nullptr!", logging::Severity::WARNING);
-		return nullptr;
-	}
+	return al_sources_.get_resource(id);
 }
 
 std::size_t add_2d_text(std::string_view text, const sdl::Surface& surface)
@@ -198,17 +171,9 @@ std::size_t add_cubemap(std::string_view directory_path)
 	return add_mesh(directory_path, Mesh::Info{utils::get_3d_ebo_values(), utils::get_3d_vertices(), {texture_id}, GL_TRIANGLES});
 }
 
-const Mesh* get_mesh(std::size_t id)
+Mesh* get_mesh(std::size_t id)
 {
-	if(meshes_.ids_.count(id))
-	{
-		if(Mesh::Id mesh_id = meshes_.ids_.at(id); meshes_.resources_.count(mesh_id))
-		{
-			return &meshes_.resources_.at(mesh_id);
-		}
-	}
-	logging::log("get_mesh() returned nullptr!", logging::Severity::WARNING);
-	return nullptr;
+	return meshes_.get_resource(id);
 }
 
 std::size_t add_mesh(std::string_view file_name, Mesh::Info mesh_info, int32_t mesh_index)
@@ -223,17 +188,9 @@ std::size_t add_aabb_mesh(std::string_view file_name, Mesh::Info mesh_info, int3
 	return aabb_meshes_.insert_resource(mesh_id, Mesh(mesh_id, mesh_info));
 }
 
-const Mesh* get_aabb_mesh(std::size_t id)
+Mesh* get_aabb_mesh(std::size_t id)
 {
-	if(aabb_meshes_.ids_.count(id))
-	{
-		if(Mesh::Id mesh_id = aabb_meshes_.ids_.at(id); aabb_meshes_.resources_.count(mesh_id))
-		{
-			return &aabb_meshes_.resources_.at(mesh_id);
-		}
-	}
-	logging::log("get_aabb_mesh() returned nullptr!", logging::Severity::WARNING);
-	return nullptr;
+	return aabb_meshes_.get_resource(id);
 }
 
 std::size_t add_model(Model::Info model_info)
@@ -241,18 +198,9 @@ std::size_t add_model(Model::Info model_info)
 	return models_.insert_resource(Model(model_info));
 }
 
-//TODO : très proche d'autres méthodes dans ce fichier
 Model* get_model(std::size_t id)
 {
-	if(models_.resources_.count(id))
-	{
-		return &models_.resources_.at(id);
-	}
-	else
-	{
-		logging::log("get_model() returned nullptr!", logging::Severity::WARNING);
-		return nullptr;
-	}
+	return models_.get_resource(id);
 }
 
 std::unordered_map<std::size_t, Model>& get_models()
@@ -279,21 +227,11 @@ ShaderProgram* bind_shader(std::string_view name)
 	return shader_program;
 }
 
-//TODO : très proche d'autres méthodes dans ce fichier
 ShaderProgram* get_shader(std::size_t id)
 {
-	if(shader_programs_.ids_.count(id))
-	{
-		if(std::string shader_program_string = shader_programs_.ids_.at(id); shader_programs_.resources_.count(shader_program_string))
-		{
-			return &shader_programs_.resources_.at(shader_program_string);
-		}
-	}
-	logging::log("get_shader2() returned nullptr!", logging::Severity::WARNING);
-	return nullptr;
+	return shader_programs_.get_resource(id);
 }
 
-//TODO : très proche d'autres méthodes dans ce fichier
 ShaderProgram* get_shader(std::string_view name)
 {
 	std::string name_str = std::string(name);
@@ -359,15 +297,7 @@ std::size_t add_font(std::string_view font_path, float font_size)
 
 sdl::Font* get_font(std::size_t id)
 {
-	if(fonts_.ids_.count(id))
-	{
-		if(sdl::Font::Id font_id = fonts_.ids_.at(id); fonts_.resources_.count(font_id))
-		{
-			return &fonts_.resources_.at(font_id);
-		}
-	}
-	logging::log("get_font() returned nullptr!", logging::Severity::WARNING);
-	return nullptr;
+	return fonts_.get_resource(id);
 }
 
 }

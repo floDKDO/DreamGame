@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Logging/logging.h"
+
 #include <unordered_map>
 
 template <typename Tid, typename Tres>
@@ -47,6 +49,19 @@ class Resources
 			}
 		}
 
+		Tres* get_resource(std::size_t id)
+		{
+			if(ids_.count(id))
+			{
+				if(Tid resource_id = ids_.at(id); resources_.count(resource_id))
+				{
+					return &resources_.at(resource_id);
+				}
+			}
+			logging::log("get_resource() returned nullptr!", logging::Severity::WARNING);
+			return nullptr;
+		}
+
 		void clear()
 		{
 			resources_.clear();
@@ -72,6 +87,19 @@ class Resources<std::size_t, Tres>
 			else
 			{
 				return GlobalId::global_id_++;
+			}
+		}
+
+		Tres* get_resource(std::size_t id)
+		{
+			if(resources_.count(id))
+			{
+				return &resources_.at(id);
+			}
+			else
+			{
+				logging::log("get_resource() returned nullptr!", logging::Severity::WARNING);
+				return nullptr;
 			}
 		}
 

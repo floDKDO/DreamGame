@@ -31,10 +31,10 @@ std::size_t add_mesh(std::string_view file_name, Mesh::Info mesh_info, int32_t m
 std::size_t add_2d_text(std::string_view text, const sdl::Surface& surface);
 std::size_t add_2d_image(std::string_view path);
 std::size_t add_cubemap(std::string_view directory_path);
-const Mesh* get_mesh(std::size_t id);
+Mesh* get_mesh(std::size_t id);
 
 std::size_t add_aabb_mesh(std::string_view file_name, Mesh::Info aabb_mesh_info, int32_t mesh_index);
-const Mesh* get_aabb_mesh(std::size_t id);
+Mesh* get_aabb_mesh(std::size_t id);
 
 std::size_t add_model(Model::Info model_info);
 Model* get_model(std::size_t id); //ne retourne pas de const cat la classe Player a besoin de modifier le modèle du joueur
