@@ -1,4 +1,5 @@
 #include "window.h"
+#include "Common/constants.h"
 
 #include <string>
 #include <iostream>
@@ -9,11 +10,11 @@ namespace sdl
 Window::Window() 
 	: window_icon_()
 {
-	window_icon_.load_png("resources/images/icon.png");
+	window_icon_.load_png(constants::window_icon_path_);
 
 	set_opengl_attributes();
 
-	if((window_ = SDL_CreateWindow("DreamGame, FPS: ", 1280, 720, SDL_WINDOW_RESIZABLE | /*SDL_WINDOW_MAXIMIZED |*/ SDL_WINDOW_OPENGL)) == nullptr)
+	if((window_ = SDL_CreateWindow("DreamGame, FPS: ", constants::initial_window_width_, constants::initial_window_height_, SDL_WINDOW_RESIZABLE | /*SDL_WINDOW_MAXIMIZED |*/ SDL_WINDOW_OPENGL)) == nullptr)
 	{
 		SDL_Log("(SDL_CreateWindow) %s\n", SDL_GetError());
 	}

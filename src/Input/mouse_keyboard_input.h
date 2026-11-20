@@ -24,6 +24,8 @@ class MouseKeyboard //le fichier se nomme mouse_keyboard_input pour garder la co
 		void set_rotation_mouse(float xrel, float yrel);
 		void mouse_motion_event_end();
 
+		const static float min_rotation_intensity_;
+		const static float max_rotation_intensity_;
 		const static float max_mouse_rel_value_;
 		Info input_info_;
 		Uint64 mouse_motion_last_time_;

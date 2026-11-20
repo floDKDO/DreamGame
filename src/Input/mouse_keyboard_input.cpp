@@ -7,6 +7,8 @@
 namespace input
 {
 
+const float MouseKeyboard::min_rotation_intensity_ = -1.0f;
+const float MouseKeyboard::max_rotation_intensity_ = 1.0f;
 const float MouseKeyboard::max_mouse_rel_value_ = 10.0f;
 
 MouseKeyboard::MouseKeyboard()
@@ -138,8 +140,8 @@ void MouseKeyboard::set_key_direction_inactive(Direction direction)
 void MouseKeyboard::set_rotation_mouse(float xrel, float yrel)
 {
 	mouse_motion_last_time_ = SDL_GetTicks();
-	input_info_.x_rotation_intensity_ = std::clamp(xrel / max_mouse_rel_value_, -1.0f, 1.0f);
-	input_info_.y_rotation_intensity_ = std::clamp(yrel / max_mouse_rel_value_, -1.0f, 1.0f);
+	input_info_.x_rotation_intensity_ = std::clamp(xrel / max_mouse_rel_value_, min_rotation_intensity_, max_rotation_intensity_);
+	input_info_.y_rotation_intensity_ = std::clamp(yrel / max_mouse_rel_value_, min_rotation_intensity_, max_rotation_intensity_);
 }
 
 void MouseKeyboard::mouse_motion_event_end()

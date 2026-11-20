@@ -18,7 +18,7 @@ class Node
 		{
 			Transform transform_;
 			glm::mat4 parent_matrix_;
-			std::size_t mesh_id_ = std::numeric_limits<std::size_t>::max();
+			std::size_t mesh_id_ = constants::undefined_resource_id_;
 			AABBInfo aabb_info_;
 			bool is_empty_node_ = false; //<=> empty node sur Blender (le noeud n'a pas de mesh ni d'AABB)
 		};

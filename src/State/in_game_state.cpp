@@ -1,19 +1,22 @@
 #include "in_game_state.h"
 #include "Resource/resource_manager.h"
 #include "OpenAL/listener.h"
+#include "Logging/logging.h"
+#include "Common/utils.h"
+#include "Common/constants.h"
 
 InGameState::InGameState(const input::InputManager& input_manager, Backend& backend)
 	: State(input_manager, backend), player_(input_manager_),
 	camera_(input_manager_, player_.get_model()->get_position()),
-	test_map_("resources/maps/corridor_multiple_lights.gltf"), gizmo_(nullptr),
-	test_image_("resources/images/yuri_tea.png"),
-	textbox_(input_manager), skybox_("resources/images/skybox")
+	test_map_(std::string(constants::maps_path_) + "corridor_multiple_lights.gltf"), gizmo_(nullptr),
+	test_image_(std::string(constants::images_path_) + "yuri_tea.png"),
+	textbox_(input_manager), skybox_(std::string(constants::cubemaps_path_) + "skybox/")
 {
-	std::size_t gizmo_model_id = resource::add_model(Model::Info{"Axis guizmo", "resources/models/axis_gizmo.glb"});
+	std::size_t gizmo_model_id = resource::add_model(Model::Info{"Axis guizmo", std::string(constants::models_path_) + "axis_gizmo.glb"});
 	gizmo_ = resource::get_model(gizmo_model_id);
 	textbox_.set_dialogues({{"Yuri", "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."}, {"Unknown", "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."}});
 	
-	/*std::size_t map_music_id = resource::add_al_source("resources/audio/musics/" + test_map_.get_map_music(), true);
+	/*std::size_t map_music_id = resource::add_al_source(std::string(constants::musics_path_) + test_map_.get_map_music(), true);
 	al::Source* music_source = resource::get_al_source(map_music_id);
 	music_source->play();*/
 }

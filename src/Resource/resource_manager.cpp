@@ -182,6 +182,12 @@ std::size_t add_mesh(std::string_view file_name, Mesh::Info mesh_info, int32_t m
 	return meshes_.insert_resource(mesh_id, Mesh(mesh_id, mesh_info));
 }
 
+std::size_t add_mesh(Mesh::Info mesh_info, int32_t mesh_index)
+{
+	Mesh::Id mesh_id{std::string("Empty path " + std::to_string(GlobalId::get())), mesh_index};
+	return meshes_.insert_resource(mesh_id, Mesh(mesh_id, mesh_info));
+}
+
 std::size_t add_aabb_mesh(std::string_view file_name, Mesh::Info mesh_info, int32_t mesh_index)
 {
 	Mesh::Id mesh_id{std::string(file_name), mesh_index};
@@ -271,7 +277,7 @@ std::size_t get_id_from_font_id(sdl::Font::Id font_id)
 			return res_id;
 		}
 	}
-	return std::numeric_limits<std::size_t>::max();
+	return constants::undefined_resource_id_;
 }
 
 std::size_t add_font(std::string_view font_path, float font_size)

@@ -11,6 +11,11 @@
 namespace gltf
 {
 
+inline constexpr std::string_view position_primitive_attribute_str_ = "POSITION";
+inline constexpr std::string_view normal_primitive_attribute_str_ = "NORMAL";
+inline constexpr std::string_view color_primitive_attribute_str_ = "COLOR_";
+inline constexpr std::string_view texcoord_primitive_attribute_str_ = "TEXCOORD_";
+
 glm::mat4 get_mat4_from_1d_matrix(const double m[16]);
 glm::mat4 get_transformation_matrix(glm::mat4 parent_matrix, glm::vec3 translation, glm::quat rotation, glm::vec3 scale);
 glm::mat4 get_transformation_matrix_from_double(glm::mat4 parent_matrix, const double translation[3], const double rotation[4], const double scale[3]);

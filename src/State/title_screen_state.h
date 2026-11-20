@@ -1,7 +1,6 @@
 #pragma once
 
 #include "state.h"
-#include "Image/image.h"
 #include "Input/input_manager.h"
 #include "Backend/backend.h"
 
@@ -15,5 +14,4 @@ class TitleScreenState : public State
 		void update([[maybe_unused]] float delta_time) override;
 
 	private:
-		Image test_image_;
 };

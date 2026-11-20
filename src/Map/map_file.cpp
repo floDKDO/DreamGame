@@ -1,6 +1,7 @@
 #include "map_file.h"
 #include "Resource/resource_manager.h"
 #include "Resource/model.h"
+#include "Common/constants.h"
 //#include "Logging/logging.h"
 
 #include <fstream>
@@ -50,9 +51,9 @@ void MapFile::add_models() const
 		std::string model_ambient_sound = model_value["ambientSound"];
 		if(!model_ambient_sound.empty())
 		{
-			model_ambient_sound = "resources/audio/sounds/" + model_ambient_sound;
+			model_ambient_sound = std::string(constants::sounds_path_) + model_ambient_sound;
 		}
-		resource::add_model(Model::Info{model_value["instanceName"], "resources/models/" + model_filename, transform, model_ambient_sound});
+		resource::add_model(Model::Info{model_value["instanceName"], std::string(constants::models_path_) + model_filename, transform, model_ambient_sound});
 	}
 }
 

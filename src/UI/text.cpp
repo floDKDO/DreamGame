@@ -1,11 +1,12 @@
 #include "text.h"
 #include "Resource/resource_manager.h"
+#include "Common/constants.h"
 
 #include <glm/gtc/type_ptr.hpp>
 
 Text::Text(std::string_view text, int wrap_length)
 	: color_({255, 255, 255, 255}), is_wrapped_(wrap_length == 0 ? false : true), wrap_length_(wrap_length), quality_(Quality::SOLID),
-	font_path_("resources/fonts/Aller_Rg.ttf"), font_id_(resource::add_font(font_path_, 24.0f)), //TODO : police et tailles hardcodées
+	font_path_(std::string(constants::fonts_path_) + "Aller_Rg.ttf"), font_id_(resource::add_font(font_path_, 24.0f)), //TODO : police et tailles hardcodées
 	surface_(), text_(text), position_(glm::vec2(0.0f)), angle_(0.0f)
 {
 	init_surface_from_text();

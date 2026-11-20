@@ -178,6 +178,11 @@ void Mesh::set_texture_parameters(const Texture* texture) const
 
 void Mesh::set_2d_texture_content(Texture* texture, int width, int height, void* pixels) const
 {
+	if(pixels == nullptr)
+	{
+		return; //retourner car la fonction glTextureSubImage2D() ne fonctionne pas si son dernier paramètre "pixels" vaut nullptr
+	}
+
 	GLenum format = gltf::get_base_enum_from_channels(texture->original_channels_);
 	GLint texture_level = 0; //on ne spécifie que la texture de niveau 0 et on génère automatiquement les mipmaps avec glGenerateTextureMipmap()
 	glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 1, -1, "Entering texture content code.");

@@ -2,7 +2,7 @@
 #include "state_machine.h"
 
 TitleScreenState::TitleScreenState(const input::InputManager& input_manager, Backend& backend)
-	: State(input_manager, backend), test_image_("resources/images/nakazato.jpg")
+	: State(input_manager, backend)
 {}
 
 void TitleScreenState::on_show()
@@ -19,13 +19,10 @@ void TitleScreenState::on_hide()
 
 void TitleScreenState::display()
 {
-	test_image_.render();
+
 }
 
 void TitleScreenState::update([[maybe_unused]] float delta_time)
 {
-	if(input_manager_.is_interacting())
-	{
-		pop_state();
-	}
+
 }

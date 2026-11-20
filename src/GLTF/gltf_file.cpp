@@ -2,6 +2,7 @@
 #include "gltf.h"
 #include "node.h"
 #include "Common/utils.h"
+#include "Common/constants.h"
 #include "Logging/logging.h"
 #include "Resource/resource_manager.h"
 
@@ -70,7 +71,7 @@ glTFFile::~glTFFile()
 
 void glTFFile::open()
 {
-	if(path_.find("resources/models/") == std::string::npos)
+	if(path_.find(constants::models_path_) == std::string::npos)
 	{
 		logging::log("The glTF file '" + path_ + "' is not a model. Exiting!", logging::Severity::CRITICAL);
 		exit(EXIT_FAILURE);
@@ -324,8 +325,8 @@ std::unique_ptr<gltf::Node> get_node(std::string_view path, glm::mat4 parent_mat
 
 	bool is_empty_node = node_tg3.children_count >= 1 && node_tg3.mesh == -1;
 	std::unique_ptr<gltf::Node> node = std::make_unique<gltf::Node>(std::string_view(node_name), gltf::Node::Info{get_transform(node_tg3), parent_matrix, 
-		is_empty_node ? std::numeric_limits<std::size_t>::max() : get_mesh(path, model_tg3, node_tg3),
-		is_empty_node ? AABBInfo{std::numeric_limits<std::size_t>::max(), std::nullopt} : get_aabb(path, model_tg3, node_tg3)}
+		is_empty_node ? constants::undefined_resource_id_ : get_mesh(path, model_tg3, node_tg3),
+		is_empty_node ? AABBInfo{constants::undefined_resource_id_, std::nullopt} : get_aabb(path, model_tg3, node_tg3)}
 	);
 	
 	if(is_empty_node)
@@ -365,19 +366,19 @@ Vertices get_vertices(const tg3_model& model_tg3, const tg3_primitive& primitive
 			attribute_name_str = std::string(attribute_tg3.key.data);
 		}
 
-		if(attribute_name_str == "POSITION") //vec3 de float
+		if(attribute_name_str == gltf::position_primitive_attribute_str_) //vec3 de float
 		{
 			vertices.add_position_attributes(get_float_vec_attribute<3>(model_tg3, attribute_tg3));
 		}
-		else if(attribute_name_str == "NORMAL") //vec3 de float
+		else if(attribute_name_str == gltf::normal_primitive_attribute_str_) //vec3 de float
 		{
 			vertices.add_normal_attributes(get_float_vec_attribute<3>(model_tg3, attribute_tg3));
 		}
-		else if(attribute_name_str.find("TEXCOORD_") != std::string::npos) //vec2
+		else if(attribute_name_str.find(gltf::texcoord_primitive_attribute_str_) != std::string::npos) //vec2
 		{
 			vertices.add_texcoord_attributes(get_float_vec_attribute<2>(model_tg3, attribute_tg3));
 		}
-		else if(attribute_name_str.find("COLOR_") != std::string::npos) //vec3 ou vec4
+		else if(attribute_name_str.find(gltf::color_primitive_attribute_str_) != std::string::npos) //vec3 ou vec4
 		{
 			tg3_accessor accessor_tg3 = model_tg3.accessors[attribute_tg3.value];
 			if(gltf::get_type_str(accessor_tg3.type) == "VEC3")
@@ -431,7 +432,7 @@ Transform get_transform(const tg3_node& node_tg3)
 std::size_t get_mesh(std::string_view path, const tg3_model& model_tg3, const tg3_node& node_tg3)
 {
 	int32_t mesh_index = node_tg3.mesh;
-	std::size_t id = std::numeric_limits<std::size_t>::max();
+	std::size_t id = constants::undefined_resource_id_;
 	if(mesh_index != -1)
 	{
 		tg3_mesh mesh_tg3 = model_tg3.meshes[mesh_index];
@@ -466,9 +467,9 @@ std::size_t get_aabb_mesh(std::string_view file_name, Mesh::Info mesh_info, int3
 
 std::optional<tg3_accessor> get_accessor_from_attribute(std::string_view attribute, const tg3_model& model_tg3, const tg3_primitive& primitive_tg3)
 {
-	if(attribute != "POSITION" && attribute != "NORMAL"
-	&& attribute.find("TEXCOORD_") != std::string_view::npos
-	&& attribute.find("COLOR_") != std::string_view::npos)
+	if(attribute != gltf::position_primitive_attribute_str_ && attribute != gltf::normal_primitive_attribute_str_
+	&& attribute.find(gltf::texcoord_primitive_attribute_str_) != std::string_view::npos
+	&& attribute.find(gltf::color_primitive_attribute_str_) != std::string_view::npos)
 	{
 		logging::log("get_accessor_from_attribute() returned std::nullopt!", logging::Severity::CRITICAL);
 		return std::nullopt;
@@ -494,7 +495,7 @@ std::optional<tg3_accessor> get_accessor_from_attribute(std::string_view attribu
 
 glm::vec3 get_min_values(const tg3_model& model_tg3, const tg3_primitive& primitive_tg3)
 {
-	tg3_accessor accessor_tg3 = get_accessor_from_attribute("POSITION", model_tg3, primitive_tg3).value(); //je suis assuré que la méthode retourne quelque chose car "POSITION" est un attribut qui existe donc osef de tester l'optional
+	tg3_accessor accessor_tg3 = get_accessor_from_attribute(gltf::position_primitive_attribute_str_, model_tg3, primitive_tg3).value(); //je suis assuré que la méthode retourne quelque chose car "POSITION" est un attribut qui existe donc osef de tester l'optional
 	glm::vec3 min_values(0.0f);
 	if(accessor_tg3.min_values_count > 0)
 	{
@@ -506,7 +507,7 @@ glm::vec3 get_min_values(const tg3_model& model_tg3, const tg3_primitive& primit
 
 glm::vec3 get_max_values(const tg3_model& model_tg3, const tg3_primitive& primitive_tg3)
 {
-	tg3_accessor accessor_tg3 = get_accessor_from_attribute("POSITION", model_tg3, primitive_tg3).value(); //je suis assuré que la méthode retourne quelque chose car "POSITION" est un attribut qui existe donc osef de tester l'optional
+	tg3_accessor accessor_tg3 = get_accessor_from_attribute(gltf::position_primitive_attribute_str_, model_tg3, primitive_tg3).value(); //je suis assuré que la méthode retourne quelque chose car "POSITION" est un attribut qui existe donc osef de tester l'optional
 	glm::vec3 max_values(0.0f);
 	if(accessor_tg3.max_values_count > 0)
 	{
@@ -547,7 +548,7 @@ AABBInfo get_aabb(std::string_view path, const tg3_model& model_tg3, const tg3_n
 	}
 	std::string node_name = (node_tg3.name.len > 0) ? std::string(node_tg3.name.data) : "";
 	logging::log("get_aabb() returned std::nullopt (the node \"" + node_name + "\" does not have a AABB)", logging::Severity::NOTICE);
-	return {std::numeric_limits<std::size_t>::max(), std::nullopt}; //cas où le node ne possède pas de aabb
+	return {constants::undefined_resource_id_, std::nullopt}; //cas où le node ne possède pas de aabb
 }
 
 std::vector<std::size_t> get_textures(const tg3_model& model_tg3)
@@ -585,7 +586,7 @@ std::vector<std::size_t> get_textures(const tg3_model& model_tg3)
 			}
 			else
 			{
-				image_texture.path_ = "resources/models/" + image_str;
+				image_texture.path_ = std::string(constants::models_path_) + image_str;
 				image_texture.pixels_ = utils::checked_stbi_load(image_texture.path_, mesh_texture.original_width_, mesh_texture.original_height_, mesh_texture.original_channels_);
 			}
 		}

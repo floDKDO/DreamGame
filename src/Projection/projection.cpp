@@ -1,5 +1,6 @@
 #include "projection.h"
 #include "Common/utils.h"
+#include "Common/constants.h"
 
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -13,8 +14,7 @@ glm::mat4 get_perspective_matrix()
 
 glm::mat4 get_orthographic_matrix()
 {
-	//TODO : créer des constantes pour 1280.0f et 720.0f
-	return glm::ortho(0.0f, 1280.0f, 720.0f, 0.0f, -1.0f, 1.0f); //l'origine (0, 0) est en haut à gauche => pas besoin d'appeler stbi_set_flip_vertically_on_load(true);
+	return glm::ortho(0.0f, float(constants::initial_window_width_), float(constants::initial_window_height_), 0.0f, -1.0f, 1.0f); //l'origine (0, 0) est en haut à gauche => pas besoin d'appeler stbi_set_flip_vertically_on_load(true);
 }
 
 }

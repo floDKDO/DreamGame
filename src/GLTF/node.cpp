@@ -47,7 +47,7 @@ void Node::render() const
 			mesh->render();
 		}
 
-		if(node_info_.aabb_info_.mesh_id_ != std::numeric_limits<std::size_t>::max())
+		if(node_info_.aabb_info_.mesh_id_ != constants::undefined_resource_id_)
 		{
 			if(const Mesh* aabb_mesh = resource::get_aabb_mesh(node_info_.aabb_info_.mesh_id_); aabb_mesh != nullptr)
 			{

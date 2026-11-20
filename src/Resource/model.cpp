@@ -8,13 +8,13 @@
 //=> soit "Apply all transforms" sur Blender ou définir nous-même une Transform dans Model::Info
 Model::Model(Info model_info)
 	: model_info_(model_info), gltf_file_(model_info.path_), root_node_(gltf_file_.get_root_node()),
-	ambient_sound_id_(model_info.ambient_sound_path_.empty() ? std::numeric_limits<std::size_t>::max() : resource::add_al_source(model_info.ambient_sound_path_, true))
+	ambient_sound_id_(model_info.ambient_sound_path_.empty() ? constants::undefined_resource_id_ : resource::add_al_source(model_info.ambient_sound_path_, true))
 {
 	set_translation(model_info.transform_.position_);
 	set_rotation(model_info.transform_.rotation_);
 	set_scale(model_info.transform_.scale_);
 
-	if(ambient_sound_id_ != std::numeric_limits<std::size_t>::max())
+	if(ambient_sound_id_ != constants::undefined_resource_id_)
 	{
 		al::Source* source = resource::get_al_source(ambient_sound_id_);
 		source->set_position(get_position());

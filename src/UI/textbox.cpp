@@ -1,6 +1,7 @@
 #include "textbox.h"
 #include "Resource/resource_manager.h"
 #include "Common/utils.h"
+#include "Common/constants.h"
 
 const int Textbox::textbox_x_delta_ = 30;
 const int Textbox::textbox_y_delta_ = 20;
@@ -11,7 +12,7 @@ const int Textbox::text_y_delta_ = 20;
 const Uint64 Textbox::time_between_char_ = 25ULL; //valeur en ms
 
 Textbox::Textbox(const input::InputManager& input_manager)
-	: input_manager_(input_manager), textbox_("resources/images/yuri_textbox.png"), end_dialogue_indicator_("resources/images/textbox_end_dialogue_indicator.png"),
+	: input_manager_(input_manager), textbox_(std::string(constants::images_path_) + "yuri_textbox.png"), end_dialogue_indicator_(std::string(constants::images_path_) + "textbox_end_dialogue_indicator.png"),
 	text_("", int(textbox_.get_width()) - (text_x_delta_ * 2)), all_dialogues_shown_(false), current_dialogue_info_{}, last_time_(0ULL)
 {
 	textbox_.set_position(

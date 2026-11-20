@@ -1,13 +1,14 @@
 #include "player.h"
 #include "Collision/collision.h"
 #include "Resource/resource_manager.h"
+#include "Common/constants.h"
 
 #include <iostream>
 
 Player::Player(const input::InputManager& input_manager)
 	: input_manager_(input_manager), model_(nullptr)
 {
-	std::size_t player_model_id = resource::add_model(Model::Info{"Player", "resources/models/player.glb"});
+	std::size_t player_model_id = resource::add_model(Model::Info{"Player", std::string(constants::models_path_) + "player.glb"});
 	model_ = resource::get_model(player_model_id);
 	model_->add_translation_y(5.0f);
 }

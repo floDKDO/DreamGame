@@ -40,7 +40,7 @@ class Resources
 						return key;
 					}
 				}
-				return std::numeric_limits<std::size_t>::max();
+				return constants::undefined_resource_id_;
 			}
 			else
 			{

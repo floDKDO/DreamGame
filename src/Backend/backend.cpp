@@ -1,5 +1,6 @@
 #include "backend.h"
 #include "Common/utils.h"
+#include "Common/constants.h"
 #include "Resource/resource_manager.h"
 #include "Logging/logging.h"
 
@@ -88,7 +89,7 @@ void Backend::init_debug() const
 
 void Backend::init_shaders() const
 {
-	std::filesystem::path path("resources/shaders");
+	std::filesystem::path path(constants::shaders_path_);
 	std::filesystem::directory_iterator it = std::filesystem::directory_iterator(path);
 	while(it != std::filesystem::directory_iterator())
 	{
