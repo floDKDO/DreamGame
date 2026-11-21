@@ -180,6 +180,7 @@ void Mesh::set_2d_texture_content(Texture* texture, int width, int height, void*
 {
 	if(pixels == nullptr)
 	{
+		logging::log("set_2d_texture_content(): pixels is nullptr!", logging::Severity::WARNING);
 		return; //retourner car la fonction glTextureSubImage2D() ne fonctionne pas si son dernier paramètre "pixels" vaut nullptr
 	}
 

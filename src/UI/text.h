@@ -35,7 +35,6 @@ class Text
 		int wrap_length_;
 
 		Quality quality_;
-		std::string font_path_;
 		std::size_t font_id_;
 		sdl::Surface surface_;
 		std::string text_;

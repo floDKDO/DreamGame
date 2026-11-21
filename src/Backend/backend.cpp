@@ -191,7 +191,7 @@ void Backend::begin_frame() const
 	glClear(clear_bits);
 }
 
-void Backend::end_frame() const
+void Backend::end_frame()
 {
 	swap_window_buffers();
 	reset_opengl_states();
@@ -251,8 +251,9 @@ void Backend::swap_window_buffers() const
 	window_.swap_buffers();
 }
 
-void Backend::reset_opengl_states() const
+void Backend::reset_opengl_states()
 {
+	depth_write(true);
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 }
 

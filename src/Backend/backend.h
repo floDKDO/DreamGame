@@ -20,7 +20,7 @@ class Backend
 		Backend& operator=(Backend&&) = delete;
 
 		void begin_frame() const;
-		void end_frame() const;
+		void end_frame();
 		void stencil_test(bool enabled);
 		void depth_test(bool enabled);
 		void depth_write(bool enabled);
@@ -28,7 +28,7 @@ class Backend
 		void swap_window_buffers() const;
 		void update_window_fps(unsigned int frame_count_this_second) const;
 		void handle_events(const SDL_Event& e);
-		void reset_opengl_states() const;
+		void reset_opengl_states();
 
 	private:
 		struct PixelProcessingState

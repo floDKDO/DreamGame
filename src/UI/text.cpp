@@ -6,7 +6,7 @@
 
 Text::Text(std::string_view text, int wrap_length)
 	: color_({255, 255, 255, 255}), is_wrapped_(wrap_length == 0 ? false : true), wrap_length_(wrap_length), quality_(Quality::SOLID),
-	font_path_(std::string(constants::fonts_path_) + "Aller_Rg.ttf"), font_id_(resource::add_font(font_path_, 24.0f)), //TODO : police et tailles hardcodées
+	font_id_(resource::add_font(constants::default_text_font_)),
 	surface_(), text_(text), position_(glm::vec2(0.0f)), angle_(0.0f)
 {
 	init_surface_from_text();
@@ -51,7 +51,7 @@ void Text::set_position(glm::vec2 position)
 
 void Text::set_font_size(float font_size)
 {
-	font_id_ = resource::add_font(font_path_, font_size);
+	font_id_ = resource::add_font(constants::default_text_font_, font_size);
 	init_surface_from_text();
 	resource::get_mesh(mesh_id_)->edit_text_texture(surface_.get_width(), surface_.get_height(), surface_.get_pixels());
 }

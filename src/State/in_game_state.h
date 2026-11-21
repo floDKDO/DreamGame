@@ -5,6 +5,7 @@
 #include "Map/map_file.h"
 #include "Image/image.h"
 #include "Render/cubemap.h"
+#include "Render/fbo.h"
 #include "UI/textbox.h"
 #include "Backend/backend.h"
 #include "Camera/camera.h"
@@ -27,4 +28,5 @@ class InGameState : public State
 		Image test_image_;
 		Textbox textbox_;
 		Cubemap skybox_;
+		FBO fbo_;
 };

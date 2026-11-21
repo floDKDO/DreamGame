@@ -110,7 +110,7 @@ void ShaderProgram::set_projection_matrix()
 	glm::mat4 projection_matrix(1.0f);
 
 	//TODO : inverser la condition => logiquement, il devrait y avoir très peu de shaders qui utilisent la matrice de projection orthographique
-	if(shader_program_name_ == "Phong" || shader_program_name_ == "Skybox" || shader_program_name_ == "Base") //TODO : vérifier le comportement si j'utilise la matrice orthographique avec le shader "Base" pour afficher la texture de mon propre framebuffer
+	if(shader_program_name_ == "Phong" || shader_program_name_ == "Skybox")
 	{
 		projection_matrix = projection::get_perspective_matrix();
 	}

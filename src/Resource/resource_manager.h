@@ -46,7 +46,7 @@ ShaderProgram* bind_shader(std::size_t id); //ne retourne pas de const car les m
 ShaderProgram* bind_shader(std::string_view name); //ne retourne pas de const car les méthodes d'ajout et de modification de variables uniformes ne sont pas const
 ShaderProgram* get_currently_bound_shader();
 
-std::size_t add_font(std::string_view font_path, float font_size);
+std::size_t add_font(std::string_view font_path, float font_size = 24.0f);
 sdl::Font* get_font(std::size_t id);
 
 }

@@ -1,8 +1,6 @@
 #include "in_game_state.h"
 #include "Resource/resource_manager.h"
 #include "OpenAL/listener.h"
-#include "Logging/logging.h"
-#include "Common/utils.h"
 #include "Common/constants.h"
 
 InGameState::InGameState(const input::InputManager& input_manager, Backend& backend)
@@ -10,7 +8,8 @@ InGameState::InGameState(const input::InputManager& input_manager, Backend& back
 	camera_(input_manager_, player_.get_model()->get_position()),
 	test_map_(std::string(constants::maps_path_) + "corridor_multiple_lights.gltf"), gizmo_(nullptr),
 	test_image_(std::string(constants::images_path_) + "yuri_tea.png"),
-	textbox_(input_manager), skybox_(std::string(constants::cubemaps_path_) + "skybox/")
+	textbox_(input_manager), skybox_(std::string(constants::cubemaps_path_) + "skybox/"), 
+	fbo_(constants::initial_window_width_ / 2, constants::initial_window_height_ / 2)
 {
 	std::size_t gizmo_model_id = resource::add_model(Model::Info{"Axis guizmo", std::string(constants::models_path_) + "axis_gizmo.glb"});
 	gizmo_ = resource::get_model(gizmo_model_id);
@@ -35,6 +34,8 @@ void InGameState::on_hide()
 
 void InGameState::display()
 {
+	fbo_.bind();
+
 	backend_.depth_write(false); //comme les depth values de la skybox sont sûrement plus petites que celles des modèles, on désactive l'écriture dans le depth buffer (il reste rempli de 1.0 donc les modèles pourront s'afficher)
 	resource::bind_shader("Skybox");
 	skybox_.render();
@@ -49,6 +50,16 @@ void InGameState::display()
 	{
 		model.render();
 	}
+
+	glViewport(0, 0, backend_.get_window_size().x, backend_.get_window_size().y);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	backend_.depth_write(false);
+	glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT);
+
+	resource::bind_shader("Base");
+	fbo_.render();
 }
 
 void InGameState::update([[maybe_unused]] float delta_time)

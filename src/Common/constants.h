@@ -15,6 +15,8 @@ inline constexpr std::string_view maps_path_ = "resources/maps/";
 inline constexpr std::string_view cubemaps_path_ = "resources/images/cubemaps/";
 inline constexpr std::string_view window_icon_path_ = "resources/images/icon.png";
 
+inline constexpr std::string_view default_text_font_ = "resources/fonts/Aller_Rg.ttf";
+
 inline constexpr int initial_window_width_ = 1280;
 inline constexpr int initial_window_height_ = 720;
 
