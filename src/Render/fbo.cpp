@@ -3,8 +3,8 @@
 #include "Common/utils.h"
 #include "Logging/logging.h"
 
-FBO::FBO(int width, int height)
-	: width_(width), height_(height)
+FBO::FBO(Backend& backend, int width, int height)
+	: backend_(backend), width_(width), height_(height)
 {
 	texture_id_ = resource::add_texture(Texture{TextureInfo{}, SamplingParameters{}, width_, height_});
 	mesh_id_ = resource::add_mesh(Mesh::Info{utils::get_screen_ebo_values(), utils::get_screen_vertices(), {texture_id_}});
@@ -24,6 +24,13 @@ FBO::FBO(int width, int height)
 
 void FBO::render() const
 {
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glViewport(0, 0, backend_.get_window_size().x, backend_.get_window_size().y);
+	glClearColor(0.5f, 0.5f, 0.5f, 1.0f); //TODO : hardcodé
+	glClear(GL_COLOR_BUFFER_BIT);
+	backend_.depth_write(false);
+
+	resource::bind_shader("Base");
 	resource::get_mesh(mesh_id_)->render();
 }
 

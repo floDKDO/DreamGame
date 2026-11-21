@@ -9,7 +9,7 @@ InGameState::InGameState(const input::InputManager& input_manager, Backend& back
 	test_map_(std::string(constants::maps_path_) + "corridor_multiple_lights.gltf"), gizmo_(nullptr),
 	test_image_(std::string(constants::images_path_) + "yuri_tea.png"),
 	textbox_(input_manager), skybox_(std::string(constants::cubemaps_path_) + "skybox/"), 
-	fbo_(constants::initial_window_width_ / 2, constants::initial_window_height_ / 2)
+	fbo_(backend, constants::initial_window_width_ / 2, constants::initial_window_height_ / 2)
 {
 	std::size_t gizmo_model_id = resource::add_model(Model::Info{"Axis guizmo", std::string(constants::models_path_) + "axis_gizmo.glb"});
 	gizmo_ = resource::get_model(gizmo_model_id);
@@ -51,14 +51,6 @@ void InGameState::display()
 		model.render();
 	}
 
-	glViewport(0, 0, backend_.get_window_size().x, backend_.get_window_size().y);
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-	backend_.depth_write(false);
-	glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT);
-
-	resource::bind_shader("Base");
 	fbo_.render();
 }
 
