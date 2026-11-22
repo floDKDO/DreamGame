@@ -3,6 +3,8 @@
 #include "Render/mesh.h"
 #include "Resource/resource_manager.h"
 
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/io.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <iostream>
 
@@ -15,7 +17,19 @@ Node::Node(std::string_view name, const Info& node_info)
 
 glm::mat4 Node::compute_model() const
 {
-	return get_transformation_matrix(node_info_.parent_matrix_, node_info_.transform_.position_, node_info_.transform_.rotation_, node_info_.transform_.scale_);
+	glm::mat4 transformation_matrix = get_transformation_matrix(node_info_.parent_matrix_, node_info_.transform_.position_, node_info_.transform_.rotation_, node_info_.transform_.scale_);
+	/*
+	Voici ce que dit la spécification de glTF : 
+	"When a mesh primitive uses any triangle-based topology (i.e., triangles, triangle strip, or triangle fan), the determinant of the node’s global transform defines the winding order of that primitive. 
+	If the determinant is a positive value, the winding order triangle faces is counterclockwise; in the opposite case, the winding order is clockwise."
+	=> det(transformation_matrix) > 0.0f -> CCW, det(transformation_matrix) < 0.0f -> CW
+	*/
+	if(glm::determinant(transformation_matrix) < 0.0f)
+	{
+		//TODO : winding order
+	}
+
+	return transformation_matrix;
 }
 
 glm::mat4 Node::get_parent_matrix() const

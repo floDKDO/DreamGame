@@ -202,7 +202,7 @@ int get_viewport_height()
 
 std::vector<GLushort> get_screen_ebo_values()
 {
-	return std::vector<GLushort>{0, 1, 2, 0, 3, 1}; //TODO : identique à get_2d_ebo_values()
+	return std::vector<GLushort>{0, 2, 1, 0, 1, 3}; //CCW
 }
 
 Vertices get_screen_vertices()
@@ -210,17 +210,17 @@ Vertices get_screen_vertices()
 	std::vector<glm::vec3> position_vector //on simule un vec2 avec un vec3 => la composante z vaut donc 0.0f
 	{
 		//NDC !
-		glm::vec3(-1.0f,  1.0f, 0.0f),
-		glm::vec3(1.0f, -1.0f, 0.0f),
-		glm::vec3(-1.0f, -1.0f, 0.0f),
-		glm::vec3(1.0f,  1.0f, 0.0f)
+		glm::vec3(-1.0f,  1.0f, 0.0f), //0 : coin supérieur gauche
+		glm::vec3( 1.0f, -1.0f, 0.0f), //1 : coin inférieur droite
+		glm::vec3(-1.0f, -1.0f, 0.0f), //2 : coin inférieur gauche
+		glm::vec3( 1.0f,  1.0f, 0.0f)  //3 : coin supérieur droite
 	};
 	std::vector<glm::vec4> color_vector
 	{
-		glm::vec4(1.0f, 1.0f, 1.0f, 1.0f),
-		glm::vec4(1.0f, 1.0f, 1.0f, 1.0f),
-		glm::vec4(1.0f, 1.0f, 1.0f, 1.0f),
-		glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)
+		glm::vec4(0.0f, 0.0f, 0.0f, 1.0f), //TODO : hardcodé
+		glm::vec4(0.0f, 0.0f, 0.0f, 1.0f),
+		glm::vec4(0.0f, 0.0f, 0.0f, 1.0f),
+		glm::vec4(0.0f, 0.0f, 0.0f, 1.0f)
 	};
 	std::vector<glm::vec2> texcoord_vector
 	{
@@ -241,18 +241,19 @@ Vertices get_screen_vertices()
 
 std::vector<GLushort> get_2d_ebo_values()
 {
-	return std::vector<GLushort>{0, 1, 2, 0, 3, 1};
+	return std::vector<GLushort>{0, 1, 2, 0, 3, 1}; //CCW
 }
 
 Vertices get_2d_vertices()
 {
+	//carré de coté 1 pixel placé à l'origine (dépend des arguments passés à glm::ortho()) => la multiplication par une size fonctionne (ex avec size = (300, 200) : (1, 1) * (300, 200) = (300, 200))
 	std::vector<glm::vec3> position_vector //on simule un vec2 avec un vec3 => la composante z vaut donc 0.0f
 	{
 		//pas des NDC !
-		glm::vec3(0.0f, 1.0f, 0.0f), //carré de coté 1 pixel placé à l'origine (dépend des arguments passés à glm::ortho()) => la multiplication par une size fonctionne (ex avec size = (300, 200) : (1, 1) * (300, 200) = (300, 200))
-		glm::vec3(1.0f, 0.0f, 0.0f),
-		glm::vec3(0.0f, 0.0f, 0.0f),
-		glm::vec3(1.0f, 1.0f, 0.0f)
+		glm::vec3(0.0f, 1.0f, 0.0f), //0 : coin inférieur gauche (si origine est en haut à gauche)
+		glm::vec3(1.0f, 0.0f, 0.0f), //1 : coin supérieur droite
+		glm::vec3(0.0f, 0.0f, 0.0f), //2 : coin supérieur gauche
+		glm::vec3(1.0f, 1.0f, 0.0f)  //3 : coin inférieur droite
 		//si on remplace les 1.0 par une grande taille (ex : 300.0), alors le carré sera toujours placé à l'origine mais fera 300 pixels de côté
 	};
 	std::vector<glm::vec4> color_vector
@@ -280,14 +281,15 @@ Vertices get_2d_vertices()
 
 std::vector<GLushort> get_3d_ebo_values()
 {
-	return std::vector<GLushort> //ex du rubix cube avec la face verte au-dessus et la face rouge face à nous
+	//ex du rubix cube avec la face verte au-dessus et la face rouge face à nous
+	return std::vector<GLushort> //CCW
 	{
-		0, 1, 4, 4, 5, 1, //face rouge
-		6, 2, 0, 6, 4, 0, //face jaune
-		7, 3, 1, 7, 5, 1, //face blanche
-		2, 3, 6, 6, 7, 3, //face orange
-		6, 4, 5, 6, 7, 5, //face verte
-		0, 1, 2, 2, 3, 1 //face bleue
+		0, 1, 4, 5, 4, 1, //face rouge
+		6, 2, 0, 4, 6, 0, //face jaune
+		7, 1, 3, 7, 5, 1, //face blanche
+		3, 2, 6, 6, 7, 3, //face orange
+		6, 4, 5, 7, 6, 5, //face verte
+		0, 1, 2, 3, 2, 1  //face bleue
 	};
 }
 
@@ -296,16 +298,16 @@ Vertices get_3d_vertices()
 	std::vector<glm::vec3> position_vector //ex du rubix cube avec la face verte au-dessus et la face rouge face à nous
 	{
 		//face bleue
-		glm::vec3(-0.5f, -0.5f,  0.5f), //0 : en bas à gauche
-		glm::vec3( 0.5f, -0.5f,  0.5f), //1 : en bas à droite
-		glm::vec3(-0.5f, -0.5f, -0.5f), //2 : en haut à gauche
-		glm::vec3( 0.5f, -0.5f, -0.5f), //3 : en haut à droite
+		glm::vec3(-0.5f, -0.5f,  0.5f), //0 : coin inférieur gauche
+		glm::vec3( 0.5f, -0.5f,  0.5f), //1 : coin inférieur droite
+		glm::vec3(-0.5f, -0.5f, -0.5f), //2 : coin supérieur gauche
+		glm::vec3( 0.5f, -0.5f, -0.5f), //3 : coin supérieur droite
 		
 		//face verte
-		glm::vec3(-0.5f, 0.5f,  0.5f), //4 : en bas à gauche
-		glm::vec3( 0.5f, 0.5f,  0.5f), //5 : en bas à droite
-		glm::vec3(-0.5f, 0.5f, -0.5f), //6 : en haut à gauche
-		glm::vec3( 0.5f, 0.5f, -0.5f), //7 : en haut à droite
+		glm::vec3(-0.5f, 0.5f,  0.5f), //4 : coin inférieur gauche
+		glm::vec3( 0.5f, 0.5f,  0.5f), //5 : coin inférieur droite
+		glm::vec3(-0.5f, 0.5f, -0.5f), //6 : coin supérieur gauche
+		glm::vec3( 0.5f, 0.5f, -0.5f), //7 : coin supérieur droite
 	};
 
 	Vertices vertices(position_vector.size());

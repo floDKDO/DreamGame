@@ -403,16 +403,19 @@ Vertices get_aabb_vertices(const tg3_model& model_tg3, const tg3_primitive& prim
 	glm::vec3 min_values = get_min_values(model_tg3, primitive_tg3);
 	glm::vec3 max_values = get_max_values(model_tg3, primitive_tg3);
 
-	std::vector<glm::vec3> position_attributes
+	std::vector<glm::vec3> position_attributes //ex du rubix cube avec la face verte au-dessus et la face rouge face à nous
 	{
-		glm::vec3(max_values.x, min_values.y, min_values.z), //0 : bottom face, upper right
-		glm::vec3(min_values.x, min_values.y, min_values.z), //1 : bottom face, upper left
-		glm::vec3(max_values.x, min_values.y, max_values.z), //2 : bottom face, down right
-		glm::vec3(min_values.x, min_values.y, max_values.z), //3 : bottom face, down left
-		glm::vec3(max_values.x, max_values.y, min_values.z), //4 : top face, upper right
-		glm::vec3(min_values.x, max_values.y, min_values.z), //5 : top face, upper left
-		glm::vec3(max_values.x, max_values.y, max_values.z), //6 : top face, down right
-		glm::vec3(min_values.x, max_values.y, max_values.z)  //7 : top face, down left
+		//face bleue
+		glm::vec3(min_values.x, min_values.y, max_values.z), //0 : coin inférieur gauche
+		glm::vec3(max_values.x, min_values.y, max_values.z), //1 : coin inférieur droite
+		glm::vec3(min_values.x, min_values.y, min_values.z), //2 : coin supérieur gauche
+		glm::vec3(max_values.x, min_values.y, min_values.z), //3 : coin supérieur droite
+
+		//face verte
+		glm::vec3(min_values.x, max_values.y, max_values.z), //4 : coin inférieur gauche
+		glm::vec3(max_values.x, max_values.y, max_values.z), //5 : coin inférieur droite
+		glm::vec3(min_values.x, max_values.y, min_values.z), //6 : coin supérieur gauche
+		glm::vec3(max_values.x, max_values.y, min_values.z)  //7 : coin supérieur droite
 	};
 
 	Vertices vertices(position_attributes.size());
@@ -530,14 +533,16 @@ AABBInfo get_aabb(std::string_view path, const tg3_model& model_tg3, const tg3_n
 
 		tg3_primitive primitive_tg3 = mesh_tg3.primitives[0];
 		Vertices vertices = get_aabb_vertices(model_tg3, primitive_tg3);
-		std::vector<GLushort> ebo_values = //ex du rubix cube avec la face verte au-dessus et la face rouge face à nous
+
+		//ex du rubix cube avec la face verte au-dessus et la face rouge face à nous
+		std::vector<GLushort> ebo_values = //CCW
 		{
-			3, 2, 7, 2, 6, 7, //face rouge
-			1, 5, 7, 1, 3, 7, //face jaune
-			0, 4, 6, 0, 2, 6, //face blanche
-			1, 0, 5, 0, 4, 5, //face orange
-			7, 5, 4, 4, 6, 7, //face verte
-			3, 1, 0, 0, 2, 3  //face bleue
+			0, 1, 4, 5, 4, 1, //face rouge
+			6, 2, 0, 4, 6, 0, //face jaune
+			7, 1, 3, 7, 5, 1, //face blanche
+			3, 2, 6, 6, 7, 3, //face orange
+			6, 4, 5, 7, 6, 5, //face verte
+			0, 1, 2, 3, 2, 1  //face bleue
 		};
 		glm::vec3 min_values = get_min_values(model_tg3, primitive_tg3);
 		glm::vec3 max_values = get_max_values(model_tg3, primitive_tg3);
