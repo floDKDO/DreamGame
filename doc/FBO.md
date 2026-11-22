@@ -1,0 +1,8 @@
+- **Taille des buffers dans un framebuffer** : 
+	- Cas du framebuffer présent par défaut : chaque buffer a la taille de la fenêtre (cela est logique comme ce framebuffer est créé par SDL dans mon cas et c'est cette dernière qui gère la fenêtre)
+	- Cas d'un FBO : chaque buffer a la taille qu'on a précisé lors de sa création (les deux derniers paramètres de ```glTextureStorage2D()``` et de ```glNamedRenderbufferStorage()``` pour les textures et les renderbuffers respectivement)
+- **Attacher un stencil buffer seul à un framebuffer** : cela n'est pas vraiment supporté (voir https://community.khronos.org/t/fbo-and-texture-about-gl-stencil-attachment/61912/3)
+- **Impact de la taille du viewport sur un FBO** : 
+	- Contexte : soit une texture de taille (640 * 360) stockée dans le color buffer d'un FBO. Quand elle est affichée dans le framebuffer par défaut avec un viewport de taille (1280 * 720), la texture est gigantesque / zoomée
+	- Raison : cela vient du fait que le viewport est deux fois plus grand que les buffers du FBO. 
+	- Explications : les objets de la scène sont dessinés dans l'intégrité du viewport (taille = 1280 * 720) mais comme la texture du FBO est deux fois plus petite que le viewport, uniquement la partie basse des pixels du viewport est dessinée dans la texture => elle ne contient que la partie inférieure gauche de la scène. Quand on bind le framebuffer par défaut, cette texture est étirée pour prendre tout le viewport car les coordonnées UV prennent toute la texture et celle-ci est affichée aux 4 coins du viewport du fait de l'attribut "position" des vertices utilisés. On se retrouve donc bien avec la partie inférieure gauche de la scène étirée sur l'écran

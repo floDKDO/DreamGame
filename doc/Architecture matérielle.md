@@ -9,12 +9,13 @@
 		- La hiérarchie est la suivante : 
 			- le GPU est composée de **GPCs** (Graphics Processor Cluster)
 			- chaque GPC contient des **SMs** (Streaming Multiprocessor)
-			- chaque SM contient des cœurs (**CUDA cores**, **Tensor cores** et **Ray Tracing cores** => ce sont les cœurs du GPU)
+			- chaque SM contient des cœurs (**CUDA cores** <=> (unified) shader cores, **Tensor cores** et **Ray Tracing cores** => ce sont les cœurs du GPU)
 		- Chaque type de cœur réalise des opérations spécifiques : 
-			- CUDA core : opérations arithmétiques
+			- CUDA core : opérations arithmétiques, c'est ce type de coeur qui exécute les shaders. Ces coeurs disposent de threads (SIMT)
 			- Tensor core : opérations matricielles
 			- Ray Tracing core : opérations de ray tracing
-		- Les CUDA cores disposent de threads (SIMT)
+		- A l'époque, chaque type de shader (vertex, fragment etc.) avait son propre type de coeur qui lui était réservé, chacun avec une architecture matérielle et une ISA différentes. Cela est peu efficace si une charge de travail demande beaucoup de coeurs pour un certain type de shader (ex : vertex) et peu pour un autre (ex : fragment) : en effet, peu des coeurs pour les fragment shaders seraient utilisés alors qu'ils auraient pu l'être pour faire tourner les opérations des vertex shaders dont les coeurs sont eux surchargés.
+		  Aujourd'hui, les coeurs qui font tourner les shaders (= CUDA cores) sont unifiés : ils ont tous les mêmes capacités matérielles (quasiment la même ISA). On appelle cette architecture une **unified shader architecture**
 		- Le GPU dispose de registres, d'un cache L1 privé à chaque SM et d'un cache L2 partagé entre tous les SMs
 	- Connectiques : 
 		- Display ports / HDMIs où on branche l'écran

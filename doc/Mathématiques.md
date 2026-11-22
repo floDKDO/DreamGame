@@ -27,7 +27,7 @@ Les deux méthodes visuelles de l'addition fonctionnent ici. Il suffit juste d'i
 ![[vector_sub.png | center]]
 
 ## Représentation informatique
-On peut représenter des vecteurs de toutes tailles avec la librairie **glm** (type *glm::vecX*). Il faut noter qu'un objet de type vecteur peut à la fois représenter un vecteur ou un point ! La différentiation pourra être réalisée avec la valeur de leur composante *w* (si w = 0.0, alors c'est un vecteur, sinon c'est un point).
+On peut représenter des vecteurs de toutes tailles avec la librairie **glm** (type *glm::vecX*). Il faut noter qu'un objet de type vecteur peut à la fois représenter un vecteur ou un point ! La différentiation pourra être réalisée avec la valeur de leur composante *w* (si $w = 0.0$, alors c'est un vecteur, sinon c'est un point).
 
 
 # Matrices
@@ -39,3 +39,19 @@ L'inverse d'une matrice de transformation qui effectue une translation (4ème co
 
 ## Matrice orthogonale
 Si une matrice est orthogonale, alors son inverse est égal à sa transposée. Dans ce cas là, autant calculer sa transposée car il est moins coûteux de calculer la transposée plutôt que l'inverse.
+
+## Déterminant
+Le déterminant, dans le cas 2D, représente l'aire du carré / parallélogramme défini par les 2 vecteurs i et j de la base après application de la matrice de transformation.
+
+Le déterminant, dans le cas 3D, représente l'aire du cube / parallélépipède défini par les 3 vecteurs i, j et k de la base après application de la matrice de transformation.
+
+Exemple : 
+![[determinant.png | center]]
+Sur ce schéma, toutes les aires après application de la matrice de transformation sont 6 fois plus grandes : on est passé d'une aire égale à 1 à une aire égale à 6.
+
+Signification de la valeur du déterminant selon son signe : 
+- $det(M) > 0$ : cas classique (l'orientation de l'espace est conservée)
+- $det(M) = 0$ : le parallélogramme devient une ligne
+- $det(M) < 0$ : la valeur absolue du déterminant négatif est l'aire du parallélogramme, le signe négatif indique que l'orientation de l'espace a été inversé (= symétrie)
+	- cas 2D : l'angle orienté Oij est CCW, après la transformation, il est CW
+	- cas 3D : passage d'un système de coordonnées right-hand à left-hand ou inversement

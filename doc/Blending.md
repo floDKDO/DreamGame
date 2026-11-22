@@ -1,0 +1,10 @@
+- Modifier le canal alpha d'une couleur ne change rien si on n'a pas activé le blending via un appel à ```glEnable(GL_BLEND)```
+- Il est possible de cacher un fragment dans un fragment shader avec l'instruction ```discard```
+- Quand le blending est activé, la couleur de chaque fragment n'est pas directement écrit dans le color buffer : une *blending equation* est réalisée sur la couleur du fragment, appelée *source color*, et sur la couleur du pixel associé dans le color buffer, appelée *destination color*, pour déterminer la bonne couleur
+- Dans le cas classique, afficher une couleur semi-transparente (ex : alpha = 0.6f) sur une couleur opaque (alpha = 1.0f) revient à afficher $0.6 * (1 - 0.6) = 0.6_{src} * 0.4_{dst}$, c'est-à-dire afficher 60\% de la couleur semi transparente et 40% de la couleur opaque. L'opération réalisée (1 - alpha source) est représentée par la constante ```GL_ONE_MINUS_SRC_ALPHA```
+- On peut modifier la blending equation avec la fonction ```glBlendEquation()```
+- On peut faire en sorte d'avoir un *blend factor* commun (```glBlendFunc()```) ou séparé (```glBlendFuncSeparate()```) pour la couleur (canaux rgb) et l'alpha des *source color* et *destination color*
+- Pour réaliser de la transparence, appeler : 
+	- ```glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)```
+	- ```glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ZERO)``` (copier l'alpha de la source color directement dans le color buffer)
+- La valeur de l'alpha en sorte de la blending equation n'a pas l'air d'être utile. En tout cas, on peut agir dessus avec les deux derniers paramètres de ```glBlendFuncSeparate()```

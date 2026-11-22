@@ -6,12 +6,9 @@
 - **CUDA / OpenCL** : deux langages qui permettent le *GPGPU* (General-Purpose computing on Graphics Processing Units), c'est-à-dire d'effectuer des calculs généralistes sur GPU. CUDA est propriétaire NVIDIA, OpenCL est open source
 - **Pourquoi les jeux vidéos demandent de compiler leurs shaders ?** : par rapport aux CPUs qui ont des ISA standardisées (x86, ARM...), presque chaque GPU dispose de sa propre ISA. Il est donc impossible pour un jeu d'embarquer une version compilée des shaders pour chaque ISA possible : il y en a beaucoup trop. En effet, même des CPUs d'un même vendeur ont une ISA différente. Les shaders peuvent néanmoins être préalablement compilés en SPIR-V mais devront quand même être compilés en "binaire" sur la machine du joueur. 
   Il faut noter que cela ne concerne que les ordinateurs personnels où n'importe quel modèle de carte graphique peut être installé. Dans le cas d'une console, le matériel étant connu à l'avance, les shaders pourront donc être directement compilés dans le jeu.
+- **Unified**
 
 # Informations sur OpenGL
-- **Taille des buffers dans un framebuffer** : 
-	- Cas du framebuffer présent par défaut : chaque buffer a la taille de la fenêtre (cela est logique comme ce framebuffer est créé par SDL dans mon cas et c'est cette dernière qui gère la fenêtre)
-	- Cas d'un FBO : chaque buffer a la taille qu'on a précisé lors de sa création (les deux derniers paramètres de ```glTextureStorage2D()``` et de ```glNamedRenderbufferStorage()``` pour les textures et les renderbuffers respectivement)
-- **Attacher un stencil buffer seul à un framebuffer** : cela n'est pas vraiment supporté (voir https://community.khronos.org/t/fbo-and-texture-about-gl-stencil-attachment/61912/3)
 - **Column-major ou row-major** : 
 	- voir https://fgiesen.wordpress.com/2012/02/12/row-major-vs-column-major-row-vectors-vs-column-vectors/ et https://www.scratchapixel.com/lessons/mathematics-physics-for-computer-graphics/geometry//row-major-vs-column-major-vector.html
 	- column-major et row-major dans le contexte d'une matrice peuvent signifier deux choses : 
