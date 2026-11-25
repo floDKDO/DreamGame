@@ -89,10 +89,10 @@ void Backend::init_debug() const
 
 void Backend::init_shaders() const
 {
-	resource::add_shader("Phong",  {"resources/shaders/phong.vert",  "resources/shaders/phong.frag"});
-	resource::add_shader("2d",     {"resources/shaders/2d.vert",     "resources/shaders/base.frag"});
-	resource::add_shader("Base",   {"resources/shaders/base.vert",   "resources/shaders/base.frag"});
-	resource::add_shader("Alpha",  {"resources/shaders/base.vert",   "resources/shaders/alpha.frag"});
+	resource::add_shader("Phong",  {"resources/shaders/mvp.vert",    "resources/shaders/phong.frag"});
+	resource::add_shader("2d",     {"resources/shaders/2d.vert",     "resources/shaders/texture.frag"});
+	resource::add_shader("NDC",    {"resources/shaders/ndc.vert",    "resources/shaders/texture.frag"});
+	resource::add_shader("Color",  {"resources/shaders/ndc.vert",    "resources/shaders/color.frag"});
 	resource::add_shader("Skybox", {"resources/shaders/skybox.vert", "resources/shaders/skybox.frag"});
 
 	resource::bind_shader("Phong");

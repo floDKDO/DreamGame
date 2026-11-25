@@ -150,7 +150,7 @@ void ShaderProgram::insert_uniform(const GLchar* name)
 		GLint location;
 		if((location = glGetUniformLocation(shader_program_id_, name)) == -1) //ne nécessite pas que le shader program soit actif pour fonctionner => pas besoin que glUseProgram() ait été appelé auparavant
 		{
-			logging::log("The requested uniform variable (" + std::string(name) + ") does not exist!", logging::Severity::WARNING);
+			logging::log("The requested uniform variable (" + std::string(name) + ") does not exist in the shader program " + shader_program_name_ + "!", logging::Severity::WARNING);
 		}
 		uniforms_.insert({name_str, location});
 	}

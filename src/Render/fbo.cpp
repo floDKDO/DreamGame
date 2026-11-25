@@ -30,7 +30,7 @@ void FBO::render() const
 	glClear(GL_COLOR_BUFFER_BIT);
 	backend_.depth_write(false);
 
-	resource::bind_shader("Base");
+	resource::bind_shader("NDC");
 	resource::get_mesh(mesh_id_)->render();
 }
 

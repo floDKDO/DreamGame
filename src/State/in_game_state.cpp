@@ -21,7 +21,7 @@ InGameState::InGameState(const input::InputManager& input_manager, Backend& back
 	music_source->play();*/
 
 	mesh_id_ = resource::add_mesh(Mesh::Info{utils::get_screen_ebo_values(), utils::get_screen_vertices(glm::vec4(0.0f)), {}});
-	resource::bind_shader("Alpha");
+	resource::bind_shader("Color");
 	resource::get_currently_bound_shader()->set_uniform_1f("alpha_", 0.0f);
 }
 
@@ -70,7 +70,7 @@ void InGameState::display()
 	static float alpha = 0.0f;
 	static Uint64 then = SDL_GetTicks() + 5000;
 	float div = std::clamp(float(SDL_GetTicks()) / float(then), 0.0f, 1.0f);
-	resource::bind_shader("Alpha");
+	resource::bind_shader("Color");
 	resource::get_currently_bound_shader()->set_uniform_1f("alpha_", alpha);
 	resource::get_mesh(mesh_id_)->render();
 	alpha = utils::lerp(0.0f, 1.0f, div);
