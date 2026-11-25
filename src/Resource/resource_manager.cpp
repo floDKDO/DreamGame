@@ -105,14 +105,14 @@ al::Source* get_al_source(std::size_t id)
 	return al_sources_.get_resource(id);
 }
 
-std::size_t add_2d_text(std::string_view text, const sdl::Surface& surface)
+std::size_t add_2d_text(std::string_view text, const sdl::Surface& surface, glm::vec4 color)
 {
 	int width = text.empty() ? 0 : surface.get_width();
 	int height = text.empty() ? 0 : surface.get_height();
 
 	Texture texture{TextureInfo{false}, SamplingParameters{}, width, height, 4, text.empty() ? TextTexture{} : TextTexture{surface.get_pixels()}};
 	std::size_t texture_id = add_texture(std::move(texture));
-	return add_mesh(text, Mesh::Info{utils::get_2d_ebo_values(), utils::get_2d_vertices(), {texture_id}, GL_TRIANGLES});
+	return add_mesh(text, Mesh::Info{utils::get_2d_ebo_values(), utils::get_2d_vertices(color), {texture_id}, GL_TRIANGLES});
 }
 
 std::size_t add_2d_image(std::string_view path)

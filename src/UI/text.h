@@ -16,7 +16,7 @@ class Text
 			LCD
 		};
 
-		explicit Text(std::string_view text, int wrap_length = 0);
+		explicit Text(std::string_view text, glm::vec4 color = glm::vec4(1.0f), int wrap_length = 0);
 
 		void set_position(glm::vec2 position);
 		void set_font_size(float font_size);
@@ -28,8 +28,6 @@ class Text
 	private:
 		glm::mat4 get_model_matrix() const;
 		void init_surface_from_text();
-
-		SDL_Color color_;
 
 		bool is_wrapped_;
 		int wrap_length_;

@@ -6,6 +6,7 @@
 #include <glm/mat4x4.hpp>
 #include <glm/vec3.hpp>
 #include <glm/gtc/quaternion.hpp>
+#include <SDL3/SDL_pixels.h>
 #include <string>
 #include <string_view>
 
@@ -23,6 +24,7 @@ double lerp(Arithmetic1 a, Arithmetic2 b, Arithmetic3 t) //TODO : à terme, rempl
 	return a_d + t_d * (b_d - a_d);
 }
 
+SDL_Color get_sdl_color_from_vec4(glm::vec4 color);
 unsigned char* checked_stbi_load(std::string_view path, int& width, int& height, int& channels);
 unsigned char* checked_stbi_load(std::string_view path);
 unsigned char* checked_stbi_load_from_memory(const unsigned char* buffer, std::size_t size, int& width, int& height, int& channels);
@@ -42,9 +44,9 @@ std::string base64_decode(const void* data, const std::size_t len);
 int get_viewport_width();
 int get_viewport_height();
 std::vector<GLushort> get_screen_ebo_values();
-Vertices get_screen_vertices();
+Vertices get_screen_vertices(glm::vec4 color = glm::vec4(1.0f));
 std::vector<GLushort> get_2d_ebo_values();
-Vertices get_2d_vertices();
+Vertices get_2d_vertices(glm::vec4 color = glm::vec4(1.0f));
 std::vector<GLushort> get_3d_ebo_values();
 Vertices get_3d_vertices();
 

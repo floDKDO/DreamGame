@@ -13,7 +13,7 @@ const Uint64 Textbox::time_between_char_ = 25ULL; //valeur en ms
 
 Textbox::Textbox(const input::InputManager& input_manager)
 	: input_manager_(input_manager), textbox_(std::string(constants::images_path_) + "yuri_textbox.png"), end_dialogue_indicator_(std::string(constants::images_path_) + "textbox_end_dialogue_indicator.png"),
-	text_("", int(textbox_.get_width()) - (text_x_delta_ * 2)), all_dialogues_shown_(false), current_dialogue_info_{}, last_time_(0ULL)
+	text_("", glm::vec4(1.0f), int(textbox_.get_width()) - (text_x_delta_ * 2)), all_dialogues_shown_(false), current_dialogue_info_{}, last_time_(0ULL)
 {
 	textbox_.set_position(
 		glm::vec2(
@@ -69,13 +69,12 @@ void Textbox::set_members_to_end_condition()
 
 void Textbox::render()
 {
-	resource::bind_shader("Text");
+	resource::bind_shader("2d");
 	if(!all_dialogues_shown_)
 	{
 		text_.render();
 	}
 
-	resource::bind_shader("2d");
 	if(!all_dialogues_shown_)
 	{
 		if(current_dialogue_info_.dialogue_finished_)

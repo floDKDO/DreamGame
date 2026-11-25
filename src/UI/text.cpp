@@ -1,23 +1,24 @@
 #include "text.h"
 #include "Resource/resource_manager.h"
 #include "Common/constants.h"
+#include "Common/utils.h"
 
 #include <glm/gtc/type_ptr.hpp>
 
-Text::Text(std::string_view text, int wrap_length)
-	: color_({255, 255, 255, 255}), is_wrapped_(wrap_length == 0 ? false : true), wrap_length_(wrap_length), quality_(Quality::SOLID),
+Text::Text(std::string_view text, glm::vec4 color, int wrap_length)
+	: is_wrapped_(wrap_length == 0 ? false : true), wrap_length_(wrap_length), quality_(Quality::SOLID),
 	font_id_(resource::add_font(constants::default_text_font_)),
 	surface_(), text_(text), position_(glm::vec2(0.0f)), angle_(0.0f)
 {
 	init_surface_from_text();
-	mesh_id_ = resource::add_2d_text(text, surface_);
+	mesh_id_ = resource::add_2d_text(text, surface_, color);
 }
 
 void Text::init_surface_from_text()
 {
 	if(sdl::Font* font = resource::get_font(font_id_); font != nullptr) //N'est normalement pas NULL
 	{
-		//la valeur "{255, 255, 255, 255}" n'est pas hardcodée : elle est nécessaire pour que la multiplication via text_color_ fonctionne
+		//la valeur "{255, 255, 255, 255}" n'est pas hardcodée : elle est nécessaire pour que la multiplication via l'attribut couleur des vertices fonctionne
 		if(quality_ == Quality::SOLID)
 		{
 			if(is_wrapped_)
@@ -95,10 +96,9 @@ void Text::render() const
 	{
 		if(const Mesh* mesh = resource::get_mesh(mesh_id_); mesh != nullptr)
 		{
-			if(ShaderProgram* shader_program_2d = resource::bind_shader("Text"); shader_program_2d != nullptr)
+			if(ShaderProgram* shader_program_2d = resource::bind_shader("2d"); shader_program_2d != nullptr)
 			{
 				shader_program_2d->set_uniform_matrix_4fv("model_matrix_", glm::value_ptr(get_model_matrix()));
-				shader_program_2d->set_uniform_4f("text_color_", glm::vec4(color_.r, color_.g, color_.b, color_.a));
 			}
 			mesh->render();
 		}

@@ -89,21 +89,12 @@ void Backend::init_debug() const
 
 void Backend::init_shaders() const
 {
-	std::filesystem::path path(constants::shaders_path_);
-	std::filesystem::directory_iterator it = std::filesystem::directory_iterator(path);
-	while(it != std::filesystem::directory_iterator())
-	{
-		std::filesystem::path fragment_shader_path = it->path();
-		std::advance(it, 1);
+	resource::add_shader("Phong",  {"resources/shaders/phong.vert",  "resources/shaders/phong.frag"});
+	resource::add_shader("2d",     {"resources/shaders/2d.vert",     "resources/shaders/base.frag"});
+	resource::add_shader("Base",   {"resources/shaders/base.vert",   "resources/shaders/base.frag"});
+	resource::add_shader("Alpha",  {"resources/shaders/base.vert",   "resources/shaders/alpha.frag"});
+	resource::add_shader("Skybox", {"resources/shaders/skybox.vert", "resources/shaders/skybox.frag"});
 
-		std::filesystem::path vertex_shader_path = it->path();
-		std::advance(it, 1);
-
-		std::string shader_name = fragment_shader_path.stem().string();
-		shader_name[0] = char(std::toupper(static_cast<unsigned char>(shader_name[0]))); //voir cppreference pour les raisons des casts
-
-		resource::add_shader(shader_name, {vertex_shader_path.string(), fragment_shader_path.string()});
-	}
 	resource::bind_shader("Phong");
 }
 

@@ -10,6 +10,11 @@
 namespace utils
 {
 
+SDL_Color get_sdl_color_from_vec4(glm::vec4 color)
+{
+	return SDL_Color{static_cast<unsigned char>(color.r), static_cast<unsigned char>(color.g), static_cast<unsigned char>(color.b), static_cast<unsigned char>(color.a)};
+}
+
 unsigned char* checked_stbi_load(std::string_view path, int& width, int& height, int& channels)
 {
 	std::string path_str = std::string(path);
@@ -205,7 +210,7 @@ std::vector<GLushort> get_screen_ebo_values()
 	return std::vector<GLushort>{0, 2, 1, 0, 1, 3}; //CCW
 }
 
-Vertices get_screen_vertices()
+Vertices get_screen_vertices(glm::vec4 color)
 {
 	std::vector<glm::vec3> position_vector //on simule un vec2 avec un vec3 => la composante z vaut donc 0.0f
 	{
@@ -217,10 +222,10 @@ Vertices get_screen_vertices()
 	};
 	std::vector<glm::vec4> color_vector
 	{
-		glm::vec4(0.0f, 0.0f, 0.0f, 1.0f), //TODO : hardcodé
-		glm::vec4(0.0f, 0.0f, 0.0f, 1.0f),
-		glm::vec4(0.0f, 0.0f, 0.0f, 1.0f),
-		glm::vec4(0.0f, 0.0f, 0.0f, 1.0f)
+		color,
+		color,
+		color,
+		color
 	};
 	std::vector<glm::vec2> texcoord_vector
 	{
@@ -244,7 +249,7 @@ std::vector<GLushort> get_2d_ebo_values()
 	return std::vector<GLushort>{0, 1, 2, 0, 3, 1}; //CCW
 }
 
-Vertices get_2d_vertices()
+Vertices get_2d_vertices(glm::vec4 color)
 {
 	//carré de coté 1 pixel placé à l'origine (dépend des arguments passés à glm::ortho()) => la multiplication par une size fonctionne (ex avec size = (300, 200) : (1, 1) * (300, 200) = (300, 200))
 	std::vector<glm::vec3> position_vector //on simule un vec2 avec un vec3 => la composante z vaut donc 0.0f
@@ -258,10 +263,10 @@ Vertices get_2d_vertices()
 	};
 	std::vector<glm::vec4> color_vector
 	{
-		glm::vec4(1.0f, 1.0f, 1.0f, 1.0f),
-		glm::vec4(1.0f, 1.0f, 1.0f, 1.0f),
-		glm::vec4(1.0f, 1.0f, 1.0f, 1.0f),
-		glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)
+		color,
+		color,
+		color,
+		color
 	};
 	std::vector<glm::vec2> texcoord_vector
 	{

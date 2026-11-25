@@ -29,7 +29,7 @@ al::Source* get_al_source(std::size_t id);
 
 std::size_t add_mesh(std::string_view file_name, Mesh::Info mesh_info, int32_t mesh_index = Mesh::absent_mesh_index);
 std::size_t add_mesh(Mesh::Info mesh_info, int32_t mesh_index = Mesh::absent_mesh_index);
-std::size_t add_2d_text(std::string_view text, const sdl::Surface& surface);
+std::size_t add_2d_text(std::string_view text, const sdl::Surface& surface, glm::vec4 color = glm::vec4(1.0f));
 std::size_t add_2d_image(std::string_view path);
 std::size_t add_cubemap(std::string_view directory_path);
 Mesh* get_mesh(std::size_t id);

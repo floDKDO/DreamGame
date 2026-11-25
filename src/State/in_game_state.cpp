@@ -20,7 +20,7 @@ InGameState::InGameState(const input::InputManager& input_manager, Backend& back
 	al::Source* music_source = resource::get_al_source(map_music_id);
 	music_source->play();*/
 
-	mesh_id_ = resource::add_mesh(Mesh::Info{utils::get_screen_ebo_values(), utils::get_screen_vertices(), {}});
+	mesh_id_ = resource::add_mesh(Mesh::Info{utils::get_screen_ebo_values(), utils::get_screen_vertices(glm::vec4(0.0f)), {}});
 	resource::bind_shader("Alpha");
 	resource::get_currently_bound_shader()->set_uniform_1f("alpha_", 0.0f);
 }
@@ -62,7 +62,7 @@ void InGameState::display()
 
 	//fbo_.render();
 
-	glDisable(GL_DEPTH_TEST);
+	/*glDisable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
 	glBlendEquation(GL_FUNC_ADD);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -75,7 +75,7 @@ void InGameState::display()
 	resource::get_mesh(mesh_id_)->render();
 	alpha = utils::lerp(0.0f, 1.0f, div);
 	glDisable(GL_BLEND);
-	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_DEPTH_TEST);*/
 }
 
 void InGameState::update([[maybe_unused]] float delta_time)
